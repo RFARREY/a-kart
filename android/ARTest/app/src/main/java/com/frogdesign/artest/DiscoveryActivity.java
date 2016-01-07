@@ -13,22 +13,31 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.frogdesign.arsdk.Discovery;
+import com.frogdesign.arsdk.TestUtils;
 import com.frogdesign.artest.databinding.DiscoveryListItemBinding;
 import com.parrot.arsdk.ardiscovery.ARDiscoveryDeviceService;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
 
 public class DiscoveryActivity extends AppCompatActivity {
-
+    private static final String TAG = DiscoveryActivity.class.getSimpleName();
     private RecyclerView list;
     private DiscoveryAdapter adapter;
     private LinearLayoutManager llm;
+    private Discovery discovery;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         DataBindingUtil.setContentView(this, R.layout.discovery_activity);
+        discovery = new Discovery(getBaseContext());
         list = (RecyclerView) findViewById(android.R.id.list);
         list.setHasFixedSize(true);
         llm = new LinearLayoutManager(this);
@@ -43,24 +52,52 @@ public class DiscoveryActivity extends AppCompatActivity {
         });
     }
 
-    public static class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryListItemHolder> implements View.OnClickListener {
+    @Override
+    protected void onStart() {
+        super.onStart();
+        discovery.discoverer();
+        TestUtils.constantDiscoverer()
+                .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(deviceList -> {
+            Log.i(TAG, "--> SERVICES:");
+            // Do what you want with the device list
+            for (ARDiscoveryDeviceService service : deviceList) {
+                Log.i(TAG, "The service " + service);
+            }
+            Log.i(TAG, "<-- SERVICES.");
+            adapter.update(deviceList);
+            //Controller ctrl = new Controller(getBaseContext(), deviceList.get(0));
+            //ctrl.start();
+            //ctrl.mediaStreamer().observeOn(AndroidSchedulers.mainThread()).subscribe(bmpConsumer);
+        });
+    }
 
-        private LayoutInflater layoutInflater;
+    public static class DiscoveryAdapter extends RecyclerView.Adapter<DiscoveryListItemHolder>
+            implements View.OnClickListener {
+
+        private final LayoutInflater layoutInflater;
         private final PublishSubject<ARDiscoveryDeviceService> subject = PublishSubject.create();
+        private final ArrayList<ARDiscoveryDeviceService> devices = new ArrayList<>();
 
         private DiscoveryAdapter(Context ctx) {
             layoutInflater = LayoutInflater.from(ctx);
             setHasStableIds(true);
         }
 
+        private void update(List<ARDiscoveryDeviceService> newDevices) {
+            devices.clear();
+            devices.addAll(newDevices);
+            notifyDataSetChanged();
+        }
+
         @Override
         public long getItemId(int position) {
-            return position;
+            return devices.get(position).getName().hashCode();
         }
 
         @Override
         public DiscoveryListItemHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            DiscoveryListItemBinding binding = DiscoveryListItemBinding.inflate(layoutInflater, parent, false);
+            DiscoveryListItemBinding binding =
+                    DiscoveryListItemBinding.inflate(layoutInflater, parent, false);
             binding.setHandler(this);
             return new DiscoveryListItemHolder(binding);
         }
@@ -72,7 +109,7 @@ public class DiscoveryActivity extends AppCompatActivity {
 
         @Override
         public int getItemCount() {
-            return 30;
+            return devices.size();
         }
 
         public Observable<ARDiscoveryDeviceService> clicksOn() {

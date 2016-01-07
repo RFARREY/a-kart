@@ -31,7 +31,8 @@ public class TestUtils {
     private static List<ARDiscoveryDeviceService> fakeServices = Arrays.asList(
             new ARDiscoveryDeviceService("fake0", null, 0),
             new ARDiscoveryDeviceService("fake1", null, 1),
-            new ARDiscoveryDeviceService("fake2", null, 2)
+            new ARDiscoveryDeviceService("fake2", null, 2),
+            new ARDiscoveryDeviceService("fake3", null, 3)
     );
 
     public static Observable<List<ARDiscoveryDeviceService>> constantDiscoverer() {
@@ -39,7 +40,7 @@ public class TestUtils {
             @Override
             public void call(final Subscriber<? super List<ARDiscoveryDeviceService>> subscriber) {
                 int lastIdx = fakeServices.size() > 0 ? 1 : 0;
-                while (lastIdx < fakeServices.size()) {
+                while (lastIdx <= fakeServices.size()) {
                     SystemClock.sleep(1000);
                     subscriber.onNext(fakeServices.subList(0, lastIdx));
                     lastIdx++;
