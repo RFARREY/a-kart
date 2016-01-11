@@ -1,6 +1,5 @@
 package com.frogdesign.artest;
 
-import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -8,34 +7,36 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.ImageView;
 
-import com.frogdesign.arsdk.Controller;
-import com.frogdesign.arsdk.Discovery;
+import com.frogdesign.akart.model.Car;
+import com.frogdesign.akart.model.Cars;
 import com.frogdesign.arsdk.TestUtils;
 import com.parrot.arsdk.ardiscovery.ARDiscoveryDeviceService;
-import com.parrot.arsdk.ardiscovery.ARDiscoveryService;
 
 import org.artoolkit.ar.base.ARToolKit;
 import org.artoolkit.ar.base.NativeInterface;
 import org.artoolkit.ar.base.Utils;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import rx.Observable;
 import rx.Observer;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
-public class MainActivity extends AppCompatActivity {
-    private static final String TAG = MainActivity.class.getSimpleName();
+public class PlayActivity extends AppCompatActivity {
+    private static final String TAG = PlayActivity.class.getSimpleName();
+
+    private static final String EXTRA_DEVICE = TAG + ".extra_device";
 
     private ImageView image;
-    private Discovery discovery;
-    private int markerID;
-    private int markerIDHijo;
+
+    //private Controller controller;
+
+    private Subscription bitmapSubscription;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -43,16 +44,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         image = (ImageView) findViewById(R.id.image);
 
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.tutto);
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-        byte[] byteArray = stream.toByteArray();
 
-        discovery = new Discovery(getBaseContext());
-        TestUtils.constantProducer(byteArray, 16) //jumping sumo 15 FPS
-                .sample(16, TimeUnit.MILLISECONDS) //our game can run at 30 fps
-                .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-                .subscribe(bmpConsumer);
+        ARDiscoveryDeviceService device = getIntent().getParcelableExtra(EXTRA_DEVICE);
+//        controller = new Controller(getBaseContext(), device);
     }
 
     @Override
@@ -67,37 +61,34 @@ public class MainActivity extends AppCompatActivity {
         NativeInterface.arwSetMatrixCodeType(NativeInterface.AR_MATRIX_CODE_3x3_HAMMING63);
 
 
-        //markerID = ARToolKit.getInstance().addMarker("single;Data/patt.kanji;80");
-        markerID = ARToolKit.getInstance().addMarker("single_barcode;1;80");
-        if (markerID < 0) throw new RuntimeException("e' tutto finito1");
-        //markerIDHijo = ARToolKit.getInstance().addMarker("single;Data/patt.hiro;80");
-        markerIDHijo = ARToolKit.getInstance().addMarker("single_barcode;3;80");
-        if (markerIDHijo < 0) throw new RuntimeException("e' tutto finito2");
+        for (Car c : Cars.all) {
+            int leftId = ARToolKit.getInstance().addMarker("single_barcode;" + c.getLrMarkers().getFirst() + ";80");
+            int rightId = ARToolKit.getInstance().addMarker("single_barcode;" + c.getLrMarkers().getSecond() + ";80");
+            c.setLeftAR(leftId);
+            c.setRightAR(rightId);
+        }
         ARToolKit.getInstance().initialiseAR(640, 480, "Data/camera_para.dat", 0, true);
-        discovery.discoverer().subscribe(new Observer<List<ARDiscoveryDeviceService>>() {
-            @Override
-            public void onCompleted() {
 
-            }
+        //       controller.start();
+        bitmapSubscription = getBitmapProducer()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread()).subscribe(bmpConsumer);
+    }
 
-            @Override
-            public void onError(Throwable e) {
+    private boolean FAKE_PRODUCER = true;
 
-            }
-
-            @Override
-            public void onNext(List<ARDiscoveryDeviceService> deviceList) {
-                Log.i(TAG, "--> SERVICES:");
-                // Do what you want with the device list
-                for (ARDiscoveryDeviceService service : deviceList) {
-                    Log.i(TAG, "The service " + service);
-                }
-                Log.i(TAG, "<-- SERVICES.");
-                Controller ctrl = new Controller(getBaseContext(), deviceList.get(0));
-                ctrl.start();
-                ctrl.mediaStreamer().observeOn(AndroidSchedulers.mainThread()).subscribe(bmpConsumer);
-            }
-        });
+    private Observable<byte[]> getBitmapProducer() {
+        if (FAKE_PRODUCER) {
+            Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.test);
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            byte[] byteArray = stream.toByteArray();
+            return TestUtils.constantProducer(byteArray, 60) //jumping sumo 15 FPS
+                    .sample(300, TimeUnit.MILLISECONDS); //our game can run at 30 fps
+        } else {
+            //  return controller.mediaStreamer();
+            return null;
+        }
     }
 
     private Observer<byte[]> bmpConsumer = new Observer<byte[]>() {
@@ -105,8 +96,11 @@ public class MainActivity extends AppCompatActivity {
         private Bitmap inBitmap = null;
         private int[] argbBuffer = null;
         private byte[] yuvBuffer = null;
-        private BitmapFactory.Options opts =  new BitmapFactory.Options();
-        {opts.inMutable = true;}
+        private BitmapFactory.Options opts = new BitmapFactory.Options();
+
+        {
+            opts.inMutable = true;
+        }
 
         @Override
         public void onCompleted() {
@@ -115,15 +109,15 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onError(Throwable e) {
-
+            Log.e(TAG, "Error in bitmap streaming!", e);
         }
 
         private void checkForBuffers(int w, int h) {
-            final int argbLength = w*h;
+            final int argbLength = w * h;
             if (argbBuffer == null || argbBuffer.length != argbLength)
                 argbBuffer = new int[argbLength];
 
-            final int yuvLength = Utils.yuvByteLength(w,h);
+            final int yuvLength = Utils.yuvByteLength(w, h);
             if (yuvBuffer == null || yuvBuffer.length != yuvLength)
                 yuvBuffer = new byte[yuvLength];
         }
@@ -138,10 +132,10 @@ public class MainActivity extends AppCompatActivity {
             image.setImageBitmap(inBitmap);
             final int w = inBitmap.getWidth();
             final int h = inBitmap.getHeight();
-            checkForBuffers(w,h);
+            checkForBuffers(w, h);
             inBitmap.getPixels(argbBuffer, 0, w, 0, 0, w, h);
 
-            Utils.encodeYUV420SP(yuvBuffer, argbBuffer, w,h);
+            Utils.encodeYUV420SP(yuvBuffer, argbBuffer, w, h);
             if (ARToolKit.getInstance().convertAndDetect(yuvBuffer)) {
                 onFrameProcessed();
             }
@@ -151,7 +145,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        discovery.unbind();
+        ARToolKit.getInstance().cleanup();
+        if (bitmapSubscription != null && !bitmapSubscription.isUnsubscribed()) {
+            bitmapSubscription.unsubscribe();
+            bitmapSubscription = null;
+        }
+        // controller.stop();
     }
 
     private void printMatrix(float[] matrix) {
@@ -172,14 +171,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onFrameProcessed() {
-
-        if (ARToolKit.getInstance().queryMarkerVisible(markerID)) {
-            float[] canaliPercettivi = ARToolKit.getInstance().queryMarkerTransformation(markerID);
-            printMatrix(canaliPercettivi);
+        for (int i = 0; i < Cars.all.size(); i++) {
+            Car c =  Cars.all.get(i);
+            if (c.isDetected(ARToolKit.getInstance())) {
+                Log.i(TAG, "Car visibile! " + c.getId());
+                Log.i(TAG, "Position: "+c.estimatePosition(ARToolKit.getInstance()));
+            }
         }
-        if (ARToolKit.getInstance().queryMarkerVisible(markerIDHijo)) {
-            float[] canaliPercettivi = ARToolKit.getInstance().queryMarkerTransformation(markerIDHijo);
-            printMatrix(canaliPercettivi);
-        }
+//        if (ARToolKit.getInstance().queryMarkerVisible(markerID)) {
+//            float[] canaliPercettivi = ARToolKit.getInstance().queryMarkerTransformation(markerID);
+//            printMatrix(canaliPercettivi);
+//        }
+//        if (ARToolKit.getInstance().queryMarkerVisible(markerIDHijo)) {
+//            float[] canaliPercettivi = ARToolKit.getInstance().queryMarkerTransformation(markerIDHijo);
+//            printMatrix(canaliPercettivi);
+//        }
     }
 }

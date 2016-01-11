@@ -112,7 +112,26 @@ public class Controller implements ARDeviceControllerListener {
                 }));
             }
         });
-    }@Override
+    }
+
+    public void speed(float percentage) {
+        deviceController.getFeatureJumpingSumo().setPilotingPCMDSpeed( (byte) (50 * percentage) );
+        deviceController.getFeatureJumpingSumo().setPilotingPCMDFlag((byte) 1);
+    }
+
+    public void turn(float percentage) {
+        deviceController.getFeatureJumpingSumo().setPilotingPCMDTurn( (byte) (50 * percentage) );
+        deviceController.getFeatureJumpingSumo().setPilotingPCMDFlag((byte) 1);
+    }
+
+    public void neutral() {
+        deviceController.getFeatureJumpingSumo().setPilotingPCMDSpeed( (byte) 0);
+        deviceController.getFeatureJumpingSumo().setPilotingPCMDTurn( (byte) 0);
+        deviceController.getFeatureJumpingSumo().setPilotingPCMDFlag((byte) 0);
+    }
+
+
+    @Override
     // called when the state of the device controller has changed
     public void onStateChanged(ARDeviceController deviceController,
                                ARCONTROLLER_DEVICE_STATE_ENUM newState, ARCONTROLLER_ERROR_ENUM error) {

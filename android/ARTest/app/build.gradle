@@ -3,7 +3,8 @@ apply plugin: 'me.tatarka.retrolambda'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion '23.0.2'
+
+    buildToolsVersion '22.0.1'
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -46,4 +47,18 @@ dependencies {
 
     compile 'com.android.support:appcompat-v7:23.1.1'
     compile 'com.android.support:recyclerview-v7:23.1.1'
+}
+
+// fix for dataBinder: Source folders generated at incorrect location
+android.applicationVariants.all { variant ->
+    def variantName = variant.name.capitalize()
+    def inputDir = "${buildDir}/intermediates/classes/${variant.dirName}"
+    def sourceDir = "${buildDir}/generated/source/dataBinding/${variant.dirName}"
+    def copyTask = tasks.create(name: "dataBindingFix${variantName}", type: Copy) {
+        from inputDir
+        into sourceDir
+        include '*/.java'
+    }
+    tasks["generate${variantName}Sources"].dependsOn copyTask
+    variant.addJavaSourceFoldersToModel new File(sourceDir)
 }

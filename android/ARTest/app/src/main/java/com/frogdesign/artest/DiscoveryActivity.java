@@ -47,7 +47,8 @@ public class DiscoveryActivity extends AppCompatActivity {
 
         adapter.clicksOn().subscribe(dev -> {
             Log.i("CLICK", "on " + dev.getName());
-            Intent i = new Intent(getBaseContext(), MainActivity.class);
+            Intent i = new Intent(getBaseContext(), PlayActivity.class);
+
             startActivity(i);
         });
     }
