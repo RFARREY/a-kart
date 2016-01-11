@@ -41,11 +41,12 @@
         android:allowBackup="true"
         android:icon="@drawable/icon"
         android:label="@string/app_name"
-        android:theme="@style/Theme.AppCompat">
+        android:theme="@style/AppTheme">
 
         <activity
             android:name="com.frogdesign.artest.DiscoveryActivity"
-            android:label="@string/app_name">
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -57,8 +58,8 @@
         <activity
             android:name=".PlayActivity"
             android:screenOrientation="landscape"
-            android:label="@string/app_name">
-
+            android:label="@string/app_name"
+            android:theme="@style/AppThemePlay">
         </activity>
 
         <activity

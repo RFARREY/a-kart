@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="libARMavlink">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/app/libs/libARMavlink.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>
