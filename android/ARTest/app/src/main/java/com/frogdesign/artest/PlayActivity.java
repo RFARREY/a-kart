@@ -10,6 +10,9 @@ import android.widget.ImageView;
 
 import com.frogdesign.akart.model.Car;
 import com.frogdesign.akart.model.Cars;
+import com.frogdesign.akart.model.Position;
+import com.frogdesign.akart.view.TargetsView;
+import com.frogdesign.arsdk.Controller;
 import com.frogdesign.arsdk.TestUtils;
 import com.parrot.arsdk.ardiscovery.ARDiscoveryDeviceService;
 
@@ -31,11 +34,12 @@ import rx.schedulers.Schedulers;
 public class PlayActivity extends AppCompatActivity {
     private static final String TAG = PlayActivity.class.getSimpleName();
 
-    private static final String EXTRA_DEVICE = TAG + ".extra_device";
+    public static final String EXTRA_DEVICE = TAG + ".extra_device";
 
     private ImageView image;
+    private TargetsView targets;
 
-    //private Controller controller;
+    private Controller controller;
 
     private Subscription bitmapSubscription;
 
@@ -44,10 +48,11 @@ public class PlayActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         image = (ImageView) findViewById(R.id.image);
+        targets = (TargetsView) findViewById(R.id.targets);
 
 
         ARDiscoveryDeviceService device = getIntent().getParcelableExtra(EXTRA_DEVICE);
-//        controller = new Controller(getBaseContext(), device);
+        controller = new Controller(getBaseContext(), device);
     }
 
     @Override
@@ -70,13 +75,13 @@ public class PlayActivity extends AppCompatActivity {
         }
         ARToolKit.getInstance().initialiseAR(640, 480, "Data/camera_para.dat", 0, true);
 
-        //       controller.start();
+        controller.start();
         bitmapSubscription = getBitmapProducer()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread()).subscribe(bmpConsumer);
     }
 
-    private boolean FAKE_PRODUCER = true;
+    private boolean FAKE_PRODUCER = false;
 
     private Observable<byte[]> getBitmapProducer() {
         if (FAKE_PRODUCER) {
@@ -87,8 +92,7 @@ public class PlayActivity extends AppCompatActivity {
             return TestUtils.constantProducer(byteArray, 60) //jumping sumo 15 FPS
                     .sample(300, TimeUnit.MILLISECONDS); //our game can run at 30 fps
         } else {
-            //  return controller.mediaStreamer();
-            return null;
+            return controller.mediaStreamer();
         }
     }
 
@@ -172,11 +176,14 @@ public class PlayActivity extends AppCompatActivity {
     }
 
     public void onFrameProcessed() {
+        targets.nullify();
         for (int i = 0; i < Cars.all.size(); i++) {
             Car c =  Cars.all.get(i);
             if (c.isDetected(ARToolKit.getInstance())) {
                 Log.i(TAG, "Car visibile! " + c.getId());
                 Log.i(TAG, "Position: "+c.estimatePosition(ARToolKit.getInstance()));
+                Position p = c.estimatePosition(ARToolKit.getInstance());
+                targets.setTarget(c.getId(), p.getX() + targets.getWidth() / 2, - p.getY()+ targets.getHeight() / 2);
             }
         }
 //        if (ARToolKit.getInstance().queryMarkerVisible(markerID)) {

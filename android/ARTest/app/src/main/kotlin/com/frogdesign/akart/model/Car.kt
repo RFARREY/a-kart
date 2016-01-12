@@ -44,12 +44,12 @@ data class Car(val id: String, val lrMarkers: Pair<Int, Int>) {
             pos.z += matrix[14];
         }
 
-        pos /= sides;
-
         //scaled to nullify depth
         var depth : Float = pos.z / -500;
         pos.x /= depth;
         pos.y /= depth;
+
+        pos /= sides;
         return pos;
     }
 }

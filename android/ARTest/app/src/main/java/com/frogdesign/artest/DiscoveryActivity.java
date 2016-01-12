@@ -48,7 +48,7 @@ public class DiscoveryActivity extends AppCompatActivity {
         adapter.clicksOn().subscribe(dev -> {
             Log.i("CLICK", "on " + dev.getName());
             Intent i = new Intent(getBaseContext(), PlayActivity.class);
-
+            i.putExtra(PlayActivity.EXTRA_DEVICE, dev);
             startActivity(i);
         });
     }
@@ -56,8 +56,9 @@ public class DiscoveryActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        discovery.discoverer();
-        TestUtils.constantDiscoverer()
+        discovery.discoverer()
+//        ;
+//        TestUtils.constantDiscoverer()
                 .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(deviceList -> {
             Log.i(TAG, "--> SERVICES:");
             // Do what you want with the device list
@@ -105,7 +106,7 @@ public class DiscoveryActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(DiscoveryListItemHolder holder, int position) {
-            holder.bind(new ARDiscoveryDeviceService("fake" + position, null, position));
+            holder.bind(devices.get(position));
         }
 
         @Override

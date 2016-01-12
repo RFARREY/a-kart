@@ -30,6 +30,12 @@
             android:layout_marginTop="268px"
             android:text="G"
             android:textColor="@android:color/holo_red_light"/>
+
+        <com.frogdesign.akart.view.TargetsView
+            android:id="@+id/targets"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            />
     </FrameLayout>
 
     <FrameLayout
