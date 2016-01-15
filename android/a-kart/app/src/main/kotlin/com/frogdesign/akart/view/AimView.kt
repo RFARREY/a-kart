@@ -35,7 +35,7 @@ class AimView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defSty
         paint.alpha = 128;
     }
 
-    constructor(ctx: Context, attrs: AttributeSet, defStyleAttr: Int) : this(ctx, attrs, 0, 0) {
+    constructor(ctx: Context, attrs: AttributeSet, @Suppress("UNUSED_PARAMETER") defStyleAttr: Int) : this(ctx, attrs, 0, 0) {
     }
 
     constructor(ctx: Context, attrs: AttributeSet) : this(ctx, attrs, 0, 0) {

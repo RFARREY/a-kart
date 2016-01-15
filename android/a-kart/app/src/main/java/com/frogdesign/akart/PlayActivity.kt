@@ -103,7 +103,7 @@ class PlayActivity : AppCompatActivity() {
         trackedSubscriptions.track(steerSubscription);
 
         var batterySubscription = controller!!.batteryLevel()
-                .observeOn(AndroidSchedulers.mainThread()).subscribe { bat -> battery?.text = Integer.toString(bat) }
+                .observeOn(AndroidSchedulers.mainThread()).subscribe { bat -> battery.text = Integer.toString(bat) }
         trackedSubscriptions.track(batterySubscription);
     }
 

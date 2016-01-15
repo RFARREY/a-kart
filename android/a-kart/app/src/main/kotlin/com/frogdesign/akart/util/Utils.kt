@@ -86,7 +86,7 @@ class TrackedSubscriptions : ArrayList<Subscription>() {
 
     public fun unsubAll(): TrackedSubscriptions {
         for (a in this)
-            if (a?.isUnsubscribed) a?.unsubscribe()
+            if (a.isUnsubscribed) a.unsubscribe()
 
         this.clear();
         return this
