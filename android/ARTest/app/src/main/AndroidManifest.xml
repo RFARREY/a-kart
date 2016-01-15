@@ -47,12 +47,10 @@
             android:name="com.frogdesign.artest.DiscoveryActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
 
         <activity
@@ -60,6 +58,12 @@
             android:screenOrientation="landscape"
             android:label="@string/app_name"
             android:theme="@style/AppThemePlay">
+        </activity>
+
+        <activity
+            android:name="com.frogdesign.akart.AccelTestActivity"
+            android:screenOrientation="landscape">
+
         </activity>
 
         <activity

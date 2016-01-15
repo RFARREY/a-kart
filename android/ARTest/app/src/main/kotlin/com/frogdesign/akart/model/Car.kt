@@ -50,6 +50,10 @@ data class Car(val id: String, val lrMarkers: Pair<Int, Int>) {
         pos.y /= depth;
 
         pos /= sides;
+
+        val FACTOR = 2;
+        pos.x *= FACTOR;
+        pos.y *= FACTOR;
         return pos;
     }
 }

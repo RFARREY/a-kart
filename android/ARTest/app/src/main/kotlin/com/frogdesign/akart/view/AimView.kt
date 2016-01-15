@@ -1,4 +1,4 @@
-package com.frogdesign.akart.view;
+package com.frogdesign.akart.view
 
 import android.content.Context
 import android.graphics.Canvas
@@ -7,14 +7,30 @@ import android.graphics.Paint
 import android.graphics.PointF
 import android.util.AttributeSet
 import android.view.View
-import org.apache.commons.lang3.tuple.MutablePair
+import com.frogdesign.akart.util.dpToPx
 
-class TargetsView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : View(context, attrs, defStyleAttr, defStyleRes) {
+class AimView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : View(context, attrs, defStyleAttr, defStyleRes) {
+    companion object {
+        val SIZE = 80.0f //dp
+        val RADIUS = 30.0f //dp
+        val STROKE = 3.0f //dp
+    }
+
     private val points: MutableMap<String, PointF> = hashMapOf()
+    private var size = AimView.SIZE.toInt()
+    private var radius = AimView.RADIUS
+    private var stroke = AimView.STROKE
     private val paint: Paint
 
     init {
+        if (context != null) {
+            size = dpToPx(context, AimView.SIZE)
+            radius = dpToPx(context, AimView.RADIUS).toFloat()
+            stroke = dpToPx(context, AimView.STROKE).toFloat()
+        }
         paint = Paint()
+        paint.style = Paint.Style.STROKE
+        paint.strokeWidth = stroke
         paint.color = Color.RED
         paint.alpha = 128;
     }
@@ -29,15 +45,19 @@ class TargetsView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, de
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        val w: Int = MeasureSpec.getSize(widthMeasureSpec)
-        val h: Int = MeasureSpec.getSize(heightMeasureSpec)
+        val w = resolveSize(size, widthMeasureSpec)
+        val h = resolveSize(size, heightMeasureSpec)
         setMeasuredDimension(w, h)
     }
 
     override fun onDraw(canvas: Canvas?) {
-        super.onDraw(canvas)
-        for (b in points.values)
+        var cx = (width / 2).toFloat()
+        var cy = (height / 2).toFloat()
+        canvas?.drawCircle(cx, cy, radius, paint)
+
+        for (b in points.values) {
             if (b.x > Float.MIN_VALUE) canvas?.drawCircle(b.x, b.y, 10f, paint);
+        }
     }
 
     fun nullify() {
@@ -56,3 +76,4 @@ class TargetsView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, de
         invalidate()
     }
 }
+

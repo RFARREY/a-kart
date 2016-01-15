@@ -87,6 +87,8 @@ public class Discovery {
 
                         }
                     };
+                    //first update is immediate
+                    delegate.onServicesDevicesListUpdated();
                     mArdiscoveryServicesDevicesListUpdatedReceiver = new ARDiscoveryServicesDevicesListUpdatedReceiver(delegate);
                     LocalBroadcastManager localBroadcastMgr = LocalBroadcastManager.getInstance(ctx);
                     localBroadcastMgr.registerReceiver(mArdiscoveryServicesDevicesListUpdatedReceiver,

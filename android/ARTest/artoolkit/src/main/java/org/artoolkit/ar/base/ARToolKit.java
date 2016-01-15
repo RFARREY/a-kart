@@ -177,7 +177,7 @@ public class ARToolKit {
         this.cameraIndex = cameraIndex;
         this.cameraIsFrontFacing = cameraIsFrontFacing;
 
-        if (!NativeInterface.arwStartRunning("-format=NV21", cameraParaPath, 10.0f, 10000.0f)) {
+        if (!NativeInterface.arwStartRunning("-format=RGBA", cameraParaPath, 10.0f, 10000.0f)) {
             Log.e(TAG, "Error starting video");
             return false;
         }
@@ -347,7 +347,6 @@ public class ARToolKit {
     }
 
     public boolean convertAndDetect2(byte[] frame, int width, int height) {
-
         if (!initedNative) return false;
         if (frame == null) return false;
         if (!NativeInterface.arwAcceptVideoImage(frame, width, height, cameraIndex, cameraIsFrontFacing))
@@ -365,9 +364,10 @@ public class ARToolKit {
 
         NativeInterface.arwStopRunning();
         NativeInterface.arwShutdownAR();
-
-        debugBitmap.recycle();
-        debugBitmap = null;
+        if (debugBitmap != null) {
+            debugBitmap.recycle();
+            debugBitmap = null;
+        }
 
         initedNative = false;
     }
