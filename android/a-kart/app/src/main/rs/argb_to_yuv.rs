@@ -26,7 +26,7 @@ int frameSize;
 
 void filter() {
         int yIndex = 0;
-        int uvIndex;
+        int uvIndex = frameSize;
         for (int j = 0; j < height; j++) {
             for (int i = 0; i < width; i++) {
                 const uchar4 *in_pixel = rsGetElementAt(gInImage, i, j);
