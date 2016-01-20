@@ -4,8 +4,10 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Looper
+import android.renderscript.*
 import android.util.DisplayMetrics
 import android.view.View
+import com.frogdesign.akart.ScriptC_argb_to_yuv
 import org.artoolkit.ar.base.ARToolKit
 import org.artoolkit.ar.base.Utils
 import rx.Observable
@@ -42,16 +44,19 @@ class CachedBitmapDecoder : Func1<ByteArray, Bitmap> {
 
     init {
         opts.inMutable = true
+        //opts.inPreferredConfig = Bitmap.Config.RGB_565;
     }
+
 
     override fun call(data: ByteArray?): Bitmap? {
         opts.inBitmap = inBitmap
         if (data != null) inBitmap = BitmapFactory.decodeByteArray(data, 0, data.size, opts)
-        return inBitmap
+        var result = inBitmap
+        return result
     }
 }
 
-class BmpToYUVToARtoolkitConverter : Func1<Bitmap, Boolean> {
+class BmpToYUVToARToolkitConverter : Func1<Bitmap, Boolean> {
     private var argbBuffer: IntArray? = null
     private var yuvBuffer: ByteArray? = null
 
@@ -77,6 +82,7 @@ class BmpToYUVToARtoolkitConverter : Func1<Bitmap, Boolean> {
         return true
     }
 }
+
 
 class TrackedSubscriptions : ArrayList<Subscription>() {
     public fun track(sub: Subscription): TrackedSubscriptions {

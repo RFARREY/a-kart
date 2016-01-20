@@ -5,16 +5,22 @@ import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import android.widget.ImageView
+import android.view.MotionEvent
+import android.widget.Button
 import android.widget.SeekBar
 import android.widget.TextView
 import butterknife.bindView
 import com.frogdesign.akart.model.Cars
 import com.frogdesign.akart.util.*
 import com.frogdesign.akart.view.AimView
+import com.frogdesign.akart.view.CameraView
 import com.frogdesign.akart.view.VerticalSeekBar
-import com.frogdesign.arsdk.Controller
-import com.frogdesign.arsdk.TestUtils
+import com.jakewharton.rxbinding.internal.Functions
+import com.jakewharton.rxbinding.view.RxView
+import com.jakewharton.rxbinding.view.pressed
+import com.jakewharton.rxbinding.widget.RxSeekBar
+import com.jakewharton.rxbinding.widget.SeekBarProgressChangeEvent
+import com.jakewharton.rxbinding.widget.SeekBarStopChangeEvent
 import com.parrot.arsdk.ardiscovery.ARDiscoveryDeviceService
 import org.artoolkit.ar.base.ARToolKit
 import org.artoolkit.ar.base.NativeInterface
@@ -28,13 +34,14 @@ class PlayActivity : AppCompatActivity() {
     companion object {
         private val TAG = PlayActivity::class.java.simpleName
         const val EXTRA_DEVICE = "PlayActivity.extra_device"
-        const val DEBUG = true
+        const val TRACE = false
     }
 
-    private val image: ImageView by bindView(R.id.image)
+    private val camera: CameraView by bindView(R.id.camera)
     private val targets: AimView by bindView(R.id.aim)
     private val gasPedal: VerticalSeekBar by bindView(R.id.gasPedal)
     private val battery: TextView by bindView(R.id.battery)
+    private val rear: Button by bindView(R.id.rear)
 
     private var controller: Controller? = null
 
@@ -43,25 +50,34 @@ class PlayActivity : AppCompatActivity() {
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        RxView.touches(rear).subscribe { event ->
+            Log.i(TAG, "touch "+event)
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    controller?.speed(-0.4f)
+                    rear.isPressed = true
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    controller?.neutral()
+                    rear.isPressed = false
+                }
+            }
+        }
 
         val device = intent.getParcelableExtra<ARDiscoveryDeviceService>(EXTRA_DEVICE)
         controller = Controller(baseContext, device)
-        gasPedal.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {
 
-            }
-
-            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                trace("Progress: %d fromUser %b", progress, fromUser)
-                if (progress != 0) controller!!.speed(progress / seekBar.max.toFloat())
+        RxSeekBar.changeEvents(gasPedal).subscribe { event ->
+            if (event is SeekBarProgressChangeEvent) {
+                var progress = event.progress()
+                if (progress != 0) controller!!.speed(progress / event.view().max.toFloat())
                 else controller!!.neutral()
-            }
-
-            override fun onStopTrackingTouch(seekBar: SeekBar) {
+            } else if (event is SeekBarStopChangeEvent) {
                 controller!!.neutral()
-                seekBar.progress = 0
+                event.view().progress = 0
             }
-        })
+        }
+        //camera.xImageInsets.subscribe({x -> targets.xImageInsets = x})
     }
 
     override fun onStart() {
@@ -83,18 +99,16 @@ class PlayActivity : AppCompatActivity() {
 
         val bitmapProducer: Observable<Bitmap> = byteArrayProducer.map(CachedBitmapDecoder())
 
-        var bitmapSubscription =
-                bitmapProducer.andAsync()
-                        .filter { b ->
-                            trace("filtering: %b", isMainThread())
-                            image.setImageBitmap(b)
-                            true
-                        }
-                        .sample(66, TimeUnit.MILLISECONDS)
-                        .filter(BmpToYUVToARtoolkitConverter())
-                        .andAsync()
-                        .subscribe { onFrameProcessed() }
-        trackedSubscriptions.track(bitmapSubscription);
+        var bmpObs = bitmapProducer.andAsync()
+
+        trackedSubscriptions.track(camera.link(bmpObs))
+
+        var bitmapSubscription = bmpObs
+                .sample(66, TimeUnit.MILLISECONDS)
+                .filter(BmpToYUVToARToolkitConverter2(this))
+                .andAsync()
+                .subscribe { onFrameProcessed() }
+        trackedSubscriptions.track(bitmapSubscription)
 
         var steerSubscription = SteeringWheel(this).stream().subscribe { steer ->
             trace("steer: %b", isMainThread())
@@ -156,6 +170,6 @@ class PlayActivity : AppCompatActivity() {
     }
 
     private fun trace(s: String, vararg args: Any) {
-        if (DEBUG) Log.d(TAG, s.format(args))
+        if (TRACE) Log.d(TAG, s.format(args))
     }
 }

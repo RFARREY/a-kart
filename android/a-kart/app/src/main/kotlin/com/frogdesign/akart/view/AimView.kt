@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.PointF
 import android.util.AttributeSet
+import android.util.FloatMath
 import android.view.View
 import com.frogdesign.akart.util.dpToPx
 
@@ -57,8 +58,16 @@ class AimView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defSty
 
         for (b in points.values) {
             if (b.x > Float.MIN_VALUE) canvas?.drawCircle(b.x, b.y, 10f, paint);
+            var distance = hypot(cx - b.x, cy - b.y)
+            if (distance < radius) {
+                paint.style = Paint.Style.FILL
+                canvas?.drawCircle(cx, cy, radius, paint)
+                paint.style = Paint.Style.STROKE
+            }
         }
     }
+
+    private fun hypot(x : Float, y: Float) = Math.hypot(x.toDouble() , y.toDouble()).toFloat()
 
     fun nullify() {
         for (b in points.values) {
@@ -70,10 +79,12 @@ class AimView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defSty
 
     fun setTarget(id: String, x: Float, y: Float) {
         var pair = points.get(id) ?: PointF()
-        pair.x = x
+        pair.x = xImageInsets + x
         pair.y = y
         points.put(id, pair)
         invalidate()
     }
+
+    public var xImageInsets: Float = 0f
 }
 

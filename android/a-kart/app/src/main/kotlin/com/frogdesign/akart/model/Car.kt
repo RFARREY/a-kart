@@ -28,32 +28,37 @@ data class Car(val id: String, val lrMarkers: Pair<Int, Int>) {
         var pos : Position = Position(0f,0f,0f);
         if (!isDetected(arScene)) return pos;
         var sides : Int = 0;
+        val X_OFFSET = 50f;
+        val X_BIAS = 0f;
+        val Y_BIAS = -120f;
         if(isLeftMarkerVisible(arScene)) {
             var matrix : FloatArray = arScene.queryMarkerTransformation(leftAR)
-            sides++;
-            pos.x += matrix[12];
-            pos.y += matrix[13];
-            pos.z += matrix[14];
+            sides++
+            pos.x += (matrix[12] + X_OFFSET)
+            pos.y += matrix[13]
+            pos.z += matrix[14]
         }
 
         if(isRightMarkerVisible(arScene)) {
             var matrix : FloatArray = arScene.queryMarkerTransformation(rightAR)
             sides++;
-            pos.x += matrix[12];
-            pos.y += matrix[13];
-            pos.z += matrix[14];
+            pos.x += (matrix[12] - X_OFFSET)
+            pos.y += matrix[13]
+            pos.z += matrix[14]
         }
 
+        pos /= sides
+        pos.x += X_BIAS
+        pos.y += Y_BIAS
         //scaled to nullify depth
-        var depth : Float = pos.z / -500;
-        pos.x /= depth;
-        pos.y /= depth;
+        var depth : Float = pos.z / -500
+        pos.x /= depth
+        pos.y /= depth
 
-        pos /= sides;
-
-        val FACTOR = 2;
-        pos.x *= FACTOR;
-        pos.y *= FACTOR;
+        val X_FACTOR = 2.85f
+        val Y_FACTOR = 2.6f
+        pos.x *= X_FACTOR
+        pos.y *= Y_FACTOR
         return pos;
     }
 }
@@ -61,7 +66,7 @@ data class Car(val id: String, val lrMarkers: Pair<Int, Int>) {
 object Cars {
     @JvmField
     public val all = listOf(
-            Car("taxiguerrilla", Pair(0, 1)),
-            Car("gargamella", Pair(2, 3))
+            Car("gargamella", Pair(1, 0)),
+            Car("taxiguerrilla", Pair(2, 3))
     );
 }

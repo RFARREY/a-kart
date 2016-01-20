@@ -1,4 +1,4 @@
-package com.frogdesign.arsdk;
+package com.frogdesign.akart;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -19,7 +19,6 @@ import java.util.List;
 import rx.Observable;
 import rx.Subscriber;
 import rx.functions.Action1;
-
 
 /**
  * Created by emanuele.di.saverio on 17/12/15.
@@ -45,7 +44,8 @@ public class Discovery {
         }
     };
     private ARDiscoveryService mArdiscoveryService;
-    private ARDiscoveryServicesDevicesListUpdatedReceiver mArdiscoveryServicesDevicesListUpdatedReceiver;
+    private ARDiscoveryServicesDevicesListUpdatedReceiver
+            mArdiscoveryServicesDevicesListUpdatedReceiver;
 
     public Discovery(Context ctx) {
         this.ctx = ctx.getApplicationContext();
@@ -69,37 +69,42 @@ public class Discovery {
         });
     }
 
-    private Observable.OnSubscribe<List<ARDiscoveryDeviceService>> discoverer = new Observable.OnSubscribe<List<ARDiscoveryDeviceService>>() {
-        @Override
-        public void call(final Subscriber<? super List<ARDiscoveryDeviceService>> subscriber) {
-            binder().subscribe(new Action1<Discovery>() {
+    private Observable.OnSubscribe<List<ARDiscoveryDeviceService>> discoverer =
+            new Observable.OnSubscribe<List<ARDiscoveryDeviceService>>() {
                 @Override
-                public void call(Discovery discovery) {
-                    Log.i(TAG, "nexted call");
-                    ARDiscoveryServicesDevicesListUpdatedReceiverDelegate delegate = new ARDiscoveryServicesDevicesListUpdatedReceiverDelegate() {
+                public void call(final Subscriber<? super List<ARDiscoveryDeviceService>> subscriber) {
+                    unbind();
+                    binder().subscribe(new Action1<Discovery>() {
                         @Override
-                        public void onServicesDevicesListUpdated() {
-                            Log.d(TAG, "onServicesDevicesListUpdated ...");
-                            if (mArdiscoveryService != null) {
-                                List<ARDiscoveryDeviceService> deviceList = mArdiscoveryService.getDeviceServicesArray();
-                                subscriber.onNext(deviceList);
-                            }
+                        public void call(Discovery discovery) {
+                            Log.i(TAG, "nexted call");
+                            ARDiscoveryServicesDevicesListUpdatedReceiverDelegate delegate =
+                                    new ARDiscoveryServicesDevicesListUpdatedReceiverDelegate() {
+                                        @Override
+                                        public void onServicesDevicesListUpdated() {
+                                            Log.d(TAG, "onServicesDevicesListUpdated ...");
+                                            if (mArdiscoveryService != null) {
+                                                List<ARDiscoveryDeviceService> deviceList =
+                                                        mArdiscoveryService.getDeviceServicesArray();
+                                                subscriber.onNext(deviceList);
+                                            }
+                                        }
+                                    };
+                            //first update is immediate
+                            delegate.onServicesDevicesListUpdated();
+                            mArdiscoveryServicesDevicesListUpdatedReceiver =
+                                    new ARDiscoveryServicesDevicesListUpdatedReceiver(delegate);
+                            LocalBroadcastManager localBroadcastMgr = LocalBroadcastManager.getInstance(ctx);
+                            localBroadcastMgr.registerReceiver(mArdiscoveryServicesDevicesListUpdatedReceiver,
+                                    new IntentFilter(
+                                            ARDiscoveryService.kARDiscoveryServiceNotificationServicesDevicesListUpdated)
 
+                            );
+                            mArdiscoveryService.start();
                         }
-                    };
-                    //first update is immediate
-                    delegate.onServicesDevicesListUpdated();
-                    mArdiscoveryServicesDevicesListUpdatedReceiver = new ARDiscoveryServicesDevicesListUpdatedReceiver(delegate);
-                    LocalBroadcastManager localBroadcastMgr = LocalBroadcastManager.getInstance(ctx);
-                    localBroadcastMgr.registerReceiver(mArdiscoveryServicesDevicesListUpdatedReceiver,
-                            new IntentFilter(ARDiscoveryService.kARDiscoveryServiceNotificationServicesDevicesListUpdated)
-
-                    );
-                    mArdiscoveryService.start();
+                    });
                 }
-            });
-        }
-    };
+            };
 
     public Observable<List<ARDiscoveryDeviceService>> discoverer() {
         return Observable.create(discoverer);
@@ -108,9 +113,10 @@ public class Discovery {
     public void unbind() {
         unregisterReceivers();
         Log.d(TAG, "closeServices ...");
-        ctx.unbindService(mArdiscoveryServiceConnection);
-        if (mArdiscoveryService != null)
+        if (mArdiscoveryService != null) {
+            ctx.unbindService(mArdiscoveryServiceConnection);
             mArdiscoveryService.stop();
+        }
         mArdiscoveryService = null;
     }
 

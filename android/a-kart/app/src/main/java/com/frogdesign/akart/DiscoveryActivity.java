@@ -14,7 +14,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
-import com.frogdesign.arsdk.Discovery;
 import com.frogdesign.akart.databinding.DiscoveryListItemBinding;
 import com.parrot.arsdk.ardiscovery.ARDiscoveryDeviceService;
 

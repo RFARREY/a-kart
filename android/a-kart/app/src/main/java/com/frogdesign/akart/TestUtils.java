@@ -1,4 +1,4 @@
-package com.frogdesign.arsdk;
+package com.frogdesign.akart;
 
 import android.os.SystemClock;
 import android.util.Log;

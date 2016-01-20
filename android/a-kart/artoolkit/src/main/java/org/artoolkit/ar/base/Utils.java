@@ -28,24 +28,24 @@ public class Utils {
     }
 
     public static void encodeYUV420SP(byte[] yuv420sp, int[] argb, int width, int height) {
-        int correctLength = yuvByteLength(width, height);
-        if (yuv420sp.length != correctLength) {
-            throw new RuntimeException("byte size should be "+correctLength);
-        }
+//        int correctLength = yuvByteLength(width, height);
+//        if (yuv420sp.length != correctLength) {
+//            throw new RuntimeException("byte size should be "+correctLength);
+//        }
         final int frameSize = width * height;
 
         int yIndex = 0;
         int uvIndex = frameSize;
 
-        int a, R, G, B, Y, U, V;
+        int /*a,*/ R, G, B, Y, U, V;
         int index = 0;
         for (int j = 0; j < height; j++) {
             for (int i = 0; i < width; i++) {
 
-                a = (argb[index] & 0xff000000) >> 24; // a is not used obviously
+                //a = (argb[index] & 0xff000000) >> 24; // a is not used obviously
                 R = (argb[index] & 0xff0000) >> 16;
                 G = (argb[index] & 0xff00) >> 8;
-                B = (argb[index] & 0xff) >> 0;
+                B = argb[index] & 0xff;
 
                 // well known RGB to YUV algorithm
                 Y = ((66 * R + 129 * G + 25 * B + 128) >> 8) + 16;
