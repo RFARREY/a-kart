@@ -17,7 +17,7 @@ public class AccelTestActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.accel_test);
+        setContentView(R.layout.accel_test_activity);
 
         SensorManager sensorManager = (SensorManager) this.getSystemService(SENSOR_SERVICE);
 

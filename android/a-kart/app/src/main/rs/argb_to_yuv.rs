@@ -31,3 +31,21 @@ void filter() {
         }
     }
 }
+
+void rgbToYuv(const uchar4 *in_pixel, uint32_t x, uint32_t y) {
+    int R = in_pixel->r;
+    int G = in_pixel->g;
+    int B = in_pixel->b;
+    int yIndex = y * width + x;
+
+    int Y = ((66 * R + 129 * G + 25 * B + 128) >> 8) + 16;
+
+    outBytes[yIndex] = (uchar) ((Y < 0) ? 0 : ((Y > 255) ? 255 : Y));
+    if (y % 2 == 0 && x % 2 == 0) {
+        int U = ((-38 * R - 74 * G + 112 * B + 128) >> 8) + 128;
+        int V = ((112 * R - 94 * G - 18 * B + 128) >> 8) + 128;
+        int uvIndex = frameSize + ((int)(yIndex / 4)) * 2;
+        outBytes[uvIndex] = (uchar) ((V < 0) ? 0 : ((V > 255) ? 255 : V));
+        outBytes[uvIndex + 1] = (uchar) ((U < 0) ? 0 : ((U > 255) ? 255 : U));
+    }
+}

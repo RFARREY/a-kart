@@ -85,8 +85,10 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
                     subscriber.onNext(data)
                 }
 
+                var n : Int = 0;
+
                 override fun onFrameTimeout(arDeviceController: ARDeviceController) {
-                    Log.w(TAG, "onFrameTimeout")
+                    Log.w(TAG, "onFrameTimeout" + ++n)
                 }
             }
             deviceController.addStreamListener(listener)
@@ -142,8 +144,7 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
         return "product: " + ardiscovery_product_enum.toString() + " , s: " + s
     }
 
-    override // called when a command has been received from the drone
-    fun onCommandReceived(deviceController: ARDeviceController,
+    override fun onCommandReceived(deviceController: ARDeviceController,
                           commandKey: ARCONTROLLER_DICTIONARY_KEY_ENUM?, elementDictionary: ARControllerDictionary?) {
         if (commandKey == null) throw RuntimeException("Received a null command!")
         if (commandKey == ARCONTROLLER_DICTIONARY_KEY_ENUM.ARCONTROLLER_DICTIONARY_KEY_COMMON_COMMONSTATE_BATTERYSTATECHANGED) {

@@ -49,7 +49,7 @@ class PlayActivity : AppCompatActivity() {
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.play_activity)
         RxView.touches(rear).subscribe { event ->
             Log.i(TAG, "touch "+event)
             when (event.actionMasked) {
@@ -77,7 +77,6 @@ class PlayActivity : AppCompatActivity() {
                 event.view().progress = 0
             }
         }
-        //camera.xImageInsets.subscribe({x -> targets.xImageInsets = x})
     }
 
     override fun onStart() {
@@ -156,8 +155,8 @@ class PlayActivity : AppCompatActivity() {
         for (i in Cars.all.indices) {
             val c = Cars.all[i]
             if (c.isDetected(ARToolKit.getInstance())) {
-                Log.i(TAG, "Car visibile! " + c.id)
-                Log.i(TAG, "Position: " + c.estimatePosition(ARToolKit.getInstance()))
+               // Log.i(TAG, "Car visibile! " + c.id)
+               // Log.i(TAG, "Position: " + c.estimatePosition(ARToolKit.getInstance()))
                 val p = c.estimatePosition(ARToolKit.getInstance())
                 targets.setTarget(c.id, p.x + targets.width / 2, -p.y + targets.height / 2)
             }
