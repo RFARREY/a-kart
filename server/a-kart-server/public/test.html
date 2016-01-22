@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        var socket = io();
+    </script>
+</head>
+<body>
+<form class="pure-form pure-form-stacked">
+    <fieldset>
+        <legend>Global Setup</legend>
+        <button class="pure-button pure-button-primary" type="button" id="reset">RESET</button>
+
+        <button class="pure-button pure-button-primary" type="button" id="start">START</button>
+    </fieldset>
+</form>
+<form class="pure-form">
+    <fieldset>
+        <legend>Player Actions</legend>
+        <input type="text" placeholder="target" id="target"/>
+        <button class="pure-button pure-button-primary" type="button" id="register">REGISTER</button>
+        <button class="pure-button pure-button-primary" type="button" id="boom">BOOM</button>
+    </fieldset>
+</form>
+<script>
+    var target = document.getElementById('target');
+    document.getElementById('reset').addEventListener('click', function () {
+        socket.emit('reset');
+    });
+    document.getElementById('start').addEventListener('click', function () {
+        socket.emit('start');
+    });
+    document.getElementById('register').addEventListener('click', function () {
+        if (target.value.length >= 0) {
+            socket.emit('register', {'id': target.value});
+        }
+    });
+    document.getElementById('boom').addEventListener('click', function () {
+        if (target.value.length >= 0) {
+            socket.emit('boom', {'id': target.value});
+            console.log('boomed')
+        }
+    });
+</script>
+</body>
+</html>

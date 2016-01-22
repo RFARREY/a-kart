@@ -1,0 +1,16 @@
+{
+  "name": "a-kart-server",
+  "version": "0.0.1",
+  "description": "server for the a-kart game",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "^4.0.0",
+    "q": "^1.4.1",
+    "socket.io": "^1.3.5",
+    "socket.io-client": "^1.3.5",
+    "ejs": "^2.3.1"
+  }
+}

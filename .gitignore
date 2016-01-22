@@ -7,3 +7,5 @@
 **/build
 **/captures
 
+node_modules
+bower_components
