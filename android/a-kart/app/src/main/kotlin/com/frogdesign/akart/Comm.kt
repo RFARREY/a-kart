@@ -2,83 +2,65 @@ package com.frogdesign.akart
 
 import android.content.Context
 import android.util.Log
-import org.java_websocket.WebSocket
-import org.java_websocket.client.WebSocketClient
-import org.java_websocket.drafts.Draft_17
-import org.java_websocket.handshake.ServerHandshake
+import io.socket.client.IO
+import io.socket.client.Socket
+import rx.Observable
 import rx.lang.kotlin.BehaviourSubject
-import java.net.URI
 
-class Comm(ctx: Context, uri: String) {
+class Comm(val id: String, val ctx: Context, val uri: String) {
 
     companion object {
         private val TAG = Comm::class.java.simpleName
-        private val TRACE = false
-
-        private var inst: Comm? = null;
-
-        fun instance(ctx: Context): Comm = synchronized(Comm, {
-            if (inst == null) inst = Comm(ctx, "")
-            return inst!!
-        })
+        private val TRACE = true
     }
 
-    private class WSClient : WebSocketClient {
 
-        private val ctx: Context
-        private val comm: Comm
-
-        constructor(ctx: Context, comm: Comm, uri: URI?) : super(uri, Draft_17()) {
-            this.ctx = ctx
-            this.comm = comm
-        }
-
-        override fun onClose(code: Int, reason: String?, remote: Boolean) {
-            comm.trace("onClose %d %s %b", code, reason, remote)
-        }
-
-        override fun onError(ex: Exception?) {
-            comm.trace("onError %s %b", ex)
-            comm.subject.onNext(Erroz(ex!!))
-        }
-
-        override fun onMessage(message: String?) {
-            comm.trace("onMessage %s", message)
-            comm.subject.onNext(Message(message!!))
-        }
-
-        override fun onOpen(handshakedata: ServerHandshake?) {
-            comm.trace("onOpen %s", handshakedata)
-        }
-    }
-
-    private val client: WSClient
+    private val client: Socket
     public val subject = BehaviourSubject<Event>()
+    public val pin : Observable<Event>
 
     init {
-        client = WSClient(ctx, this, URI.create(uri))
-        subject.doOnSubscribe({
-            if (client.readyState != WebSocket.READYSTATE.OPEN &&
-                    client.readyState != WebSocket.READYSTATE.CONNECTING)
-                client.connect()
-        })
-        subject.doOnUnsubscribe({
-            if (!subject.hasObservers()) client.close()
+        client = IO.socket(uri)
+        trace("init!")
+        pin = subject.asObservable()
+        pin.doOnSubscribe {
+            trace("onSub")
+            client.disconnect()
         }
-        )
+
+    }
+
+    public fun connect() {
+        client.on(Socket.EVENT_CONNECT, { args ->
+            trace("connect, registering")
+            client.emit("register", id)
+        }).on("set game", { args ->
+            trace("set game"+ args[0])
+        }).on("start", { args ->
+            trace("start")
+        }).on("boom", { args ->
+            trace("boom")
+            subject.onNext(Hit())
+        }).on(Socket.EVENT_DISCONNECT, { args ->
+            trace("disconnect")
+        });
+        client.connect();
+    }
+
+    public fun disconnect() {
+        client.disconnect()
     }
 
     public open class Event(val type: String)
     public class Message(val mex: String) : Event("message")
+    public class Hit() : Event("hit")
     public class Erroz(ex: Exception) : Event("error")
 
     private fun trace(s: String, vararg args: Any?) {
-        if (TRACE) Log.d(TAG, s.format(args))
+        if (TRACE) Log.d(TAG, if (args != null) s.format(args) else s)
     }
 
-    public fun send(s : String) {
-        if (client.readyState == WebSocket.READYSTATE.OPEN) {
-            client.send(s)
-        }
+    public fun send(s: String) {
+        client.send(s)
     }
 }

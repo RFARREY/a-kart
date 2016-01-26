@@ -87,8 +87,9 @@ class BmpToYUVToARToolkitConverter : Func1<Bitmap, Boolean> {
 
 
 class TrackedSubscriptions : ArrayList<Subscription>() {
-    public fun track(sub: Subscription): TrackedSubscriptions {
-        super.add(sub)
+
+    public fun track(sub: Subscription?): TrackedSubscriptions {
+        if (sub != null) super.add(sub)
         return this
     }
 

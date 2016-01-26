@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title></title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
+    <link rel="stylesheet" href="/switch.css">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <script src="/socket.io/socket.io.js"></script>
@@ -14,10 +15,15 @@
 <body>
 <form class="pure-form pure-form-stacked">
     <fieldset>
-        <legend>Global Setup</legend>
-        <button class="pure-button pure-button-primary" type="button" id="reset">RESET</button>
-
-        <button class="pure-button pure-button-primary" type="button" id="start">START</button>
+        <legend>GAME CONTROL</legend>
+        <div class="switch">
+            <input id="gamecontrol" type="checkbox">
+            <label>
+                <span class="fontawesome-ok"></span>
+                <span class="fontawesome-remove"></span>
+                <div></div>
+            </label>
+        </div>
     </fieldset>
 </form>
 <form class="pure-form">
@@ -30,11 +36,9 @@
 </form>
 <script>
     var target = document.getElementById('target');
-    document.getElementById('reset').addEventListener('click', function () {
-        socket.emit('reset');
-    });
-    document.getElementById('start').addEventListener('click', function () {
-        socket.emit('start');
+    var gamecontrol = document.getElementById('gamecontrol');
+    gamecontrol.addEventListener('change', function (evt) {
+       socket.emit('set game '+ (evt.srcElement.checked ? 'on' : 'off'));
     });
     document.getElementById('register').addEventListener('click', function () {
         if (target.value.length >= 0) {
@@ -47,6 +51,13 @@
             console.log('boomed')
         }
     });
+
+    //socket.emit('get game status');
+
+    socket.on('set game', function(data) {
+        console.log('somebody set game ', data)
+        gamecontrol.checked = data
+    })
 </script>
 </body>
 </html>

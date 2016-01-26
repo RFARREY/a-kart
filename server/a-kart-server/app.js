@@ -16,13 +16,12 @@ app.get('/', function (req, res) {
     res.sendfile('index.html');
 });
 
-app.get('/', function (req, res) {
-    res.sendfile('index.html');
-});
+var GAME_IS_ON = false
 
 var connecteds = {}
 io.on('connection', function (socket) {
     console.log('a user connected');
+    socket.emit('set game', GAME_IS_ON)
 
     socket.on('disconnect', function () {
         var id = this['id'];
@@ -33,13 +32,25 @@ io.on('connection', function (socket) {
         }
     }.bind(socket));
 
-    socket.on('reset', function () {
-        console.log('reset')
-        socket.emit('reset')
+    socket.on('set game on', function () {
+        console.log('game on')
+        if (!GAME_IS_ON) {
+            GAME_IS_ON = true;
+            socket.broadcast.emit('set game', GAME_IS_ON)
+        }
     });
-    socket.on('start', function () {
-        console.log('start')
-        socket.emit('start')
+
+    socket.on('set game off', function () {
+        console.log('game off')
+        if (GAME_IS_ON) {
+            GAME_IS_ON = false;
+            socket.broadcast.emit('set game', GAME_IS_ON)
+        }
+    });
+
+    socket.on('get game status', function () {
+        console.log('get game status')
+        socket.emit('set game', GAME_IS_ON)
     });
 
     socket.on('register', function (data) {

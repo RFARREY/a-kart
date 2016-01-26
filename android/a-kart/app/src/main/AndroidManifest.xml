@@ -58,6 +58,11 @@
             android:screenOrientation="landscape">
         </activity>
 
+        <activity
+            android:name="com.frogdesign.akart.CommTestActivity"
+            android:screenOrientation="portrait">
+        </activity>
+
         <service android:name="com.parrot.arsdk.ardiscovery.ARDiscoveryService" />
     </application>
 

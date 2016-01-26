@@ -46,6 +46,7 @@ class PlayActivity : AppCompatActivity() {
     private var controller: Controller? = null
 
     private val trackedSubscriptions = TrackedSubscriptions();
+    private var comm: Comm? = null
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,6 +67,7 @@ class PlayActivity : AppCompatActivity() {
 
         val device = intent.getParcelableExtra<ARDiscoveryDeviceService>(EXTRA_DEVICE)
         controller = Controller(baseContext, device)
+        comm = Comm(device.name, this, "http://10.228.81.53:5000")
 
         RxSeekBar.changeEvents(gasPedal).subscribe { event ->
             if (event is SeekBarProgressChangeEvent) {
@@ -77,6 +79,15 @@ class PlayActivity : AppCompatActivity() {
                 event.view().progress = 0
             }
         }
+
+        trackedSubscriptions.track(comm?.subject?.subscribe { event ->
+            Log.i("COMM", "event " + event)
+            if (event is Comm.Hit) {
+                Log.e(TAG, "YOUVE BEENNE HIT")
+            }
+        })
+
+        comm?.connect()
     }
 
     override fun onStart() {
@@ -117,7 +128,8 @@ class PlayActivity : AppCompatActivity() {
 
         var batterySubscription = controller!!.batteryLevel()
                 .observeOn(AndroidSchedulers.mainThread()).subscribe { bat -> battery.text = Integer.toString(bat) }
-        trackedSubscriptions.track(batterySubscription);
+        trackedSubscriptions.track(batterySubscription)
+        comm?.connect()
     }
 
     override fun onResume() {
@@ -148,6 +160,7 @@ class PlayActivity : AppCompatActivity() {
         super.onStop()
         trackedSubscriptions.unsubAll()
         controller!!.stop()
+        comm?.disconnect()
     }
 
     fun onFrameProcessed() {

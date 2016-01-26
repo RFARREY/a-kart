@@ -6,7 +6,6 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.PointF
 import android.util.AttributeSet
-import android.util.FloatMath
 import android.view.View
 import com.frogdesign.akart.util.dpToPx
 
