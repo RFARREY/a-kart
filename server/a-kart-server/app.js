@@ -22,6 +22,9 @@ var connecteds = {}
 io.on('connection', function (socket) {
     console.log('a user connected');
     socket.emit('set game', GAME_IS_ON)
+    var players = []
+    for (var k in connecteds) players.push(k)
+    socket.emit('players', players)
 
     socket.on('disconnect', function () {
         var id = this['id'];
@@ -51,16 +54,23 @@ io.on('connection', function (socket) {
     socket.on('get game status', function () {
         console.log('get game status')
         socket.emit('set game', GAME_IS_ON)
+        var players = []
+        for (var k in connecteds) players.push(k)
+        socket.emit('players', players)
     });
 
     socket.on('register', function (data) {
         console.log('register ' + JSON.stringify(data));
-        connecteds[data.id] = this;
-        this['id'] = data.id;
+        connecteds[data] = this;
+        this['id'] = data;
+
+
+
     }.bind(socket));
 
     socket.on('boom', function (data) {
         var targetId = data.id;
+        console.log("targetId" + targetId)
         if (connecteds[targetId]) {
             connecteds[targetId].emit('hit');
             console.log('boom!!');

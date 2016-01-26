@@ -22,12 +22,6 @@ http://tympanus.net/codrops/2012/09/13/button-switches-with-checkboxes-and-css3-
     box-sizing: border-box;
 }
 
-body {
-    background: #f4f0f1;
-    margin-top: 83px;
-    width: 100%;
-}
-
 /*---Switch styles---*/
 
 /* Checkbox hack */
