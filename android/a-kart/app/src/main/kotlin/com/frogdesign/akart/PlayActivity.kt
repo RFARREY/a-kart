@@ -83,7 +83,7 @@ class PlayActivity : AppCompatActivity() {
         trackedSubscriptions.track(comm?.subject?.subscribe { event ->
             Log.i("COMM", "event " + event)
             if (event is Comm.Hit) {
-                Log.e(TAG, "YOUVE BEENNE HIT")
+                controller!!.hitAnim()
             }
         })
 
@@ -160,7 +160,7 @@ class PlayActivity : AppCompatActivity() {
         super.onStop()
         trackedSubscriptions.unsubAll()
         controller!!.stop()
-        comm?.disconnect()
+        comm?.close()
     }
 
     fun onFrameProcessed() {

@@ -3,6 +3,7 @@ package com.frogdesign.akart
 import android.content.Context
 import android.util.Log
 import com.frogdesign.akart.util.isMainThread
+import com.parrot.arsdk.arcommands.ARCOMMANDS_JUMPINGSUMO_ANIMATIONS_SIMPLEANIMATION_ID_ENUM
 import com.parrot.arsdk.arcontroller.*
 import com.parrot.arsdk.ardiscovery.*
 import com.parrot.arsdk.arsal.ARNativeDataHelper
@@ -107,6 +108,10 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
         jumpingSumo.setPilotingPCMDFlag(ON)
     }
 
+    fun hitAnim() {
+        jumpingSumo.sendAnimationsSimpleAnimation(ARCOMMANDS_JUMPINGSUMO_ANIMATIONS_SIMPLEANIMATION_ID_ENUM.ARCOMMANDS_JUMPINGSUMO_ANIMATIONS_SIMPLEANIMATION_ID_SPIN)
+    }
+
     fun turn(percentage: Float) {
         val dataToBeSent = (-TURN_MAX * percentage).toByte()
         //trace("turn %d", dataToBeSent)
@@ -164,7 +169,7 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
         } else if (commandKey == ARCONTROLLER_DICTIONARY_KEY_ENUM.ARCONTROLLER_DICTIONARY_KEY_JUMPINGSUMO_NETWORKSTATE_LINKQUALITYCHANGED) {
             //
         } else {
-            //Log.i(TAG, "Command: " + commandKey.name)
+            Log.i(TAG, "Command: " + commandKey.name)
         }
     }
 

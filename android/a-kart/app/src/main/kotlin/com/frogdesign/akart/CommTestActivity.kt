@@ -24,7 +24,7 @@ class CommTestActivity : Activity() {
     override fun onDestroy() {
         super.onDestroy()
         trackedSubs.unsubAll()
-        comm.disconnect();
+        comm.close();
     }
 
 }
