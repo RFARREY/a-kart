@@ -117,7 +117,7 @@ class PlayActivity : AppCompatActivity() {
         super.onStart()
         controller!!.start()
 
-        val FAKE_PRODUCER = false
+        val FAKE_PRODUCER = true
         var bitmapByteArrayProducer = if (!FAKE_PRODUCER) controller!!.mediaStreamer()
         else {
             val bitmap = BitmapFactory.decodeResource(resources, R.drawable.test)

@@ -177,7 +177,7 @@ public class ARToolKit {
         this.cameraIndex = cameraIndex;
         this.cameraIsFrontFacing = cameraIsFrontFacing;
 
-        if (!NativeInterface.arwStartRunning("-format=RGBA", cameraParaPath, 10.0f, 10000.0f)) {
+        if (!NativeInterface.arwStartRunning("-format=NV21", cameraParaPath, 10.0f, 10000.0f)) {
             Log.e(TAG, "Error starting video");
             return false;
         }
