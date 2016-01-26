@@ -22,6 +22,7 @@ import com.jakewharton.rxbinding.widget.SeekBarProgressChangeEvent
 import com.jakewharton.rxbinding.widget.SeekBarStopChangeEvent
 import com.parrot.arsdk.ardiscovery.ARDiscoveryDeviceService
 import org.artoolkit.ar.base.ARToolKit
+import org.artoolkit.ar.base.Bmp2
 import org.artoolkit.ar.base.NativeInterface
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
@@ -117,7 +118,7 @@ class PlayActivity : AppCompatActivity() {
         super.onStart()
         controller!!.start()
 
-        val FAKE_PRODUCER = true
+        val FAKE_PRODUCER = false
         var bitmapByteArrayProducer = if (!FAKE_PRODUCER) controller!!.mediaStreamer()
         else {
             val bitmap = BitmapFactory.decodeResource(resources, R.drawable.test)
@@ -138,7 +139,7 @@ class PlayActivity : AppCompatActivity() {
 
         var bitmapSubscription = bmpObs
                 .sample(66, TimeUnit.MILLISECONDS)
-                .filter(BmpToYUVToARToolkitConverter())
+                .filter(Bmp2(this))
                 .andAsync()
                 .subscribe { onFrameProcessed() }
         trackedSubscriptions.track(bitmapSubscription)

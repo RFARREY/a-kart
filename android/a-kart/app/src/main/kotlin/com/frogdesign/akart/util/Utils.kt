@@ -15,6 +15,7 @@ import rx.functions.Func1
 import rx.schedulers.Schedulers
 import java.util.*
 import java.util.concurrent.Executors
+import org.artoolkit.ar.base.*
 
 
 public fun dpToPx(context: Context, dp: Float): Int = Math.round(dp * pixelScaleFactor(context))
@@ -77,7 +78,7 @@ class BmpToYUVToARToolkitConverter : Func1<Bitmap, Boolean> {
         checkForBuffers(w, h)
         inBitmap.getPixels(argbBuffer, 0, w, 0, 0, w, h)
         //var startT = System.nanoTime();
-        encodeYUV420SP(yuvBuffer, argbBuffer, w, h)
+        JavaUtil.encodeYUV420SP(yuvBuffer, argbBuffer, w, h)
         //var dt = System.nanoTime() - startT;
         //Log.i("TIME", dt.toString());
         if (ARToolKit.getInstance().nativeInitialised()) {
