@@ -7,17 +7,16 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.MotionEvent
 import android.widget.Button
-import android.widget.SeekBar
+import android.widget.ImageButton
 import android.widget.TextView
+import android.widget.Toast
 import butterknife.bindView
 import com.frogdesign.akart.model.Cars
 import com.frogdesign.akart.util.*
 import com.frogdesign.akart.view.AimView
 import com.frogdesign.akart.view.CameraView
 import com.frogdesign.akart.view.VerticalSeekBar
-import com.jakewharton.rxbinding.internal.Functions
 import com.jakewharton.rxbinding.view.RxView
-import com.jakewharton.rxbinding.view.pressed
 import com.jakewharton.rxbinding.widget.RxSeekBar
 import com.jakewharton.rxbinding.widget.SeekBarProgressChangeEvent
 import com.jakewharton.rxbinding.widget.SeekBarStopChangeEvent
@@ -42,21 +41,26 @@ class PlayActivity : AppCompatActivity() {
     private val gasPedal: VerticalSeekBar by bindView(R.id.gasPedal)
     private val battery: TextView by bindView(R.id.battery)
     private val rear: Button by bindView(R.id.rear)
+    private val fireButton: ImageButton by bindView(R.id.fireButton)
 
     private var controller: Controller? = null
 
     private val trackedSubscriptions = TrackedSubscriptions();
     private var comm: Comm? = null
 
+    private var isGameOn = false
+
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.play_activity)
         RxView.touches(rear).subscribe { event ->
-            Log.i(TAG, "touch "+event)
+            Log.i(TAG, "touch " + event)
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
-                    controller?.speed(-0.4f)
-                    rear.isPressed = true
+                    if (isGameOn) {
+                        controller?.speed(-0.4f)
+                        rear.isPressed = true
+                    }
                 }
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                     controller?.neutral()
@@ -70,7 +74,7 @@ class PlayActivity : AppCompatActivity() {
         comm = Comm(device.name, this, "http://10.228.81.53:5000")
 
         RxSeekBar.changeEvents(gasPedal).subscribe { event ->
-            if (event is SeekBarProgressChangeEvent) {
+            if (event is SeekBarProgressChangeEvent && isGameOn) {
                 var progress = event.progress()
                 if (progress != 0) controller!!.speed(progress / event.view().max.toFloat())
                 else controller!!.neutral()
@@ -84,10 +88,29 @@ class PlayActivity : AppCompatActivity() {
             Log.i("COMM", "event " + event)
             if (event is Comm.Hit) {
                 controller!!.hitAnim()
+            } else if (event is Comm.GameState) {
+                isGameOn = event.on
+                updateGameState()
             }
         })
 
+        RxView.clicks(fireButton).subscribe {
+            var s = targets.targetedId
+            if (s != null) comm?.boom(s)
+            else Toast.makeText(this, "MISS!", Toast.LENGTH_SHORT)
+        }
+
         comm?.connect()
+        updateGameState()
+    }
+
+    private fun updateGameState() {
+        Log.i(TAG, "updateGameState($isGameOn)")
+        if (isGameOn) {
+
+        } else {
+            controller!!.neutral()
+        }
     }
 
     override fun onStart() {
@@ -115,14 +138,14 @@ class PlayActivity : AppCompatActivity() {
 
         var bitmapSubscription = bmpObs
                 .sample(66, TimeUnit.MILLISECONDS)
-                .filter(BmpToYUVToARToolkitConverter2(this))
+                .filter(BmpToYUVToARToolkitConverter())
                 .andAsync()
                 .subscribe { onFrameProcessed() }
         trackedSubscriptions.track(bitmapSubscription)
 
         var steerSubscription = SteeringWheel(this).stream().subscribe { steer ->
             trace("steer: %b", isMainThread())
-            controller?.turn(steer / 90f)
+            if (isGameOn) controller?.turn(steer / 90f)
         }
         trackedSubscriptions.track(steerSubscription);
 
@@ -168,8 +191,8 @@ class PlayActivity : AppCompatActivity() {
         for (i in Cars.all.indices) {
             val c = Cars.all[i]
             if (c.isDetected(ARToolKit.getInstance())) {
-               // Log.i(TAG, "Car visibile! " + c.id)
-               // Log.i(TAG, "Position: " + c.estimatePosition(ARToolKit.getInstance()))
+                Log.i(TAG, "Car visibile! " + c.id)
+                Log.i(TAG, "Position: " + c.estimatePosition(ARToolKit.getInstance()))
                 val p = c.estimatePosition(ARToolKit.getInstance())
                 targets.setTarget(c.id, p.x + targets.width / 2, -p.y + targets.height / 2)
             }

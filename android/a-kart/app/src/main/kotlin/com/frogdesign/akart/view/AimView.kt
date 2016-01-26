@@ -21,6 +21,7 @@ class AimView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defSty
     private var radius = AimView.RADIUS
     private var stroke = AimView.STROKE
     private val paint: Paint
+    public var targetedId: String? = null
 
     init {
         if (context != null) {
@@ -50,18 +51,22 @@ class AimView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defSty
         setMeasuredDimension(w, h)
     }
 
+
+
     override fun onDraw(canvas: Canvas?) {
         var cx = (width / 2).toFloat()
         var cy = (height / 2).toFloat()
         canvas?.drawCircle(cx, cy, radius, paint)
-
-        for (b in points.values) {
+        targetedId = null
+        for ((k,b) in points.entries) {
             if (b.x > Float.MIN_VALUE) canvas?.drawCircle(b.x, b.y, 10f, paint);
             var distance = hypot(cx - b.x, cy - b.y)
             if (distance < radius) {
                 paint.style = Paint.Style.FILL
                 canvas?.drawCircle(cx, cy, radius, paint)
                 paint.style = Paint.Style.STROKE
+                targetedId = k
+                break;
             }
         }
     }

@@ -76,11 +76,14 @@ class BmpToYUVToARToolkitConverter : Func1<Bitmap, Boolean> {
         val h = inBitmap.height
         checkForBuffers(w, h)
         inBitmap.getPixels(argbBuffer, 0, w, 0, 0, w, h)
-        var startT = System.nanoTime();
+        //var startT = System.nanoTime();
         encodeYUV420SP(yuvBuffer, argbBuffer, w, h)
-        var dt = System.nanoTime() - startT;
-        Log.i("TIME", dt.toString());
-        if (ARToolKit.getInstance().nativeInitialised()) ARToolKit.getInstance().convertAndDetect(yuvBuffer)
+        //var dt = System.nanoTime() - startT;
+        //Log.i("TIME", dt.toString());
+        if (ARToolKit.getInstance().nativeInitialised()) {
+            var b = ARToolKit.getInstance().convertAndDetect(yuvBuffer)
+            //Log.i("Utils", "ARToolkit $b");
+        }
         return true
     }
 }

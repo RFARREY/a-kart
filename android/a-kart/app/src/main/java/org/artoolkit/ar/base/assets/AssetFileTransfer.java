@@ -186,13 +186,8 @@ public class AssetFileTransfer {
             } catch (IOException ioe) {
                 throw new AssetFileTransferException("Error copying asset to target file: " + targetFile.getPath(), ioe);
             }
-
             assetCopied = true;
-
         }
-
-
     }
-
 
 }
