@@ -11,19 +11,16 @@ import com.frogdesign.akart.util.UtilsKt;
 
 import rx.functions.Func1;
 
-/**
- * Created by emanuele.di.saverio on 26/01/16.
- */
 
-public class Bmp2 implements Func1<Bitmap, Boolean> {
+public class BmpToYUVToARToolkitConverterRS implements Func1<Bitmap, Boolean> {
+
     private byte[] yuvBuffer = null;
+    private Allocation inAllocation = null;
+    private Allocation outAllocation = null;
+    private RenderScript rs = null;
+    private ScriptC_argb_to_yuv script = null;
 
-    private Allocation inAllocation;
-    private Allocation outAllocation;
-    private RenderScript rs;
-    private ScriptC_argb_to_yuv script;
-
-    public Bmp2(Context ctx) {
+    public BmpToYUVToARToolkitConverterRS(Context ctx) {
         rs = RenderScript.create(ctx);
         script = new ScriptC_argb_to_yuv(rs);
     }

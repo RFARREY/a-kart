@@ -202,7 +202,7 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
         private val OFF = 0.toByte()
 
         private val TURN_MAX: Byte = 50
-        private val TURN_DEADZONE: Byte = 10
+        private val TURN_DEADZONE: Byte = 6
         private val SPEED_MAX: Byte = 50
     }
 }

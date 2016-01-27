@@ -1,24 +1,20 @@
-package com.frogdesign.akart.util
+package org.artoolkit.ar.base
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.ImageFormat
 import android.renderscript.Allocation
 import android.renderscript.Element
 import android.renderscript.RenderScript
-import android.renderscript.Type
-import android.util.Log
 
 import com.frogdesign.akart.ScriptC_argb_to_yuv
-
-import org.artoolkit.ar.base.ARToolKit
+import com.frogdesign.akart.util.*
 
 import rx.functions.Func1
 
 
-class BmpToYUVToARToolkitConverter2(ctx: Context) : Func1<Bitmap, Boolean> {
-    private var yuvBuffer: ByteArray? = null
+class BmpToYUVToARToolkitConverterRS2(ctx: Context) : Func1<Bitmap, Boolean> {
 
+    private var yuvBuffer: ByteArray? = null
     private var inAllocation: Allocation? = null
     private var outAllocation: Allocation? = null
     private val rs: RenderScript
@@ -58,11 +54,7 @@ class BmpToYUVToARToolkitConverter2(ctx: Context) : Func1<Bitmap, Boolean> {
 
         inAllocation!!.copyFrom(inBitmap)
 
-        //long startT = System.nanoTime();
         script.invoke_filter()
-        //script.forEach_rgbToYuv(inAllocation);
-        //long dt = System.nanoTime() - startT;
-        //Log.i("TIME", Long.toString(dt));
 
         outAllocation!!.copyTo(yuvBuffer)
 

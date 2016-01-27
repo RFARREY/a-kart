@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.MotionEvent
+import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
@@ -22,7 +23,8 @@ import com.jakewharton.rxbinding.widget.SeekBarProgressChangeEvent
 import com.jakewharton.rxbinding.widget.SeekBarStopChangeEvent
 import com.parrot.arsdk.ardiscovery.ARDiscoveryDeviceService
 import org.artoolkit.ar.base.ARToolKit
-import org.artoolkit.ar.base.Bmp2
+import org.artoolkit.ar.base.BmpToYUVToARToolkitConverterRS
+import org.artoolkit.ar.base.BmpToYUVToARToolkitConverterRS2
 import org.artoolkit.ar.base.NativeInterface
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
@@ -43,6 +45,7 @@ class PlayActivity : AppCompatActivity() {
     private val battery: TextView by bindView(R.id.battery)
     private val rear: Button by bindView(R.id.rear)
     private val fireButton: ImageButton by bindView(R.id.fireButton)
+    private val stoppedMask: View by bindView(R.id.stopped_mask)
 
     private var controller: Controller? = null
 
@@ -72,7 +75,7 @@ class PlayActivity : AppCompatActivity() {
 
         val device = intent.getParcelableExtra<ARDiscoveryDeviceService>(EXTRA_DEVICE)
         controller = Controller(baseContext, device)
-        comm = Comm(device.name, this, "http://10.228.81.53:5000")
+        comm = Comm(device.name, this)
 
         RxSeekBar.changeEvents(gasPedal).subscribe { event ->
             if (event is SeekBarProgressChangeEvent && isGameOn) {
@@ -85,8 +88,7 @@ class PlayActivity : AppCompatActivity() {
             }
         }
 
-        trackedSubscriptions.track(comm?.subject?.subscribe { event ->
-            Log.i("COMM", "event " + event)
+        trackedSubscriptions.track(comm?.subject?.andAsync()?.subscribe { event ->
             if (event is Comm.Hit) {
                 controller!!.hitAnim()
             } else if (event is Comm.GameState) {
@@ -96,9 +98,10 @@ class PlayActivity : AppCompatActivity() {
         })
 
         RxView.clicks(fireButton).subscribe {
+            Log.i(TAG, "fire?")
             var s = targets.targetedId
             if (s != null) comm?.boom(s)
-            else Toast.makeText(this, "MISS!", Toast.LENGTH_SHORT)
+            else Toast.makeText(this, "MISS!", Toast.LENGTH_SHORT).show()
         }
 
         comm?.connect()
@@ -108,8 +111,9 @@ class PlayActivity : AppCompatActivity() {
     private fun updateGameState() {
         Log.i(TAG, "updateGameState($isGameOn)")
         if (isGameOn) {
-
+            stoppedMask.visibility = View.GONE
         } else {
+            stoppedMask.visibility = View.VISIBLE
             controller!!.neutral()
         }
     }
@@ -139,7 +143,7 @@ class PlayActivity : AppCompatActivity() {
 
         var bitmapSubscription = bmpObs
                 .sample(66, TimeUnit.MILLISECONDS)
-                .filter(Bmp2(this))
+                .filter(BmpToYUVToARToolkitConverterRS2(this))
                 .andAsync()
                 .subscribe { onFrameProcessed() }
         trackedSubscriptions.track(bitmapSubscription)
@@ -192,8 +196,8 @@ class PlayActivity : AppCompatActivity() {
         for (i in Cars.all.indices) {
             val c = Cars.all[i]
             if (c.isDetected(ARToolKit.getInstance())) {
-                Log.i(TAG, "Car visibile! " + c.id)
-                Log.i(TAG, "Position: " + c.estimatePosition(ARToolKit.getInstance()))
+//                Log.i(TAG, "Car visibile! " + c.id)
+//                Log.i(TAG, "Position: " + c.estimatePosition(ARToolKit.getInstance()))
                 val p = c.estimatePosition(ARToolKit.getInstance())
                 targets.setTarget(c.id, p.x + targets.width / 2, -p.y + targets.height / 2)
             }

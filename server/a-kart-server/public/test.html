@@ -42,6 +42,7 @@
     var target = document.getElementById('target');
     var gamecontrol = document.getElementById('gamecontrol');
     var playerList = document.getElementById('playerList');
+
     gamecontrol.addEventListener('change', function (evt) {
         socket.emit('set game ' + (evt.srcElement.checked ? 'on' : 'off'));
     });

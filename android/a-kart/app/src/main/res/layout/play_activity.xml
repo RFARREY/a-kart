@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:tools="http://schemas.android.com/tools"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             tools:context=".PlayActivity">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".PlayActivity">
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -13,53 +13,73 @@
         <com.frogdesign.akart.view.CameraView
             android:id="@+id/camera"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent" />
 
         <com.frogdesign.akart.view.AimView
             android:id="@+id/aim"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_gravity="center"/>
+            android:layout_gravity="center" />
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/stopped_mask"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#22FF0000">
+        <TextView
+            android:layout_width="wrap_content"
+            android:maxWidth="200dp"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textColor="@android:color/white"
+            android:text="Game Is Stopped\nprepare to start!"
+            android:textAllCaps="true"
+            android:textStyle="bold|italic"
+            android:layout_height="wrap_content" />
     </FrameLayout>
 
     <LinearLayout
         android:layout_width="100dp"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:alpha="0.6">
-    <com.frogdesign.akart.view.VerticalSeekBar
-        android:id="@+id/gasPedal"
-        android:layout_gravity="start"
-        android:layout_width="match_parent"
-        android:background="@android:color/darker_gray"
-        android:paddingLeft="20dp"
-        android:paddingRight="20dp"
-        android:paddingTop="40dp"
-        android:paddingBottom="40dp"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:max="100"
-        android:progress="0"/>
+        android:alpha="0.9"
+        android:orientation="vertical">
+
+        <com.frogdesign.akart.view.VerticalSeekBar
+            android:id="@+id/gasPedal"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_gravity="start"
+            android:layout_weight="1"
+            android:background="@android:color/darker_gray"
+            android:max="100"
+            android:paddingBottom="40dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:paddingTop="40dp"
+            android:progress="0" />
+
         <Button
             android:id="@+id/rear"
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:text="R"/>
+            android:text="R" />
     </LinearLayout>
 
     <ImageButton
-        android:alpha="0.6"
-        android:layout_gravity="end"
         android:id="@+id/fireButton"
         android:layout_width="100dp"
         android:layout_height="match_parent"
-        android:src="@drawable/missile"
-        android:background="@android:color/darker_gray"/>
+        android:layout_gravity="end"
+        android:alpha="0.8"
+        android:background="@android:color/darker_gray"
+        android:src="@drawable/missile" />
+
     <TextView
         android:id="@+id/battery"
-        android:text="-"
+        android:layout_width="100dp"
+        android:layout_height="40dp"
         android:layout_gravity="end"
         android:gravity="center"
-        android:layout_width="100dp"
-        android:layout_height="40dp"/>
+        android:text="-" />
 </FrameLayout>

@@ -3,7 +3,7 @@ package org.artoolkit.ar.base;
 /**
  * Created by emanuele.di.saverio on 26/01/16.
  */
-public class JavaUtil {
+public class ByteUtils {
     public static void encodeYUV420SP(byte[] yuv420sp, int[] argb, int width, int height) {
 //        int correctLength = yuvByteLength(width, height);
 //        if (yuv420sp.length != correctLength) {

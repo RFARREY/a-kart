@@ -5,9 +5,9 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Looper
 import android.util.DisplayMetrics
-import android.util.Log
 import android.view.View
 import org.artoolkit.ar.base.ARToolKit
+import org.artoolkit.ar.base.ByteUtils
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
@@ -15,7 +15,6 @@ import rx.functions.Func1
 import rx.schedulers.Schedulers
 import java.util.*
 import java.util.concurrent.Executors
-import org.artoolkit.ar.base.*
 
 
 public fun dpToPx(context: Context, dp: Float): Int = Math.round(dp * pixelScaleFactor(context))
@@ -56,7 +55,7 @@ class CachedBitmapDecoder : Func1<ByteArray, Bitmap> {
     }
 }
 
-class BmpToYUVToARToolkitConverter : Func1<Bitmap, Boolean> {
+class BmpToYUVToARToolkitConverterJava : Func1<Bitmap, Boolean> {
     private var argbBuffer: IntArray? = null
     private var yuvBuffer: ByteArray? = null
 
@@ -78,7 +77,7 @@ class BmpToYUVToARToolkitConverter : Func1<Bitmap, Boolean> {
         checkForBuffers(w, h)
         inBitmap.getPixels(argbBuffer, 0, w, 0, 0, w, h)
         //var startT = System.nanoTime();
-        JavaUtil.encodeYUV420SP(yuvBuffer, argbBuffer, w, h)
+        ByteUtils.encodeYUV420SP(yuvBuffer, argbBuffer, w, h)
         //var dt = System.nanoTime() - startT;
         //Log.i("TIME", dt.toString());
         if (ARToolKit.getInstance().nativeInitialised()) {
@@ -106,8 +105,12 @@ class TrackedSubscriptions : ArrayList<Subscription>() {
     }
 }
 
-var executtor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-var scheduler = Schedulers.from(executtor);
+val executtor  by lazy {
+    Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors())
+}
+val scheduler by lazy {
+    Schedulers.from(executtor)
+}
 
 fun <T> Observable<T>.andAsync(): Observable<T> {
     return this.subscribeOn(scheduler)

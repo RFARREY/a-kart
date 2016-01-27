@@ -7,20 +7,28 @@ import io.socket.client.Socket
 import org.json.JSONObject
 import rx.Observable
 import rx.lang.kotlin.BehaviourSubject
+import java.security.cert.X509Certificate
+import java.util.*
+import javax.net.ssl.HttpsURLConnection
+import javax.net.ssl.SSLContext
 
-class Comm(val id: String, val ctx: Context, val uri: String) {
+class Comm(val id: String, val ctx: Context, val uri: String = Comm.DEFAULT_SERVER) {
 
     companion object {
         private val TAG = Comm::class.java.simpleName
         private val TRACE = true
+        private val DEFAULT_SERVER = "http://ec2-52-28-225-211.eu-central-1.compute.amazonaws.com"
     }
 
 
     private val client: Socket
     public val subject = BehaviourSubject<Event>()
-    public val pin : Observable<Event>
+    public val pin: Observable<Event>
 
     init {
+        // default SSLContext for all sockets
+        //IO.setDefaultSSLContext(createSSLContext())
+        //IO.setDefaultHostnameVerifier({ hostname, session -> true })
         client = IO.socket(uri)
         trace("init!")
         pin = subject.asObservable()
@@ -29,11 +37,16 @@ class Comm(val id: String, val ctx: Context, val uri: String) {
             client.disconnect()
         }
 
+
         client.on(Socket.EVENT_CONNECT, { args ->
             trace("connect, registering")
             client.emit("register", id)
+        }).on(Socket.EVENT_CONNECT_ERROR, { args ->
+            trace("error" + Arrays.toString(args))
+        }).on(Socket.EVENT_ERROR, { args ->
+            trace("error" + Arrays.toString(args))
         }).on("set game", { args ->
-            trace("set game"+ args[0].javaClass.name)
+            trace("set game" + args[0].javaClass.name)
             subject.onNext(GameState(args[0].toString().toBoolean()))
         }).on("hit", { args ->
             trace("hit")
@@ -47,12 +60,32 @@ class Comm(val id: String, val ctx: Context, val uri: String) {
         client.connect();
     }
 
+
+    private fun createSSLContext(): SSLContext {
+        var trustAllCerts = arrayOf(
+                object : javax.net.ssl.X509TrustManager {
+                    override fun checkServerTrusted(chain: Array<out X509Certificate>?, authType: String?) {
+                    }
+
+                    override fun getAcceptedIssuers(): Array<out X509Certificate>? {
+                        return null
+                    }
+
+                    override fun checkClientTrusted(chain: Array<out X509Certificate>?, authType: String?) {
+                    }
+                }
+        )
+        var sc = SSLContext.getInstance("SSL");
+        sc.init(null, trustAllCerts, java.security.SecureRandom());
+        return sc;
+    }
+
     public fun close() {
         client.off()
         client.close()
     }
 
-    public fun boom(id : String) {
+    public fun boom(id: String) {
         var obj = JSONObject()
         obj.put("id", id)
         client.emit("boom", obj)
@@ -61,7 +94,7 @@ class Comm(val id: String, val ctx: Context, val uri: String) {
     public open class Event(val type: String)
     public class Message(val mex: String) : Event("message")
     public class Hit() : Event("hit")
-    public class GameState(val on : Boolean) : Event("gamestate")
+    public class GameState(val on: Boolean) : Event("gamestate")
     public class Erroz(ex: Exception) : Event("error")
 
     private fun trace(s: String, vararg args: Any?) {
