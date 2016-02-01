@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
+    <link rel="stylesheet" href="/css/switch.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+<form class="pure-form pure-form-stacked">
+    <fieldset>
+        <legend>GAME CONTROL</legend>
+        <div class="switch">
+            <input id="gamecontrol" type="checkbox">
+            <label>
+                <span class="fontawesome-ok"></span>
+                <span class="fontawesome-remove"></span>
+
+                <div></div>
+            </label>
+        </div>
+    </fieldset>
+</form>
+<form class="pure-form">
+    <legend>Player Actions</legend>
+    <table>
+        <tr>
+            <td><input type="text" placeholder="target" id="target"/></td>
+            <td>
+                <button class="pure-button pure-button-primary" type="button" id="register">REGISTER</button>
+            </td>
+        </tr>
+    </table>
+</form>
+<table id="playerList">
+</table>
+<script src="/js/dashboard.js"></script>
+</body>
+</html>

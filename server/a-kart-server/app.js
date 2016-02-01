@@ -13,7 +13,7 @@ app.use(express.static(__dirname + '/public'));
 app.set('view engine', 'ejs');
 
 app.get('/', function (req, res) {
-    res.sendfile('index.html');
+    res.render('dashboard', {});
 });
 
 var GAME_IS_ON = false
@@ -21,10 +21,15 @@ var GAME_IS_ON = false
 var connecteds = {}
 io.on('connection', function (socket) {
     console.log('a user connected');
-    socket.emit('set game', GAME_IS_ON)
-    var players = []
-    for (var k in connecteds) players.push(k)
-    socket.emit('players', players)
+
+    function broadcastGameStatus(socket) {
+        socket.emit('set game', GAME_IS_ON);
+        var players = [];
+        for (var k in connecteds) players.push(k);
+        socket.emit('players', players);
+    }
+
+    broadcastGameStatus(socket);
 
     socket.on('disconnect', function () {
         var id = this['id'];
@@ -32,6 +37,7 @@ io.on('connection', function (socket) {
             console.log('disconnect ' + id);
             delete connecteds[id]
             delete this['id']
+            broadcastGameStatus(socket);
         }
     }.bind(socket));
 
@@ -39,7 +45,7 @@ io.on('connection', function (socket) {
         console.log('game on')
         if (!GAME_IS_ON) {
             GAME_IS_ON = true;
-            socket.broadcast.emit('set game', GAME_IS_ON)
+            broadcastGameStatus(socket);
         }
     });
 
@@ -47,25 +53,20 @@ io.on('connection', function (socket) {
         console.log('game off')
         if (GAME_IS_ON) {
             GAME_IS_ON = false;
-            socket.broadcast.emit('set game', GAME_IS_ON)
+            broadcastGameStatus(socket);
         }
     });
 
     socket.on('get game status', function () {
         console.log('get game status')
-        socket.emit('set game', GAME_IS_ON)
-        var players = []
-        for (var k in connecteds) players.push(k)
-        socket.emit('players', players)
+        broadcastGameStatus(socket)
     });
 
     socket.on('register', function (data) {
         console.log('register ' + JSON.stringify(data));
         connecteds[data] = this;
         this['id'] = data;
-
-
-
+        broadcastGameStatus(socket)
     }.bind(socket));
 
     socket.on('boom', function (data) {
