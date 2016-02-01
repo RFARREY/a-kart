@@ -15,7 +15,9 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 app.get('/', function (req, res) {
-    res.render('dashboard', {});
+    res.render('dashboard', {
+        title: 'A-Kart Dashboard'
+    });
 });
 
 var GAME_IS_ON = false

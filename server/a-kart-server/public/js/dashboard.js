@@ -6,6 +6,7 @@ var playerList = document.getElementById('playerList');
 gamecontrol.addEventListener('change', function (evt) {
     socket.emit('set game ' + (evt.srcElement.checked ? 'on' : 'off'));
 });
+
 document.getElementById('register').addEventListener('click', function () {
     if (target.value.length >= 0) {
         socket.emit('register', target.value);
@@ -15,7 +16,8 @@ document.getElementById('register').addEventListener('click', function () {
 socket.on('set game', function (data) {
     console.log('somebody set game ', data)
     gamecontrol.checked = data
-})
+});
+
 socket.on('players', function (data) {
     console.log('players', data)
     while (playerList.lastChild)  playerList.removeChild(playerList.lastChild);
