@@ -5,13 +5,14 @@
     <title><%= title %></title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
     <link rel="stylesheet" href="/css/switch.css">
+    <link rel="stylesheet" href="/css/style.css">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
-<form class="pure-form pure-form-stacked">
-    <fieldset>
-        <legend>GAME CONTROL</legend>
+<div class="pure-g">
+    <form class="pure-u pure-form pure-form-stacked l-box">
+        <legend><h4>Game Control</h4></legend>
         <div class="switch">
             <input id="gamecontrol" type="checkbox">
             <label>
@@ -21,21 +22,16 @@
                 <div></div>
             </label>
         </div>
-    </fieldset>
-</form>
-<form class="pure-form">
-    <legend>Player Actions</legend>
-    <table>
-        <tr>
-            <td><input type="text" placeholder="target" id="target"/></td>
-            <td>
-                <button class="pure-button pure-button-primary" type="button" id="register">REGISTER</button>
-            </td>
-        </tr>
-    </table>
-</form>
-<table id="playerList">
-</table>
+    </form>
+    <div class="pure-u l-box pure-form">
+        <div class="flexHolder">
+            <input type="text" placeholder="target" id="target"/>
+        </div>
+        <button class="pure-button pure-button-primary" type="button" id="register">REGISTER</button>
+    </div>
+    <div id="playerList" class="pure-u l-box">
+    </div>
+</div>
 <script src="/js/dashboard.js"></script>
 </body>
 </html>

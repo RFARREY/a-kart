@@ -1,0 +1,35 @@
+.l-box {
+    padding: 0.5em 1em;
+    width: 100%;
+    position: relative;
+}
+
+.flexHolder {
+    display: block;
+    width: 100%;
+    padding-right: 15em;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.playerRow {
+    width: 100%;
+    float: left;
+    padding-top: .5em;
+    padding-bottom: .5em;
+    position: relative;
+}
+
+input {
+    display: block;
+    float: left;
+    width: 100%;
+}
+
+button {
+    float: right;
+    right: .5em;
+    width: 12em;
+    position: relative;
+}

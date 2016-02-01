@@ -37,7 +37,7 @@ http://tympanus.net/codrops/2012/09/13/button-switches-with-checkboxes-and-css3-
 /* Container */
 .switch {
     height: 57px;
-    margin: 23px;
+    margin: 0.5em 0;
     position: relative;
     width: 127px;
 }

@@ -22,15 +22,16 @@ socket.on('players', function (data) {
     console.log('players', data)
     while (playerList.lastChild)  playerList.removeChild(playerList.lastChild);
     data.map(function (e) {
-        var li = document.createElement('tr');
-        li.innerHTML = '<td><span class="playerItem">' + e + '</span></td>' +
-            '<td><button class="pure-button pure-button-primary" type="button">BOOM</button></td>';
+        var li = document.createElement('div');
+        li.innerHTML = '<div class="playerItem flexHolder">' + e + '</div>' +
+            '<button class="pure-button pure-button-primary" type="button">BOOM</button>';
         li.getElementsByTagName('button')[0].addEventListener('click', function () {
             if (target.value.length >= 0) {
                 socket.emit('boom', {'id' :e });
                 console.log('boomed ' + e)
             }
         });
+        li.className = "playerRow"
         playerList.appendChild(li);
     })
 })
