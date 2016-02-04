@@ -10,7 +10,7 @@ http://tympanus.net/codrops/2012/09/13/button-switches-with-checkboxes-and-css3-
 
 /* Font Awesome */
 
-@import url(http://weloveiconfonts.com/api/?family=fontawesome);
+@import url(//weloveiconfonts.com/api/?family=fontawesome);
 
 
 [class*="fontawesome-"]:before {
