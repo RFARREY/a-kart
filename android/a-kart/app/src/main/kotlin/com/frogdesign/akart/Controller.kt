@@ -86,7 +86,7 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
                     subscriber.onNext(data)
                 }
 
-                var n : Int = 0;
+                var n: Int = 0;
 
                 override fun onFrameTimeout(arDeviceController: ARDeviceController) {
                     Log.w(TAG, "onFrameTimeout" + ++n)
@@ -115,13 +115,8 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
     fun turn(percentage: Float) {
         val dataToBeSent = (-TURN_MAX * percentage).toByte()
         //trace("turn %d", dataToBeSent)
-        if (dataToBeSent > -TURN_DEADZONE && dataToBeSent < TURN_DEADZONE) {
-//            jumpingSumo.setPilotingPCMDTurn(OFF)
-//            jumpingSumo.setPilotingPCMDFlag(ON)
-            return
-        }
-        jumpingSumo.setPilotingPCMDTurn(dataToBeSent)
-        //jumpingSumo.setPilotingPCMDFlag(ON)
+        if (dataToBeSent > -TURN_DEADZONE && dataToBeSent < TURN_DEADZONE) jumpingSumo.setPilotingPCMDTurn(OFF)
+        else jumpingSumo.setPilotingPCMDTurn(dataToBeSent)
     }
 
     fun neutral() {
@@ -150,7 +145,7 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
     }
 
     override fun onCommandReceived(deviceController: ARDeviceController,
-                          commandKey: ARCONTROLLER_DICTIONARY_KEY_ENUM?, elementDictionary: ARControllerDictionary?) {
+                                   commandKey: ARCONTROLLER_DICTIONARY_KEY_ENUM?, elementDictionary: ARControllerDictionary?) {
         if (commandKey == null) throw RuntimeException("Received a null command!")
         if (commandKey == ARCONTROLLER_DICTIONARY_KEY_ENUM.ARCONTROLLER_DICTIONARY_KEY_COMMON_COMMONSTATE_BATTERYSTATECHANGED) {
             if (elementDictionary != null) {
@@ -165,7 +160,7 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
             }
             if (battery != null) battery!!.onNext(batteryLevel)
         } else if (commandKey == ARCONTROLLER_DICTIONARY_KEY_ENUM.ARCONTROLLER_DICTIONARY_KEY_COMMON_COMMONSTATE_WIFISIGNALCHANGED) {
-           //
+            //
         } else if (commandKey == ARCONTROLLER_DICTIONARY_KEY_ENUM.ARCONTROLLER_DICTIONARY_KEY_JUMPINGSUMO_NETWORKSTATE_LINKQUALITYCHANGED) {
             //
         } else {
@@ -173,9 +168,9 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
         }
     }
 
-    private fun logAll(elems : ARControllerDictionary) {
-        if (elems.entries != null) for ((k,v) in elems.entries) {
-            Log.i(TAG, "(%s, %v)".format(k,v))
+    private fun logAll(elems: ARControllerDictionary) {
+        if (elems.entries != null) for ((k, v) in elems.entries) {
+            Log.i(TAG, "(%s, %v)".format(k, v))
         }
     }
 
@@ -201,7 +196,7 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
         private val ON = 1.toByte()
         private val OFF = 0.toByte()
 
-        private val TURN_MAX: Byte = 50
+        private val TURN_MAX: Byte = 20
         private val TURN_DEADZONE: Byte = 6
         private val SPEED_MAX: Byte = 50
     }

@@ -100,7 +100,10 @@ class PlayActivity : AppCompatActivity() {
         RxView.clicks(fireButton).subscribe {
             Log.i(TAG, "fire?")
             var s = targets.targetedId
-            if (s != null) comm?.boom(s)
+            if (s != null) {
+                comm?.boom(s)
+                Toast.makeText(this, "Hit "+s+"!", Toast.LENGTH_SHORT).show()
+            }
             else Toast.makeText(this, "MISS!", Toast.LENGTH_SHORT).show()
         }
 
@@ -142,7 +145,7 @@ class PlayActivity : AppCompatActivity() {
         trackedSubscriptions.track(camera.link(bmpObs))
 
         var bitmapSubscription = bmpObs
-                .sample(66, TimeUnit.MILLISECONDS)
+                .sample(33, TimeUnit.MILLISECONDS)
                 .filter(BmpToYUVToARToolkitConverterRS2(this))
                 .andAsync()
                 .subscribe { onFrameProcessed() }

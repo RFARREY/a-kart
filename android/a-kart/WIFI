@@ -1,0 +1,15 @@
+# at the end of
+# /etc/init.d/init_manager
+# add:
+#
+# sleep 30 && sh /data/wifi.sh &
+# exec /etc/init.d/start_main_app
+
+cat /data/wifi.sh
+killall udhcpd
+ifconfig wifi_bcm down
+iwconfig wifi_bcm mode managed essid AP_Jumping
+ifconfig wifi_bcm 192.168.42.62 netmask 255.255.255.0 up
+
+
+# also its suggsted to use a 5ghz Wifi setting and a free channel

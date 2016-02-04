@@ -7,7 +7,7 @@ var socketio = require('socket.io')
 var app = express();
 var server = http.Server(app);
 var io = socketio(server);
-
+console.log("dirname is ",__dirname);
 var port = process.env.PORT || 5000;
 app.set('port', port);
 app.use(express.static(__dirname + '/public'));
