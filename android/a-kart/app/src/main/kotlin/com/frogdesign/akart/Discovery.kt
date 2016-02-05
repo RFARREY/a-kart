@@ -57,7 +57,7 @@ class Discovery(ctx: Context) {
         }
     }
 
-    private val discoverer = Observable.OnSubscribe<kotlin.List<com.parrot.arsdk.ardiscovery.ARDiscoveryDeviceService>> {
+    private val discoverer = Observable.OnSubscribe<List<com.parrot.arsdk.ardiscovery.ARDiscoveryDeviceService>> {
         subscriber ->
         unbind()
         binder().subscribe(rx.functions.Action1<com.frogdesign.akart.Discovery> {

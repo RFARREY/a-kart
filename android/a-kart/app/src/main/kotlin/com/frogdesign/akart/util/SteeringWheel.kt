@@ -9,7 +9,7 @@ import android.util.Log
 import rx.Observable
 import rx.Subscriber
 import rx.Subscription
-import rx.lang.kotlin.observable
+//import rx.lang.kotlin.observable
 import rx.observables.ConnectableObservable
 import rx.observers.Subscribers
 import rx.subscriptions.Subscriptions
@@ -67,7 +67,7 @@ class SteeringWheel(context: Context) : SensorEventListener {
     private val refCount: Observable<Float>
 
     init {
-        obs = observable<Float> { sub ->
+        obs = Observable.create<Float> { sub ->
             steer = sub
             setListeners()
             sub.add(Subscriptions.create {

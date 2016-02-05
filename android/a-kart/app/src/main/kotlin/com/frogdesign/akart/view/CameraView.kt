@@ -7,8 +7,10 @@ import android.util.Log
 import android.view.View
 import rx.Observable
 import rx.Subscription
-import rx.lang.kotlin.BehaviourSubject
-import rx.lang.kotlin.PublishSubject
+import rx.subjects.BehaviorSubject
+
+//import rx.lang.kotlin.BehaviourSubject
+//import rx.lang.kotlin.PublishSubject
 
 class CameraView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : View(context, attrs, defStyleAttr, defStyleRes) {
 
@@ -60,7 +62,7 @@ class CameraView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, def
     }
 
 
-    public val xImageInsets = BehaviourSubject<Float>()
+    public val xImageInsets = BehaviorSubject.create<Float>()
 
     private fun sameSize(a :Bitmap?, b: Bitmap?) : Boolean {
         if (a != null && b != null) {

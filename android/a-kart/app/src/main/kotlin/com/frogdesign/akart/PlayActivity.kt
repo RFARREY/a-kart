@@ -124,6 +124,11 @@ class PlayActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         controller!!.start()
+        trackedSubscriptions.track(controller!!.status().subscribe { it ->
+            if (!it) {
+                finish()
+            }
+        })
 
         val FAKE_PRODUCER = false
         var bitmapByteArrayProducer = if (!FAKE_PRODUCER) controller!!.mediaStreamer()

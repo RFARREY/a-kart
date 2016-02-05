@@ -6,7 +6,8 @@ import io.socket.client.IO
 import io.socket.client.Socket
 import org.json.JSONObject
 import rx.Observable
-import rx.lang.kotlin.BehaviourSubject
+import rx.subjects.BehaviorSubject
+//import rx.lang.kotlin.BehaviourSubject
 import java.security.cert.X509Certificate
 import java.util.*
 import javax.net.ssl.HttpsURLConnection
@@ -22,7 +23,7 @@ class Comm(val id: String, val ctx: Context, val uri: String = Comm.DEFAULT_SERV
 
 
     private val client: Socket
-    public val subject = BehaviourSubject<Event>()
+    public val subject = BehaviorSubject.create<Event>()
     public val pin: Observable<Event>
 
     init {

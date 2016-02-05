@@ -128,7 +128,15 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
     override // called when the state of the device controller has changed
     fun onStateChanged(deviceController: ARDeviceController,
                        newState: ARCONTROLLER_DEVICE_STATE_ENUM?, error: ARCONTROLLER_ERROR_ENUM?) {
-        if (newState != null) Log.i(TAG, "onStateChanged: " + newState.toString())
+        if (newState != null) {
+            if (newState == ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING) {
+                status?.onNext(true)
+            } else if (newState == ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_STOPPED) {
+                status?.onNext(false)
+            } else {
+                Log.i(TAG, "onStateChanged: " + newState.toString())
+            }
+        }
         if (error != null) Log.e(TAG, "onStateChanged: " + error.toString())
     }
 
@@ -181,6 +189,15 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
             battery = subscriber
             subscriber.onNext(batteryLevel)
             subscriber.add(Subscriptions.create { battery = null })
+        }
+    }
+
+    private var status: Subscriber<in Boolean>? = null
+
+    fun status(): Observable<Boolean> {
+        return Observable.create { subscriber ->
+            status = subscriber
+            //subscriber.add(Subscriptions.create { battery = null })
         }
     }
 
