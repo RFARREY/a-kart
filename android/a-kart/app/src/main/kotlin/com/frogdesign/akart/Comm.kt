@@ -23,8 +23,8 @@ class Comm(val id: String, val ctx: Context, val uri: String = Comm.DEFAULT_SERV
 
 
     private val client: Socket
-    public val subject = BehaviorSubject.create<Event>()
-    public val pin: Observable<Event>
+    val subject = BehaviorSubject.create<Event>()
+    val pin: Observable<Event>
 
     init {
         // default SSLContext for all sockets
@@ -57,7 +57,7 @@ class Comm(val id: String, val ctx: Context, val uri: String = Comm.DEFAULT_SERV
         });
     }
 
-    public fun connect() {
+    fun connect() {
         client.connect();
     }
 

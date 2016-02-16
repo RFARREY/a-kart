@@ -27,10 +27,10 @@ io.on('connection', function (socket) {
     console.log('a user connected');
 
     function broadcastGameStatus(socket) {
-        socket.emit('set game', GAME_IS_ON);
+        io.emit('set game', GAME_IS_ON);
         var players = [];
         for (var k in connecteds) players.push(k);
-        socket.emit('players', players);
+        io.emit('players', players);
     }
 
     broadcastGameStatus(socket);
