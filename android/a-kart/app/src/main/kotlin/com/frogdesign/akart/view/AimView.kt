@@ -12,7 +12,7 @@ import com.frogdesign.akart.util.dpToPx
 class AimView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : View(context, attrs, defStyleAttr, defStyleRes) {
     companion object {
         val SIZE = 80.0f //dp
-        val RADIUS = 30.0f //dp
+        val RADIUS = 100.0f //dp
         val STROKE = 3.0f //dp
     }
 
