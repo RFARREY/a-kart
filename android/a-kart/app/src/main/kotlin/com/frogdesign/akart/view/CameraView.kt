@@ -46,7 +46,7 @@ class CameraView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, def
         if (image != null) canvas?.drawBitmap(image, drawMatrix, paint)
     }
 
-    public fun setImage(bmp: Bitmap?) {
+    fun setImage(bmp: Bitmap?) {
 
         if (bmp != null) {
             if (!sameSize(image, bmp)) {
@@ -62,7 +62,7 @@ class CameraView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, def
     }
 
 
-    public val xImageInsets = BehaviorSubject.create<Float>()
+    val xImageInsets = BehaviorSubject.create<Float>()
 
     private fun sameSize(a :Bitmap?, b: Bitmap?) : Boolean {
         if (a != null && b != null) {
@@ -75,7 +75,7 @@ class CameraView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, def
         return true;
     }
 
-    public fun link(obs: Observable<Bitmap>): Subscription {
+    fun link(obs: Observable<Bitmap>): Subscription {
         return obs.subscribe { b ->
             setImage(b)
         }

@@ -26,6 +26,11 @@ import org.artoolkit.ar.base.ARToolKit
 import org.artoolkit.ar.base.BmpToYUVToARToolkitConverterRS
 import org.artoolkit.ar.base.BmpToYUVToARToolkitConverterRS2
 import org.artoolkit.ar.base.NativeInterface
+import org.opencv.android.BaseLoaderCallback
+import org.opencv.android.LoaderCallbackInterface
+import org.opencv.android.OpenCVLoader
+import org.opencv.core.Scalar
+import org.opencv.samples.colorblobdetect.ColorBlobsDetector
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import java.io.ByteArrayOutputStream
@@ -49,14 +54,34 @@ class PlayActivity : AppCompatActivity() {
 
     private var controller: Controller? = null
 
-    private val trackedSubscriptions = TrackedSubscriptions();
+    private val trackedSubscriptions = TrackedSubscriptions()
     private var comm: Comm? = null
 
     private var isGameOn = false
-
+    private var colorBlobsDetector: ColorBlobsDetector? = null;
+    private val mLoaderCallback = object : BaseLoaderCallback(this) {
+        override fun onManagerConnected(status: Int) {
+            when (status) {
+                LoaderCallbackInterface.SUCCESS -> {
+                    Log.i("CENTROID", "OpenCV loaded successfully")
+                }
+                else -> {
+                    super.onManagerConnected(status)
+                }
+            }
+        }
+    }
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.play_activity)
+
+        if (!OpenCVLoader.initDebug()) {
+            Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization")
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, mLoaderCallback)
+        } else {
+            Log.d(TAG, "OpenCV library found inside package. Using it!")
+            mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS)
+        }
         RxView.touches(rear).subscribe { event ->
             Log.i(TAG, "touch " + event)
             when (event.actionMasked) {
@@ -130,6 +155,12 @@ class PlayActivity : AppCompatActivity() {
             }
         })
 
+        colorBlobsDetector = ColorBlobsDetector()
+        colorBlobsDetector?.addDetectedColor("red", Scalar(239.0, 134.0, 212.0, 0.0))
+        colorBlobsDetector?.addDetectedColor("green", Scalar(77.6, 78.0, 179.0, 0.0))
+        colorBlobsDetector?.addDetectedColor("blue", Scalar(148.5, 173.1, 211.5, 0.0))
+        colorBlobsDetector?.addDetectedColor("violet", Scalar(167.0, 99.0, 174.0, 0.0))
+
         val FAKE_PRODUCER = false
         var bitmapByteArrayProducer = if (!FAKE_PRODUCER) controller!!.mediaStreamer()
         else {
@@ -151,6 +182,7 @@ class PlayActivity : AppCompatActivity() {
 
         var bitmapSubscription = bmpObs
                 .sample(33, TimeUnit.MILLISECONDS)
+                .filter(colorBlobsDetector)
                 .filter(BmpToYUVToARToolkitConverterRS2(this))
                 .andAsync()
                 .subscribe { onFrameProcessed() }
@@ -209,6 +241,10 @@ class PlayActivity : AppCompatActivity() {
                 val p = c.estimatePosition(ARToolKit.getInstance())
                 targets.setTarget(c.id, p.x + targets.width / 2, -p.y + targets.height / 2)
             }
+        }
+
+        for (a in colorBlobsDetector!!.detected) {
+            Log.i("CENTROID", "a"+a.id+", "+a.centroid);
         }
     }
 

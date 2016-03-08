@@ -37,6 +37,12 @@ public fun clamp(value: Float, min: Float, max: Float): Float {
     return value
 }
 
+public fun clamp(value: Double, min: Double, max: Double): Double {
+    if (value < min) return min
+    if (value > max) return max
+    return value
+}
+
 class CachedBitmapDecoder : Func1<ByteArray, Bitmap> {
     private var inBitmap: Bitmap? = null
     private val opts = BitmapFactory.Options()

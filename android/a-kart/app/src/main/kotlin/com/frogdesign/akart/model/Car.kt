@@ -65,7 +65,7 @@ data class Car(val id: String, val lrMarkers: Pair<Int, Int>) {
 
 object Cars {
     @JvmField
-    public val all = listOf(
+    val all = listOf(
             Car("gargamella", Pair(0, 1)),
             Car("taxiguerrilla", Pair(2, 3))
     );
