@@ -4,7 +4,10 @@ import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
 import android.util.Log
+import android.view.MotionEvent
 import android.view.View
+import org.opencv.core.Scalar
+import org.opencv.samples.colorblobdetect.ColorBlobDetectionActivity
 import rx.Observable
 import rx.Subscription
 import rx.subjects.BehaviorSubject
@@ -26,7 +29,8 @@ class CameraView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, def
 
     private val paint = Paint()
     private var image: Bitmap? = null
-    private val drawMatrix = Matrix()
+    val drawMatrix = Matrix()
+    private val drawMatrixInverse = Matrix()
     private val values = FloatArray(9)
 
     init {
@@ -46,6 +50,18 @@ class CameraView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, def
         if (image != null) canvas?.drawBitmap(image, drawMatrix, paint)
     }
 
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+//        Log.i("CONTOUR", "you touched "+event!!.x+", "+event.y)
+        val point = floatArrayOf(event!!.x, event.y)
+        drawMatrixInverse.mapPoints(point)
+//        Log.i("CONTOUR", "you inverted "+point.get(0)+","+point.get(1))
+        val color = image!!.getPixel(point[0].toInt(), point[1].toInt());
+        val violet = ColorBlobDetectionActivity.converScalarRgba2Hsv(color);
+        Log.i("CameraView", "TOUCHED: (" +Integer.toHexString(color)+")");
+        Log.i("CameraView", "TOUCHED: (" + violet.`val`[0] + ", " + violet.`val`[1] +", " + violet.`val`[2] + ", " + violet.`val`[3] +")");
+        return super.onTouchEvent(event)
+    }
+
     fun setImage(bmp: Bitmap?) {
 
         if (bmp != null) {
@@ -53,6 +69,7 @@ class CameraView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, def
                 var bmpBounds = RectF(0f, 0f, bmp.width.toFloat(), bmp.height.toFloat())
                 var viewBounds = RectF(0f, 0f, width.toFloat(), height.toFloat())
                 drawMatrix.setRectToRect(bmpBounds, viewBounds, Matrix.ScaleToFit.CENTER)
+                drawMatrix.invert(drawMatrixInverse)
                 drawMatrix.getValues(values)
                 xImageInsets.onNext(values[2])
             }

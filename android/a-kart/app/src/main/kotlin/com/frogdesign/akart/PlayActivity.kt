@@ -22,10 +22,6 @@ import com.jakewharton.rxbinding.widget.RxSeekBar
 import com.jakewharton.rxbinding.widget.SeekBarProgressChangeEvent
 import com.jakewharton.rxbinding.widget.SeekBarStopChangeEvent
 import com.parrot.arsdk.ardiscovery.ARDiscoveryDeviceService
-import org.artoolkit.ar.base.ARToolKit
-import org.artoolkit.ar.base.BmpToYUVToARToolkitConverterRS
-import org.artoolkit.ar.base.BmpToYUVToARToolkitConverterRS2
-import org.artoolkit.ar.base.NativeInterface
 import org.opencv.android.BaseLoaderCallback
 import org.opencv.android.LoaderCallbackInterface
 import org.opencv.android.OpenCVLoader
@@ -33,6 +29,7 @@ import org.opencv.core.Scalar
 import org.opencv.samples.colorblobdetect.ColorBlobsDetector
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
+import rx.functions.Func1
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.TimeUnit
 
@@ -58,7 +55,7 @@ class PlayActivity : AppCompatActivity() {
     private var comm: Comm? = null
 
     private var isGameOn = false
-    private var colorBlobsDetector: ColorBlobsDetector? = null;
+    private var colorBlobsDetector: MarkerDetector? = null;
     private val mLoaderCallback = object : BaseLoaderCallback(this) {
         override fun onManagerConnected(status: Int) {
             when (status) {
@@ -71,6 +68,7 @@ class PlayActivity : AppCompatActivity() {
             }
         }
     }
+
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.play_activity)
@@ -134,6 +132,10 @@ class PlayActivity : AppCompatActivity() {
 
         comm?.connect()
         updateGameState()
+
+
+        colorBlobsDetector = ColorBlobsDetector()
+        application.registerActivityLifecycleCallbacks(colorBlobsDetector)
     }
 
     private fun updateGameState() {
@@ -156,10 +158,8 @@ class PlayActivity : AppCompatActivity() {
         })
 
         colorBlobsDetector = ColorBlobsDetector()
-        colorBlobsDetector?.addDetectedColor("red", Scalar(239.0, 134.0, 212.0, 0.0))
-        colorBlobsDetector?.addDetectedColor("green", Scalar(77.6, 78.0, 179.0, 0.0))
-        colorBlobsDetector?.addDetectedColor("blue", Scalar(148.5, 173.1, 211.5, 0.0))
-        colorBlobsDetector?.addDetectedColor("violet", Scalar(167.0, 99.0, 174.0, 0.0))
+
+        colorBlobsDetector?.setup(this, Cars.all)
 
         val FAKE_PRODUCER = false
         var bitmapByteArrayProducer = if (!FAKE_PRODUCER) controller!!.mediaStreamer()
@@ -179,11 +179,12 @@ class PlayActivity : AppCompatActivity() {
         var bmpObs = bitmapProducer.andAsync()
 
         trackedSubscriptions.track(camera.link(bmpObs))
-
         var bitmapSubscription = bmpObs
-                .sample(33, TimeUnit.MILLISECONDS)
-                .filter(colorBlobsDetector)
-                .filter(BmpToYUVToARToolkitConverterRS2(this))
+                .sample(100, TimeUnit.MILLISECONDS)
+                .filter({ p0 ->
+                    colorBlobsDetector?.process(p0)
+                    true
+                })
                 .andAsync()
                 .subscribe { onFrameProcessed() }
         trackedSubscriptions.track(bitmapSubscription)
@@ -200,28 +201,9 @@ class PlayActivity : AppCompatActivity() {
         comm?.connect()
     }
 
-    override fun onResume() {
-        super.onResume()
-        if (!ARToolKit.getInstance().initialiseNativeWithOptions(this.cacheDir.absolutePath, 16, 25)) {
-            throw RuntimeException("e' tutto finito")
-        }
-
-        NativeInterface.arwSetPatternDetectionMode(NativeInterface.AR_MATRIX_CODE_DETECTION)
-        NativeInterface.arwSetMatrixCodeType(NativeInterface.AR_MATRIX_CODE_3x3_HAMMING63)
-
-
-        for (c in Cars.all) {
-            val leftId = ARToolKit.getInstance().addMarker("single_barcode;" + c.lrMarkers.first + ";80")
-            val rightId = ARToolKit.getInstance().addMarker("single_barcode;" + c.lrMarkers.second + ";80")
-            c.leftAR = leftId
-            c.rightAR = rightId
-        }
-        ARToolKit.getInstance().initialiseAR(640, 480, "Data/camera_para.dat", 0, true)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        ARToolKit.getInstance().cleanup()
+    override fun onDestroy() {
+        super.onDestroy()
+        application.unregisterActivityLifecycleCallbacks(colorBlobsDetector)
     }
 
     override fun onStop() {
@@ -233,18 +215,10 @@ class PlayActivity : AppCompatActivity() {
 
     fun onFrameProcessed() {
         targets.nullify()
+
         for (i in Cars.all.indices) {
             val c = Cars.all[i]
-            if (c.isDetected(ARToolKit.getInstance())) {
-//                Log.i(TAG, "Car visibile! " + c.id)
-//                Log.i(TAG, "Position: " + c.estimatePosition(ARToolKit.getInstance()))
-                val p = c.estimatePosition(ARToolKit.getInstance())
-                targets.setTarget(c.id, p.x + targets.width / 2, -p.y + targets.height / 2)
-            }
-        }
-
-        for (a in colorBlobsDetector!!.detected) {
-            Log.i("CENTROID", "a"+a.id+", "+a.centroid);
+            colorBlobsDetector?.setTarget(c, camera.drawMatrix, targets)
         }
     }
 

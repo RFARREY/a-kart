@@ -6,6 +6,8 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.PointF
 import android.util.AttributeSet
+import android.util.Log
+import android.view.MotionEvent
 import android.view.View
 import com.frogdesign.akart.util.dpToPx
 
@@ -21,7 +23,7 @@ class AimView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defSty
     private var radius = AimView.RADIUS
     private var stroke = AimView.STROKE
     private val paint: Paint
-    public var targetedId: String? = null
+    var targetedId: String? = null
 
     init {
         if (context != null) {
@@ -51,22 +53,22 @@ class AimView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defSty
         setMeasuredDimension(w, h)
     }
 
-
-
     override fun onDraw(canvas: Canvas?) {
         var cx = (width / 2).toFloat()
         var cy = (height / 2).toFloat()
         canvas?.drawCircle(cx, cy, radius, paint)
         targetedId = null
         for ((k,b) in points.entries) {
-            if (b.x > Float.MIN_VALUE) canvas?.drawCircle(b.x, b.y, 10f, paint);
+            if (b.x > Float.MIN_VALUE) {
+                Log.i("CONTROUR", "Drawing $k, $b")
+                canvas?.drawCircle(b.x, b.y, 10f, paint)
+            };
             var distance = hypot(cx - b.x, cy - b.y)
-            if (distance < radius) {
+            if (distance < radius && targetedId == null) {
                 paint.style = Paint.Style.FILL
                 canvas?.drawCircle(cx, cy, radius, paint)
                 paint.style = Paint.Style.STROKE
                 targetedId = k
-                break;
             }
         }
     }
@@ -83,7 +85,7 @@ class AimView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defSty
 
     fun setTarget(id: String, x: Float, y: Float) {
         var pair = points.get(id) ?: PointF()
-        pair.x = xImageInsets + x
+        pair.x = x// + xImageInsets
         pair.y = y
         points.put(id, pair)
         invalidate()

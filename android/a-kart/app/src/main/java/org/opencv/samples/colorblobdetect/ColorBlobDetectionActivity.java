@@ -1,6 +1,7 @@
 package org.opencv.samples.colorblobdetect;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -207,10 +208,14 @@ public class ColorBlobDetectionActivity extends Activity implements OnTouchListe
         return new Scalar(pointMatRgba.get(0, 0));
     }
 
-    private Scalar converScalarRgba2Hsv(Scalar rgbColor) {
+    public static Scalar converScalarRgba2Hsv(int rgbColor) {
+        return converScalarRgba2Hsv(new Scalar(Color.red(rgbColor),Color.green(rgbColor),Color.blue(rgbColor),Color.alpha(rgbColor)));
+    }
+
+    public static Scalar converScalarRgba2Hsv(Scalar rgbColor) {
         Mat pointMatRgba = new Mat();
         Mat pointMatHsv = new Mat(1, 1, CvType.CV_8UC3, rgbColor);
-        Imgproc.cvtColor(pointMatHsv, pointMatRgba, Imgproc.COLOR_RGB2HSV, 4);
+        Imgproc.cvtColor(pointMatHsv, pointMatRgba, Imgproc.COLOR_RGB2HSV_FULL);
 
         return new Scalar(pointMatRgba.get(0, 0));
     }

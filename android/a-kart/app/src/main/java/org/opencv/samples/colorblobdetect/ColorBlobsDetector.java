@@ -1,12 +1,21 @@
 package org.opencv.samples.colorblobdetect;
 
+import android.app.Activity;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 
+import com.frogdesign.akart.MarkerDetector;
+import com.frogdesign.akart.model.Car;
 import com.frogdesign.akart.util.UtilsKt;
+import com.frogdesign.akart.view.AimView;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
@@ -29,11 +38,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import rx.functions.Func1;
 
-public class ColorBlobsDetector implements Func1<Bitmap, Boolean> {
+public class ColorBlobsDetector implements MarkerDetector {
     // Minimum contour area in percent for contours filtering
     private static double mMinContourArea = 0.1;
-    // Color radius for range checking in HSV color space
-    private Scalar mColorRadius = new Scalar(25, 50, 50, 0);
     private Mat mSpectrum = new Mat();
     private List<MatOfPoint> mContours = new ArrayList<MatOfPoint>();
 
@@ -44,13 +51,76 @@ public class ColorBlobsDetector implements Func1<Bitmap, Boolean> {
     Mat mDilatedMask = new Mat();
     Mat mHierarchy = new Mat();
 
-    public void setColorRadius(Scalar radius) {
-        mColorRadius = radius;
+    @Override
+    public void setup(Context ctx, @NotNull List<Car> cars) {
+        for (Car a : cars) {
+            addDetectedColor(a.getId(), a.getColor());
+        }
+    }
+
+    @Override
+    public void process(@Nullable Bitmap bmp) {
+        if (imgMAT == null) {
+            imgMAT = new Mat(bmp.getHeight(), bmp.getWidth(), CvType.CV_8UC4);
+        }
+        Utils.bitmapToMat(bmp, imgMAT, true);
+        process(imgMAT);
+    }
+
+    @Override
+    public void setTarget(@NotNull Car forCar, @NotNull Matrix webcamToScreenTransf, AimView targets) {
+
+        for (int i = 0; i < detected.size(); i++) {
+            NamedColorBlob a = detected.get(i);
+            if (a.id.equals(forCar.getId())) {
+                Log.i("CENTROID", "centroid " + a.id + ", " + a.centroid);
+                float[] array = new float[]{(float) a.centroid.x, (float) a.centroid.y};
+                webcamToScreenTransf.mapPoints(array);
+                Log.i("CENTROID", "mapped " + a.id + ", " + array[0] + ":" + array[1]);
+                targets.setTarget(a.id, array[0], array[1]);
+                break;
+            }
+        }
+    }
+
+    @Override
+    public void onActivityCreated(@NotNull Activity activity, @NotNull Bundle savedInstanceState) {
+
+    }
+
+    @Override
+    public void onActivityStarted(@NotNull Activity activity) {
+
+    }
+
+    @Override
+    public void onActivityResumed(@NotNull Activity activity) {
+
+    }
+
+    @Override
+    public void onActivityPaused(@NotNull Activity activity) {
+
+    }
+
+    @Override
+    public void onActivityStopped(@NotNull Activity activity) {
+
+    }
+
+    @Override
+    public void onActivitySaveInstanceState(@NotNull Activity activity, @NotNull Bundle outState) {
+
+    }
+
+    @Override
+    public void onActivityDestroyed(@NotNull Activity activity) {
+
     }
 
 
     public static class NamedColorBlob {
-        private static Scalar colorRadius = new Scalar(50, 50, 50, 0);
+        private static Scalar colorRadius = new Scalar(25, 50, 75, 0);
 
         public final String id;
         public final Scalar lowerBound = new Scalar(0);
@@ -61,8 +131,8 @@ public class ColorBlobsDetector implements Func1<Bitmap, Boolean> {
             double minH = hsvColor.val[0] - colorRadius.val[0];
             double maxH = hsvColor.val[0] + colorRadius.val[0];
 
-            lowerBound.val[0] = minH;
-            upperBound.val[0] = maxH + 1;
+            lowerBound.val[0] = UtilsKt.clamp(minH, 0, 255);
+            upperBound.val[0] = UtilsKt.clamp(maxH, 0, 255) + 1;
 
             lowerBound.val[1] = UtilsKt.clamp(hsvColor.val[1] - colorRadius.val[1], 0, 255);
             upperBound.val[1] = UtilsKt.clamp(hsvColor.val[1] + colorRadius.val[1], 0, 255) + 1;
@@ -75,6 +145,22 @@ public class ColorBlobsDetector implements Func1<Bitmap, Boolean> {
         }
 
         public final Point centroid = new Point();
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            NamedColorBlob that = (NamedColorBlob) o;
+
+            return id.equals(that.id);
+
+        }
+
+        @Override
+        public int hashCode() {
+            return id.hashCode();
+        }
     }
 
     private List<NamedColorBlob> registered = new ArrayList<>();
@@ -100,19 +186,8 @@ public class ColorBlobsDetector implements Func1<Bitmap, Boolean> {
     private Mat imgMAT = null;
     private Bitmap testImg = loadImage();
 
-    @Override
-    public Boolean call(Bitmap bmp) {
-        if (imgMAT == null) {
-            imgMAT = new Mat(bmp.getHeight(), bmp.getWidth(), CvType.CV_8UC4);
-        }
-        Utils.bitmapToMat(bmp, imgMAT, true);
-        process(imgMAT);
-//        if (testImg == null) {
-//            saveImage(bmp);
-//            Utils.bitmapToMat(bmp, imgMAT);
-//        }
-        return Boolean.TRUE;
-    }
+    private static final double AREA_LOWERBOUND = 0;//80.0 / 4;
+    private static final double AREA_UPPERBOUND = Double.MAX_VALUE;
 
     public void process(Mat rgbaImage) {
 
@@ -135,9 +210,9 @@ public class ColorBlobsDetector implements Func1<Bitmap, Boolean> {
 //            Log.i("CONTOUR", "blue: (" + blue.val[0] + ", " + blue.val[1] +", " + blue.val[2] + ", " + blue.val[3] +")");
 //            Log.i("CONTOUR", "violet: (" + violet.val[0] + ", " + violet.val[1] +", " + violet.val[2] + ", " + violet.val[3] +")");
 //        }
-        //Imgproc.pyrDown(rgbaImage, mPyrDownMat);
-        //Imgproc.pyrDown(mPyrDownMat, mPyrDownMat);
         mPyrDownMat = rgbaImage;
+        Imgproc.pyrDown(rgbaImage, mPyrDownMat);
+//        Imgproc.pyrDown(mPyrDownMat, mPyrDownMat);
         Imgproc.cvtColor(mPyrDownMat, mHsvMat, Imgproc.COLOR_RGB2HSV_FULL);
 //        double[] hsv = mHsvMat.get(263,256);
 //        Log.i("CONTOUR", "Touched hsv color: (" + hsv[0] + ", " + hsv[1] +
@@ -151,13 +226,14 @@ public class ColorBlobsDetector implements Func1<Bitmap, Boolean> {
             NamedColorBlob ncb = registered.get(i);
 
             Core.inRange(mHsvMat, ncb.lowerBound, ncb.upperBound, mMask);
+
             Imgproc.dilate(mMask, mDilatedMask, kernel);
 
             List<MatOfPoint> contours = new ArrayList<>();
 
             Imgproc.findContours(mDilatedMask, contours, mHierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
-           // Imgproc.drawContours(rgbaImage, contours, -1,  new Scalar( 0,255, 0, 255));
+            // Imgproc.drawContours(rgbaImage, contours, -1,  new Scalar( 0,255, 0, 255));
             // Find max contour area
             double maxArea = 0;
             Iterator<MatOfPoint> each = contours.iterator();
@@ -165,19 +241,25 @@ public class ColorBlobsDetector implements Func1<Bitmap, Boolean> {
                 MatOfPoint wrapper = each.next();
                 if (isProbablyAMarker(wrapper, -1)) {
                     double area = Imgproc.contourArea(wrapper);
-                    if (area > maxArea)
+                    if (area > maxArea) {
                         maxArea = area;
+                    }
                 }
             }
             each = contours.iterator();
             while (each.hasNext()) {
                 MatOfPoint contour = each.next();
                 if (isProbablyAMarker(contour, maxArea)) {
-                    //Core.multiply(contour, new Scalar(2,2), contour);
+                    Core.multiply(contour, new Scalar(2, 2), contour);
+
+                    double area = Imgproc.contourArea(contour);
+                    Log.i("AREA", ncb.id + "AREA " + area);
                     mContours.add(contour);
                     Moments mu = Imgproc.moments(contour, false);
                     ncb.centroid.x = mu.get_m10() / mu.get_m00();
                     ncb.centroid.y = mu.get_m01() / mu.get_m00();
+                    if (detected.contains(ncb))
+                        detected.remove(ncb);
                     detected.add(ncb);
                 }
             }
@@ -214,17 +296,20 @@ public class ColorBlobsDetector implements Func1<Bitmap, Boolean> {
         return null;
     }
 
-    private float squarenessRolerance = 0.1f;
+    private float squarenessRolerance = 0.2f;
 
     private boolean isProbablyAMarker(MatOfPoint contour, double maxArea) {
-         //check if roughly square
+        //check if roughly square
         Rect rect = Imgproc.boundingRect(contour);
         float low_h = rect.width * (1.0f - squarenessRolerance);
         float high_h = rect.width * (1.0f + squarenessRolerance);
         if (rect.height < low_h || rect.height > high_h) return false;
 
         //check if area is ok
-        if (maxArea >= 0 && Imgproc.contourArea(contour) < mMinContourArea * maxArea) return false;
+        final double contourArea = Imgproc.contourArea(contour);
+        if (maxArea < 0) {
+            if (!UtilsKt.inrange(contourArea, AREA_LOWERBOUND, AREA_UPPERBOUND)) return false;
+        } else if (contourArea < mMinContourArea * maxArea) return false;
         return true;
     }
 

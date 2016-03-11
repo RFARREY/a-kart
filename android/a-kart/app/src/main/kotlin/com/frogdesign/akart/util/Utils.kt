@@ -29,19 +29,22 @@ public fun threadName(): String = Thread.currentThread().name
 
 public fun isMainThread(): Boolean = Looper.getMainLooper() == Looper.myLooper()
 
-public val PI: Float = Math.PI.toFloat()
+val PI: Float = Math.PI.toFloat()
 
-public fun clamp(value: Float, min: Float, max: Float): Float {
+fun clamp(value: Float, min: Float, max: Float): Float {
     if (value < min) return min
-    if (value > max) return max
-    return value
+    else if (value > max) return max
+    else return value
 }
 
-public fun clamp(value: Double, min: Double, max: Double): Double {
+fun clamp(value: Double, min: Double, max: Double): Double {
     if (value < min) return min
-    if (value > max) return max
-    return value
+    else if (value > max) return max
+    else return value
 }
+
+fun inrange(value: Double, min: Double, max: Double): Boolean = value >= min && value <= max
+
 
 class CachedBitmapDecoder : Func1<ByteArray, Bitmap> {
     private var inBitmap: Bitmap? = null
@@ -55,7 +58,7 @@ class CachedBitmapDecoder : Func1<ByteArray, Bitmap> {
 
     override fun call(data: ByteArray?): Bitmap? {
         opts.inBitmap = inBitmap
-        if (data != null) inBitmap = BitmapFactory.decodeByteArray(data, 0, data.size, opts)
+        if (data != null) inBitmap = BitmapFactory.decodeByteArray(data, 0, data.size, null)
         var result = inBitmap
         return result
     }
@@ -134,11 +137,9 @@ fun View.hideNavbar() {
 }
 
 
-public fun yuvByteLength(w: Int, h: Int): Int {
-    return w * h * 3 / 2
-}
+fun yuvByteLength(w: Int, h: Int): Int = w * h * 3 / 2
 
-public fun encodeYUV420SP(yuv420sp: ByteArray?, argb: IntArray?, width: Int, height: Int) {
+fun encodeYUV420SP(yuv420sp: ByteArray?, argb: IntArray?, width: Int, height: Int) {
     if (argb == null || yuv420sp == null) return
     val frameSize = width * height
 
