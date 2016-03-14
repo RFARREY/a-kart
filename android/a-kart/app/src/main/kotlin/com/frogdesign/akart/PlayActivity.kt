@@ -135,7 +135,13 @@ class PlayActivity : AppCompatActivity() {
 
 
         colorBlobsDetector = ColorBlobsDetector()
+    //    colorBlobsDetector = ARMarkerDetector()
         application.registerActivityLifecycleCallbacks(colorBlobsDetector)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        application.unregisterActivityLifecycleCallbacks(colorBlobsDetector)
     }
 
     private fun updateGameState() {
@@ -156,8 +162,6 @@ class PlayActivity : AppCompatActivity() {
                 finish()
             }
         })
-
-        colorBlobsDetector = ColorBlobsDetector()
 
         colorBlobsDetector?.setup(this, Cars.all)
 
@@ -180,7 +184,7 @@ class PlayActivity : AppCompatActivity() {
 
         trackedSubscriptions.track(camera.link(bmpObs))
         var bitmapSubscription = bmpObs
-                .sample(100, TimeUnit.MILLISECONDS)
+                .sample(30, TimeUnit.MILLISECONDS)
                 .filter({ p0 ->
                     colorBlobsDetector?.process(p0)
                     true
@@ -201,11 +205,6 @@ class PlayActivity : AppCompatActivity() {
         comm?.connect()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        application.unregisterActivityLifecycleCallbacks(colorBlobsDetector)
-    }
-
     override fun onStop() {
         super.onStop()
         trackedSubscriptions.unsubAll()
@@ -215,7 +214,6 @@ class PlayActivity : AppCompatActivity() {
 
     fun onFrameProcessed() {
         targets.nullify()
-
         for (i in Cars.all.indices) {
             val c = Cars.all[i]
             colorBlobsDetector?.setTarget(c, camera.drawMatrix, targets)

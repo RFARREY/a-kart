@@ -19,7 +19,6 @@ import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
-import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -194,8 +193,8 @@ public class ColorBlobDetectionActivity extends Activity implements OnTouchListe
 //            mSpectrum.copyTo(spectrumLabel);
 
 
-        for (ColorBlobsDetector.NamedColorBlob a : mDetector.detected) {
-            Log.i("CENTROID", "a"+a.id+", "+a.centroid);
+        for (ColorBlobsDetector.NamedColorBlob a : mDetector.getDetected()) {
+            Log.i("CENTROID", "a"+a.getId()+", "+a.getCentroid());
         }
         return mRgba;
     }
