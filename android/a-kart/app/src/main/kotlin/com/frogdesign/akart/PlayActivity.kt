@@ -30,6 +30,7 @@ import org.opencv.samples.colorblobdetect.ColorBlobsDetector
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import rx.functions.Func1
+import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.TimeUnit
 
@@ -56,32 +57,12 @@ class PlayActivity : AppCompatActivity() {
 
     private var isGameOn = false
     private var colorBlobsDetector: MarkerDetector? = null;
-    private val mLoaderCallback = object : BaseLoaderCallback(this) {
-        override fun onManagerConnected(status: Int) {
-            when (status) {
-                LoaderCallbackInterface.SUCCESS -> {
-                    Log.i("CENTROID", "OpenCV loaded successfully")
-                }
-                else -> {
-                    super.onManagerConnected(status)
-                }
-            }
-        }
-    }
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.play_activity)
-
-        if (!OpenCVLoader.initDebug()) {
-            Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization")
-            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, mLoaderCallback)
-        } else {
-            Log.d(TAG, "OpenCV library found inside package. Using it!")
-            mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS)
-        }
         RxView.touches(rear).subscribe { event ->
-            Log.i(TAG, "touch " + event)
+            Timber.i(TAG, "touch " + event)
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
                     if (isGameOn) {
@@ -121,7 +102,7 @@ class PlayActivity : AppCompatActivity() {
         })
 
         RxView.clicks(fireButton).subscribe {
-            Log.i(TAG, "fire?")
+            Timber.i(TAG, "fire?")
             var s = targets.targetedId
             if (s != null) {
                 comm?.boom(s)
@@ -145,7 +126,7 @@ class PlayActivity : AppCompatActivity() {
     }
 
     private fun updateGameState() {
-        Log.i(TAG, "updateGameState($isGameOn)")
+        Timber.i(TAG, "updateGameState($isGameOn)")
         if (isGameOn) {
             stoppedMask.visibility = View.GONE
         } else {
@@ -226,6 +207,6 @@ class PlayActivity : AppCompatActivity() {
     }
 
     private fun trace(s: String, vararg args: Any) {
-        if (TRACE) Log.d(TAG, s.format(args))
+        if (TRACE) Timber.d(TAG, s.format(args))
     }
 }

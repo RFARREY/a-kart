@@ -7,6 +7,7 @@ import io.socket.client.Socket
 import org.json.JSONObject
 import rx.Observable
 import rx.subjects.BehaviorSubject
+import timber.log.Timber
 //import rx.lang.kotlin.BehaviourSubject
 import java.security.cert.X509Certificate
 import java.util.*
@@ -99,7 +100,7 @@ class Comm(val id: String, val ctx: Context, val uri: String = Comm.DEFAULT_SERV
     public class Erroz(ex: Exception) : Event("error")
 
     private fun trace(s: String, vararg args: Any?) {
-        if (TRACE) Log.d(TAG, if (args != null) s.format(args) else s)
+        if (TRACE) Timber.d(TAG, if (args != null) s.format(args) else s)
     }
 
     public fun send(s: String) {

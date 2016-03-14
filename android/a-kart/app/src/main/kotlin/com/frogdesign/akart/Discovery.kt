@@ -17,6 +17,7 @@ import com.parrot.arsdk.ardiscovery.receivers.ARDiscoveryServicesDevicesListUpda
 import rx.Observable
 import rx.Subscriber
 import rx.functions.Action1
+import timber.log.Timber
 
 class Discovery(ctx: Context) {
 
@@ -24,7 +25,7 @@ class Discovery(ctx: Context) {
     private var currentSubscriber: Subscriber<in Discovery>? = null
     private val mArdiscoveryServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
-            Log.i(TAG, "nexted" + currentSubscriber!!)
+            Timber.i(TAG, "nexted" + currentSubscriber!!)
             mArdiscoveryService = (service as ARDiscoveryService.LocalBinder).service
             if (currentSubscriber != null) {
                 currentSubscriber!!.onNext(this@Discovery)
@@ -44,7 +45,7 @@ class Discovery(ctx: Context) {
 
     fun binder(): Observable<Discovery> {
         return Observable.create { subscriber ->
-            Log.i(TAG, "Subscribed on binder " + mArdiscoveryService)
+            Timber.i(TAG, "Subscribed on binder " + mArdiscoveryService)
             // if the discoverer service doesn't exists, bind to it
             if (mArdiscoveryService == null) {
                 currentSubscriber = subscriber
@@ -61,9 +62,9 @@ class Discovery(ctx: Context) {
         subscriber ->
         unbind()
         binder().subscribe(rx.functions.Action1<com.frogdesign.akart.Discovery> {
-            Log.i(TAG, "nexted call")
+            Timber.i(TAG, "nexted call")
             val delegate = com.parrot.arsdk.ardiscovery.receivers.ARDiscoveryServicesDevicesListUpdatedReceiverDelegate {
-                Log.d(TAG, "onServicesDevicesListUpdated ...")
+                Timber.d(TAG, "onServicesDevicesListUpdated ...")
                 if (mArdiscoveryService != null) {
                     val deviceList = mArdiscoveryService!!.deviceServicesArray
                     subscriber.onNext(deviceList)
@@ -86,7 +87,7 @@ class Discovery(ctx: Context) {
 
     fun unbind() {
         unregisterReceivers()
-        Log.d(TAG, "closeServices ...")
+        Timber.d(TAG, "closeServices ...")
         if (mArdiscoveryService != null) {
             ctx.unbindService(mArdiscoveryServiceConnection)
             mArdiscoveryService!!.stop()

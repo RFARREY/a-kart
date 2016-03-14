@@ -1,9 +1,11 @@
 package org.opencv.samples.colorblobdetect
 
+import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
+import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import com.frogdesign.akart.MarkerDetector
@@ -11,9 +13,13 @@ import com.frogdesign.akart.model.Car
 import com.frogdesign.akart.util.clamp
 import com.frogdesign.akart.util.inrange
 import com.frogdesign.akart.view.AimView
+import org.opencv.android.BaseLoaderCallback
+import org.opencv.android.LoaderCallbackInterface
+import org.opencv.android.OpenCVLoader
 import org.opencv.android.Utils
 import org.opencv.core.*
 import org.opencv.imgproc.Imgproc
+import timber.log.Timber
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileNotFoundException
@@ -32,16 +38,40 @@ class ColorBlobsDetector : MarkerDetector {
     internal var mDilatedMask = Mat()
     internal var mHierarchy = Mat()
 
+    private var mLoaderCallback: BaseLoaderCallback? = null
+
     override fun setup(ctx: Context, cars: List<Car>) {
         for (a in cars) {
             addDetectedColor(a.id, a.color)
         }
     }
 
-    override fun process(inBitmap: Bitmap?) {
-        if (imgMAT == null) {
-            imgMAT = Mat(inBitmap!!.height, inBitmap.width, CvType.CV_8UC4)
+    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle) {
+        super.onActivityCreated(activity, savedInstanceState)
+        mLoaderCallback = object : BaseLoaderCallback(activity) {
+            override fun onManagerConnected(status: Int) {
+                when (status) {
+                    LoaderCallbackInterface.SUCCESS -> Timber.i("CENTROID", "OpenCV loaded successfully")
+                    else -> super.onManagerConnected(status)
+                }
+            }
         }
+
+        if (!OpenCVLoader.initDebug()) {
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, activity, mLoaderCallback)
+        } else {
+            Timber.i("OpenCV library found inside package. Using it!")
+            mLoaderCallback?.onManagerConnected(LoaderCallbackInterface.SUCCESS)
+        }
+    }
+
+    override fun onActivityDestroyed(activity: Activity) {
+        super.onActivityDestroyed(activity)
+        mLoaderCallback = null
+    }
+
+    override fun process(inBitmap: Bitmap?) {
+        if (imgMAT == null) imgMAT = Mat(inBitmap!!.height, inBitmap.width, CvType.CV_8UC4)
         Utils.bitmapToMat(inBitmap, imgMAT, true)
         process(imgMAT!!)
     }
@@ -52,14 +82,14 @@ class ColorBlobsDetector : MarkerDetector {
             try {
                 val a = detected[i]
                 if (a.id == forCar.id) {
-                    Log.i("CENTROID", "centroid " + a.id + ", " + a.centroid)
+                    Timber.i("CENTROID", "centroid " + a.id + ", " + a.centroid)
                     val array = floatArrayOf(a.centroid.x.toFloat(), a.centroid.y.toFloat())
                     webcamToScreenTransf.mapPoints(array)
-                    Log.i("CENTROID", "mapped " + a.id + ", " + array[0] + ":" + array[1])
+                    Timber.i("CENTROID", "mapped " + a.id + ", " + array[0] + ":" + array[1])
                     targets.setTarget(a.id, array[0], array[1])
                     break
                 }
-            } catch(e : ArrayIndexOutOfBoundsException){
+            } catch(e: ArrayIndexOutOfBoundsException) {
                 //just because I suck
             }
         }
@@ -115,14 +145,7 @@ class ColorBlobsDetector : MarkerDetector {
         registered.add(NamedColorBlob(id, hsvColor))
     }
 
-    fun setMinContourArea(area: Double) {
-        mMinContourArea = area
-    }
-
     private val kernel = Mat()
-
-    internal var contours: List<MatOfPoint> = ArrayList()
-    var centroids: List<Point> = ArrayList()
 
     private var imgMAT: Mat? = null
     //    private val testImg = loadImage()
@@ -148,18 +171,14 @@ class ColorBlobsDetector : MarkerDetector {
         //            Scalar blue = getAvgHSVFromRgba(imgMAT, 256,247, 277,271);
         //            Scalar violet = getAvgHSVFromRgba(imgMAT, 306,247, 327,269);
         //
-        //            Log.i("CONTOUR", "red: (" + red.val[0] + ", " + red.val[1] +", " + red.val[2] + ", " + red.val[3] +")");
-        //            Log.i("CONTOUR", "green: (" + green.val[0] + ", " + green.val[1] +", " + green.val[2] + ", " + green.val[3] +")");
-        //            Log.i("CONTOUR", "blue: (" + blue.val[0] + ", " + blue.val[1] +", " + blue.val[2] + ", " + blue.val[3] +")");
-        //            Log.i("CONTOUR", "violet: (" + violet.val[0] + ", " + violet.val[1] +", " + violet.val[2] + ", " + violet.val[3] +")");
+        //            Timber.i("CONTOUR", "red: (" + red.val[0] + ", " + red.val[1] +", " + red.val[2] + ", " + red.val[3] +")");
+        //            Timber.i("CONTOUR", "green: (" + green.val[0] + ", " + green.val[1] +", " + green.val[2] + ", " + green.val[3] +")");
+        //            Timber.i("CONTOUR", "blue: (" + blue.val[0] + ", " + blue.val[1] +", " + blue.val[2] + ", " + blue.val[3] +")");
+        //            Timber.i("CONTOUR", "violet: (" + violet.val[0] + ", " + violet.val[1] +", " + violet.val[2] + ", " + violet.val[3] +")");
         //        }
         mPyrDownMat = rgbaImage
         Imgproc.pyrDown(rgbaImage, mPyrDownMat)
-        //        Imgproc.pyrDown(mPyrDownMat, mPyrDownMat);
         Imgproc.cvtColor(mPyrDownMat, mHsvMat, Imgproc.COLOR_RGB2HSV_FULL)
-        //        double[] hsv = mHsvMat.get(263,256);
-        //        Log.i("CONTOUR", "Touched hsv color: (" + hsv[0] + ", " + hsv[1] +
-        //                ", " + hsv[2] + ")");
         // Filter contours by area and resize to fit the original image size
         mContours.clear()
         detected.clear()
@@ -196,7 +215,7 @@ class ColorBlobsDetector : MarkerDetector {
                     Core.multiply(contour, Scalar(2.0, 2.0), contour)
 
                     val area = Imgproc.contourArea(contour)
-                    Log.i("AREA", ncb.id + "AREA " + area)
+                    Timber.i("AREA", ncb.id + "AREA " + area)
                     mContours.add(contour)
                     val mu = Imgproc.moments(contour, false)
                     ncb.centroid.x = x + mu._m10 / mu._m00
@@ -209,40 +228,18 @@ class ColorBlobsDetector : MarkerDetector {
         }
     }
 
-    private fun saveImage(finalBitmap: Bitmap) {
-
-        val root = Environment.getExternalStorageDirectory().toString()
-        val myDir = File(root + "/saved_images")
-        myDir.mkdirs()
-        val fname = "Image-Drone.png"
-        val file = File(myDir, fname)
-        if (file.exists()) file.delete()
-        try {
-            val out = FileOutputStream(file)
-            finalBitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
-            out.flush()
-            out.close()
-
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-
-    }
-
-    private val squarenessRolerance = 0.2f
-
     private fun isProbablyAMarker(contour: MatOfPoint, maxArea: Double): Boolean {
         //check if roughly square
         val rect = Imgproc.boundingRect(contour)
-        val low_h = rect.width * (1.0f - squarenessRolerance)
-        val high_h = rect.width * (1.0f + squarenessRolerance)
+        val low_h = rect.width * (1.0f - SQUARENESS_TOLERANCE)
+        val high_h = rect.width * (1.0f + SQUARENESS_TOLERANCE)
         if (rect.height < low_h || rect.height > high_h) return false
 
         //check if area is ok
         val contourArea = Imgproc.contourArea(contour)
         if (maxArea < 0) {
             if (!inrange(contourArea, AREA_LOWERBOUND, AREA_UPPERBOUND)) return false
-        } else if (contourArea < mMinContourArea * maxArea) return false
+        } else if (contourArea < MIN_COUNTOUR_AREA_RATIO * maxArea) return false
         return true
     }
 
@@ -252,10 +249,11 @@ class ColorBlobsDetector : MarkerDetector {
 
     companion object {
         // Minimum contour area in percent for contours filtering
-        private var mMinContourArea = 0.1
+        private val MIN_COUNTOUR_AREA_RATIO = 0.1
 
-        private val AREA_LOWERBOUND = 20.0//64.0 / 2;
+        private val AREA_LOWERBOUND = 20.0
         private val AREA_UPPERBOUND = java.lang.Double.MAX_VALUE
+        private val SQUARENESS_TOLERANCE = 0.2f
 
         fun loadImage(): Bitmap? {
             val root = Environment.getExternalStorageDirectory().toString()
@@ -267,6 +265,26 @@ class ColorBlobsDetector : MarkerDetector {
             }
 
             return null
+        }
+
+        fun saveImage(finalBitmap: Bitmap) {
+
+            val root = Environment.getExternalStorageDirectory().toString()
+            val myDir = File(root + "/saved_images")
+            myDir.mkdirs()
+            val fname = "Image-Drone.png"
+            val file = File(myDir, fname)
+            if (file.exists()) file.delete()
+            try {
+                val out = FileOutputStream(file)
+                finalBitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+                out.flush()
+                out.close()
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
         }
 
         private fun getAvgHSVFromRgba(whole: Mat, x_topleft: Int, y_topleft: Int, x_botright: Int, y_botright: Int): Scalar {

@@ -13,6 +13,7 @@ import rx.Subscription
 import rx.observables.ConnectableObservable
 import rx.observers.Subscribers
 import rx.subscriptions.Subscriptions
+import timber.log.Timber
 
 class SteeringWheel(context: Context) : SensorEventListener {
 
@@ -71,7 +72,7 @@ class SteeringWheel(context: Context) : SensorEventListener {
             steer = sub
             setListeners()
             sub.add(Subscriptions.create {
-                Log.i(TAG, "unsub!")
+                Timber.i(TAG, "unsub!")
                 steer = sub
                 unregister()
             })

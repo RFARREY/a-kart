@@ -49,7 +49,7 @@ class BmpToYUVToARToolkitConverterRS2(ctx: Context) : Func1<Bitmap, Boolean> {
 
     override fun call(inBitmap: Bitmap?): Boolean? {
         if (inBitmap == null) return false
-        //Log.i(PlayActivity.TAG, "convert" + isMainThread())
+        //Timber.i(PlayActivity.TAG, "convert" + isMainThread())
         checkForBuffers(inBitmap)
 
         inAllocation!!.copyFrom(inBitmap)

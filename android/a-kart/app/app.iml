@@ -42,6 +42,13 @@
       <sourceFolder url="file://$MODULE_DIR$/src/armDebug/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/armDebug/jni" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/armDebug/rs" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/build/generated/source/kapt/armDebugAndroidTest" isTestSource="true" generated="true" />
+      <sourceFolder url="file://$MODULE_DIR$/build/generated/source/r/androidTest/arm/debug" isTestSource="true" generated="true" />
+      <sourceFolder url="file://$MODULE_DIR$/build/generated/source/aidl/androidTest/arm/debug" isTestSource="true" generated="true" />
+      <sourceFolder url="file://$MODULE_DIR$/build/generated/source/buildConfig/androidTest/arm/debug" isTestSource="true" generated="true" />
+      <sourceFolder url="file://$MODULE_DIR$/build/generated/source/rs/androidTest/arm/debug" isTestSource="true" generated="true" />
+      <sourceFolder url="file://$MODULE_DIR$/build/generated/res/rs/androidTest/arm/debug" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/build/generated/res/resValues/androidTest/arm/debug" type="java-test-resource" />
       <sourceFolder url="file://$MODULE_DIR$/build/generated/source/kapt/armDebugUnitTest" isTestSource="true" generated="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/testArmDebug/res" type="java-test-resource" />
       <sourceFolder url="file://$MODULE_DIR$/src/testArmDebug/resources" type="java-test-resource" />
@@ -50,13 +57,6 @@
       <sourceFolder url="file://$MODULE_DIR$/src/testArmDebug/java" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/testArmDebug/jni" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/testArmDebug/rs" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/build/generated/source/kapt/armDebugAndroidTest" isTestSource="true" generated="true" />
-      <sourceFolder url="file://$MODULE_DIR$/build/generated/source/r/androidTest/arm/debug" isTestSource="true" generated="true" />
-      <sourceFolder url="file://$MODULE_DIR$/build/generated/source/aidl/androidTest/arm/debug" isTestSource="true" generated="true" />
-      <sourceFolder url="file://$MODULE_DIR$/build/generated/source/buildConfig/androidTest/arm/debug" isTestSource="true" generated="true" />
-      <sourceFolder url="file://$MODULE_DIR$/build/generated/source/rs/androidTest/arm/debug" isTestSource="true" generated="true" />
-      <sourceFolder url="file://$MODULE_DIR$/build/generated/res/rs/androidTest/arm/debug" type="java-test-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/build/generated/res/resValues/androidTest/arm/debug" type="java-test-resource" />
       <sourceFolder url="file://$MODULE_DIR$/src/arm/res" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/src/arm/resources" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/src/arm/assets" type="java-resource" />
@@ -122,6 +122,7 @@
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.1.1/jars" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.android.support/recyclerview-v7/23.1.1/jars" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.android.support/support-v4/23.1.1/jars" />
+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.jakewharton.timber/timber/4.1.1/jars" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/io.reactivex/rxandroid/1.1.0/jars" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/incremental" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/instant-run-support" />
@@ -155,6 +156,7 @@
     <orderEntry type="library" exported="" name="libARMedia" level="project" />
     <orderEntry type="library" exported="" name="libARStream" level="project" />
     <orderEntry type="library" exported="" name="support-annotations-23.1.1" level="project" />
+    <orderEntry type="library" exported="" name="timber-4.1.1" level="project" />
     <orderEntry type="library" exported="" name="libARController" level="project" />
     <orderEntry type="library" exported="" name="libARUpdater" level="project" />
     <orderEntry type="library" exported="" name="libjson" level="project" />

@@ -11,6 +11,7 @@ import com.frogdesign.akart.view.AimView
 import org.artoolkit.ar.base.ARToolKit
 import org.artoolkit.ar.base.BmpToYUVToARToolkitConverterRS2
 import org.artoolkit.ar.base.NativeInterface
+import timber.log.Timber
 
 
 class ARMarkerDetector : MarkerDetector {
@@ -28,8 +29,8 @@ class ARMarkerDetector : MarkerDetector {
     override fun setTarget(forCar: Car, webcamToScreenTransf: Matrix, targets: AimView) {
         if (forCar.isDetected(ARToolKit.getInstance())) {
             val p = forCar.estimatePosition(ARToolKit.getInstance())
-            Log.i(TAG, "Car visibile! " + forCar.id)
-            Log.i(TAG, "Position: " + forCar.estimatePosition(ARToolKit.getInstance()))
+            Timber.i(TAG, "Car visibile! " + forCar.id)
+            Timber.i(TAG, "Position: " + forCar.estimatePosition(ARToolKit.getInstance()))
 
             webcamToScreenTransf.getValues(values)
             val x = p.x + targets.width / 2 + values[2]

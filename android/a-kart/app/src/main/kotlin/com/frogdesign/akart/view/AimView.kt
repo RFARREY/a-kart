@@ -10,6 +10,7 @@ import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import com.frogdesign.akart.util.dpToPx
+import timber.log.Timber
 
 class AimView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : View(context, attrs, defStyleAttr, defStyleRes) {
     companion object {
@@ -60,7 +61,7 @@ class AimView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defSty
         targetedId = null
         for ((k,b) in points.entries) {
             if (b.x > Float.MIN_VALUE) {
-                Log.i("CONTROUR", "Drawing $k, $b")
+                Timber.i("CONTROUR", "Drawing $k, $b")
                 canvas?.drawCircle(b.x, b.y, 10f, paint)
             };
             var distance = hypot(cx - b.x, cy - b.y)

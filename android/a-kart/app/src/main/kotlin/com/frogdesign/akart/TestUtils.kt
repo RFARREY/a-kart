@@ -17,7 +17,7 @@ object TestUtils {
         return Observable.create { subscriber ->
             while (!subscriber.isUnsubscribed) {
                 SystemClock.sleep(interval)
-                subscriber.onNext(bmp)                    //Log.d("SEND", "SEND");
+                subscriber.onNext(bmp)                    //Timber.d("SEND", "SEND");
             }
             subscriber.onCompleted()
         }

@@ -11,6 +11,7 @@ import org.opencv.samples.colorblobdetect.ColorBlobDetectionActivity
 import rx.Observable
 import rx.Subscription
 import rx.subjects.BehaviorSubject
+import timber.log.Timber
 
 //import rx.lang.kotlin.BehaviourSubject
 //import rx.lang.kotlin.PublishSubject
@@ -51,14 +52,14 @@ class CameraView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, def
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-//        Log.i("CONTOUR", "you touched "+event!!.x+", "+event.y)
+//        Timber.i("CONTOUR", "you touched "+event!!.x+", "+event.y)
         val point = floatArrayOf(event!!.x, event.y)
         drawMatrixInverse.mapPoints(point)
-//        Log.i("CONTOUR", "you inverted "+point.get(0)+","+point.get(1))
+//        Timber.i("CONTOUR", "you inverted "+point.get(0)+","+point.get(1))
         val color = image!!.getPixel(point[0].toInt(), point[1].toInt());
         val violet = ColorBlobDetectionActivity.converScalarRgba2Hsv(color);
-        Log.i("CameraView", "TOUCHED: (" +Integer.toHexString(color)+")");
-        Log.i("CameraView", "TOUCHED: (" + violet.`val`[0] + ", " + violet.`val`[1] +", " + violet.`val`[2] + ", " + violet.`val`[3] +")");
+        Timber.i("CameraView", "TOUCHED: (" +Integer.toHexString(color)+")");
+        Timber.i("CameraView", "TOUCHED: (" + violet.`val`[0] + ", " + violet.`val`[1] +", " + violet.`val`[2] + ", " + violet.`val`[3] +")");
         return super.onTouchEvent(event)
     }
 

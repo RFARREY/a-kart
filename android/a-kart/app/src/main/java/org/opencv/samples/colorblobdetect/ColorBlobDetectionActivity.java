@@ -30,6 +30,8 @@ import org.opencv.imgproc.Imgproc;
 
 import java.util.List;
 
+import timber.log.Timber;
+
 public class ColorBlobDetectionActivity extends Activity implements OnTouchListener, CvCameraViewListener2 {
     private static final String TAG = "OCVSample::Activity";
 
@@ -48,7 +50,7 @@ public class ColorBlobDetectionActivity extends Activity implements OnTouchListe
         public void onManagerConnected(int status) {
             switch (status) {
                 case LoaderCallbackInterface.SUCCESS: {
-                    Log.i(TAG, "OpenCV loaded successfully");
+                    Timber.i(TAG, "OpenCV loaded successfully");
                     mOpenCvCameraView.enableView();
                     mOpenCvCameraView.setOnTouchListener(ColorBlobDetectionActivity.this);
                 }
@@ -62,7 +64,7 @@ public class ColorBlobDetectionActivity extends Activity implements OnTouchListe
     };
 
     public ColorBlobDetectionActivity() {
-        Log.i(TAG, "Instantiated new " + this.getClass());
+        Timber.i(TAG, "Instantiated new " + this.getClass());
     }
 
     /**
@@ -70,7 +72,7 @@ public class ColorBlobDetectionActivity extends Activity implements OnTouchListe
      */
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        Log.i(TAG, "called onCreate");
+        Timber.i(TAG, "called onCreate");
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -93,10 +95,10 @@ public class ColorBlobDetectionActivity extends Activity implements OnTouchListe
     public void onResume() {
         super.onResume();
         if (!OpenCVLoader.initDebug()) {
-            Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
+            Timber.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
             OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, mLoaderCallback);
         } else {
-            Log.d(TAG, "OpenCV library found inside package. Using it!");
+            Timber.d(TAG, "OpenCV library found inside package. Using it!");
             mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
     }
@@ -137,7 +139,7 @@ public class ColorBlobDetectionActivity extends Activity implements OnTouchListe
         int x = (int) event.getX() - xOffset;
         int y = (int) event.getY() - yOffset;
 
-        Log.i(TAG, "Touch image coordinates: (" + x + ", " + y + ")");
+        Timber.i(TAG, "Touch image coordinates: (" + x + ", " + y + ")");
 
         if ((x < 0) || (y < 0) || (x > cols) || (y > rows)) return false;
 
@@ -162,10 +164,10 @@ public class ColorBlobDetectionActivity extends Activity implements OnTouchListe
 
         mBlobColorRgba = converScalarHsv2Rgba(mBlobColorHsv);
 
-        Log.i(TAG, "Touched rgba color: (" + mBlobColorRgba.val[0] + ", " + mBlobColorRgba.val[1] +
+        Timber.i(TAG, "Touched rgba color: (" + mBlobColorRgba.val[0] + ", " + mBlobColorRgba.val[1] +
                 ", " + mBlobColorRgba.val[2] + ", " + mBlobColorRgba.val[3] + ")");
 
-        Log.i(TAG, "Touched hsv color: (" + mBlobColorHsv.val[0] + ", " + mBlobColorHsv.val[1] +
+        Timber.i(TAG, "Touched hsv color: (" + mBlobColorHsv.val[0] + ", " + mBlobColorHsv.val[1] +
                 ", " + mBlobColorHsv.val[2] + ", " + mBlobColorHsv.val[3] + ")");
 
       //  mDetector.addDetectedColor("pino", mBlobColorHsv);
@@ -183,7 +185,7 @@ public class ColorBlobDetectionActivity extends Activity implements OnTouchListe
         mRgba = inputFrame.rgba();
         mDetector.process(mRgba);
         List<MatOfPoint> contours = mDetector.getContours();
-        Log.e(TAG, "Contours count: " + contours.size());
+        Timber.e(TAG, "Contours count: " + contours.size());
         Imgproc.drawContours(mRgba, contours, -1, CONTOUR_COLOR);
 
 //            Mat colorLabel = mRgba.submat(4, 68, 4, 68);
@@ -194,7 +196,7 @@ public class ColorBlobDetectionActivity extends Activity implements OnTouchListe
 
 
         for (ColorBlobsDetector.NamedColorBlob a : mDetector.getDetected()) {
-            Log.i("CENTROID", "a"+a.getId()+", "+a.getCentroid());
+            Timber.i("CENTROID", "a"+a.getId()+", "+a.getCentroid());
         }
         return mRgba;
     }

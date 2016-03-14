@@ -21,6 +21,7 @@ import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import rx.subjects.PublishSubject
+import timber.log.Timber
 import java.util.*
 
 class DiscoveryActivity : AppCompatActivity() {
@@ -77,12 +78,12 @@ class DiscoveryActivity : AppCompatActivity() {
         ensureUnsubscribed()
         sub = discovery!!.discoverer().subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread()).subscribe({ deviceList ->
-            Log.i(TAG, "--> SERVICES:")
+            Timber.i(TAG, "--> SERVICES:")
             // Do what you want with the device list
             for (service in deviceList) {
-                Log.i(TAG, "The service " + service)
+                Timber.i(TAG, "The service " + service)
             }
-            Log.i(TAG, "<-- SERVICES.")
+            Timber.i(TAG, "<-- SERVICES.")
             adapter!!.update(deviceList)
         })
 

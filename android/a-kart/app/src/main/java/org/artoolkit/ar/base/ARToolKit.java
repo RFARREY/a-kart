@@ -289,6 +289,7 @@ public class ARToolKit {
      * Adds a new single marker to the set of currently active markers.
      *
      * @param patt  The path to the pattern file to load.
+     * @param patt  The path to the pattern file to load.
      * @param width The physical width of the marker being tracked, in millimeters.
      * @return The unique identifier (UID) of the new marker, or -1 on error.
      */

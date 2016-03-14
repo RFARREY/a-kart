@@ -80,7 +80,7 @@ class BmpToYUVToARToolkitConverterJava : Func1<Bitmap, Boolean> {
 
     override fun call(inBitmap: Bitmap?): Boolean {
         if (inBitmap == null) return false;
-        //Log.i(PlayActivity.TAG, "convert" + isMainThread())
+        //Timber.i(PlayActivity.TAG, "convert" + isMainThread())
         val w = inBitmap.width
         val h = inBitmap.height
         checkForBuffers(w, h)
@@ -88,10 +88,10 @@ class BmpToYUVToARToolkitConverterJava : Func1<Bitmap, Boolean> {
         //var startT = System.nanoTime();
         ByteUtils.encodeYUV420SP(yuvBuffer, argbBuffer, w, h)
         //var dt = System.nanoTime() - startT;
-        //Log.i("TIME", dt.toString());
+        //Timber.i("TIME", dt.toString());
         if (ARToolKit.getInstance().nativeInitialised()) {
             var b = ARToolKit.getInstance().convertAndDetect(yuvBuffer)
-            //Log.i("Utils", "ARToolkit $b");
+            //Timber.i("Utils", "ARToolkit $b");
         }
         return true
     }

@@ -4,6 +4,7 @@ import android.app.Activity
 import android.os.Bundle
 import android.util.Log
 import com.frogdesign.akart.util.TrackedSubscriptions
+import timber.log.Timber
 
 class CommTestActivity : Activity() {
 
@@ -15,7 +16,7 @@ class CommTestActivity : Activity() {
         setContentView(R.layout.accel_test_activity)
         //comm = Comm("taxiguerrilla", this, "http://10.228.81.53:5000")
         trackedSubs.add(comm.pin.subscribe { event ->
-            Log.i("COMM", "event " + event)
+            Timber.i("COMM", "event " + event)
         })
 
         comm.connect()

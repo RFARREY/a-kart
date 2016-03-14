@@ -10,6 +10,7 @@ import com.parrot.arsdk.arsal.ARNativeDataHelper
 import rx.Observable
 import rx.Subscriber
 import rx.subscriptions.Subscriptions
+import timber.log.Timber
 
 
 /**
@@ -89,7 +90,7 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
                 var n: Int = 0;
 
                 override fun onFrameTimeout(arDeviceController: ARDeviceController) {
-                    Log.w(TAG, "onFrameTimeout" + ++n)
+                    Timber.w(TAG, "onFrameTimeout" + ++n)
                 }
             }
             deviceController.addStreamListener(listener)
@@ -134,18 +135,18 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
             } else if (newState == ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_STOPPED) {
                 status?.onNext(false)
             } else {
-                Log.i(TAG, "onStateChanged: " + newState.toString())
+                Timber.i(TAG, "onStateChanged: " + newState.toString())
             }
         }
-        if (error != null) Log.e(TAG, "onStateChanged: " + error.toString())
+        if (error != null) Timber.e(TAG, "onStateChanged: " + error.toString())
     }
 
     override fun onExtensionStateChanged(arDeviceController: ARDeviceController,
                                          newState: ARCONTROLLER_DEVICE_STATE_ENUM?,
                                          product: ARDISCOVERY_PRODUCT_ENUM, s: String,
                                          error: ARCONTROLLER_ERROR_ENUM?) {
-        if (newState != null) Log.i(TAG, "onExtensionStateChanged: " + newState.toString() + ", " + composeDesc(product, s))
-        if (error != null) Log.e(TAG, "onExtensionStateChanged: " + error.toString() + ", " + composeDesc(product, s))
+        if (newState != null) Timber.i(TAG, "onExtensionStateChanged: " + newState.toString() + ", " + composeDesc(product, s))
+        if (error != null) Timber.e(TAG, "onExtensionStateChanged: " + error.toString() + ", " + composeDesc(product, s))
     }
 
     private fun composeDesc(ardiscovery_product_enum: ARDISCOVERY_PRODUCT_ENUM, s: String): String {
@@ -164,7 +165,7 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
                 //trace("Battery: %d", batValue)
                 if (batValue != null) batteryLevel = batValue.toInt()
             } else {
-                Log.e(TAG, "elementDictionary is null")
+                Timber.e(TAG, "elementDictionary is null")
             }
             if (battery != null) battery!!.onNext(batteryLevel)
         } else if (commandKey == ARCONTROLLER_DICTIONARY_KEY_ENUM.ARCONTROLLER_DICTIONARY_KEY_COMMON_COMMONSTATE_WIFISIGNALCHANGED) {
@@ -172,13 +173,13 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
         } else if (commandKey == ARCONTROLLER_DICTIONARY_KEY_ENUM.ARCONTROLLER_DICTIONARY_KEY_JUMPINGSUMO_NETWORKSTATE_LINKQUALITYCHANGED) {
             //
         } else {
-            Log.i(TAG, "Command: " + commandKey.name)
+            Timber.i(TAG, "Command: " + commandKey.name)
         }
     }
 
     private fun logAll(elems: ARControllerDictionary) {
         if (elems.entries != null) for ((k, v) in elems.entries) {
-            Log.i(TAG, "(%s, %v)".format(k, v))
+            Timber.i(TAG, "(%s, %v)".format(k, v))
         }
     }
 
@@ -202,7 +203,7 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
     }
 
     private fun trace(s: String, vararg args: Any) {
-        if (TRACE) Log.d(TAG, s.format(args))
+        if (TRACE) Timber.d(TAG, s.format(args))
     }
 
     companion object {
