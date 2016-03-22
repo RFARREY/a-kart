@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title><%= title %></title>
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" rel="stylesheet">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.6.0/pure-min.css">
     <link rel="stylesheet" href="/css/switch.css">
     <link rel="stylesheet" href="/css/style.css">
@@ -11,6 +12,53 @@
 </head>
 <body>
 <div class="pure-g">
+
+	<div class="pure-u-5-5 head">
+		<div class="pure-g">
+			<div class="pure-u-5-5 title">
+				<h3>Game Control</h3>
+			</div>
+		</div>
+		<div class="pure-g">
+			<div class="pure-u-1-5 w-range">
+			    <form class="">
+			        <label>Overall speed [<output id="overall-speed-output"></output>%]:<br><input type="range" mix="0" max="100" id="overall-speed" value="50" step="5" /></label>
+			    </form>
+			</div>
+			<div class="pure-u-2-5">
+			
+			</div>
+			<div class="pure-u-2-5 w-switch">
+			    <form class="">
+			        <div class="switch">
+			            <input id="gamecontrol" type="checkbox">
+			            <label>
+			                <span class="fontawesome-ok"></span>
+			                <span class="fontawesome-remove"></span>
+			
+			                <div></div>
+			            </label>
+			        </div>
+			    </form>
+			</div>
+		</div>		
+	</div>
+</div>
+
+<form class="pure-form pure-g add-client" id="form-add">
+	<div class="pure-u-22-24 add-client-text">
+		<input type="text" placeholder="Add client" id="target" class="pure-input-rounded"/>
+	</div>
+	<div class="pure-u-2-24 add-client-button">
+		<button class="pure-button" type="button" id="register"><i class="fa fa-plus-square"></i></button>
+	</div>
+</form>
+
+<div id="playerList" class="pure-u-24-24 l-box">
+</div>
+		
+	
+    <!-- OLD CONTROLLER
     <form class="pure-u pure-form pure-form-stacked l-box">
         <legend><h4>Game Control</h4></legend>
         <div class="switch">
@@ -23,14 +71,17 @@
             </label>
         </div>
     </form>
+    -->
+    
+    
+    <!-- OLD REGISTER CLIENT CONTROLLER
     <div class="pure-u l-box pure-form">
         <div class="flexHolder">
             <input type="text" placeholder="target" id="target"/>
         </div>
         <button class="pure-button pure-button-primary" type="button" id="register">REGISTER</button>
     </div>
-    <div id="playerList" class="pure-u l-box">
-    </div>
+    -->
 </div>
 <script src="/js/dashboard.js"></script>
 </body>
