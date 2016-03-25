@@ -89,11 +89,10 @@ io.on('connection', function (socket) {
         console.log( data );
         if (connecteds[data.id]) {
 	        console.log( "Change " + data.id + " maximun speed to " + data.value);
-            connecteds[data.id].emit('speed', { "value": data.value });
+            connecteds[data.id].emit('speed', data.value );
             spped = data.value;
         } else {
             console.log( "Change all maximun speed to " + data.value);
-            
             for (var key in connecteds) {
 				if (connecteds.hasOwnProperty(key)) {
 					console.log( "Send message to " + key);
