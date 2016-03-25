@@ -14,12 +14,14 @@ import timber.log.Timber
 
 
 /**
-
- */
+*
+*/
 class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceControllerListener {
 
     private val deviceController: ARDeviceController
     private val jumpingSumo: ARFeatureJumpingSumo
+    private var maxSpeed = 255.toByte()
+    private var gasPedal = 0f
 
     private var batteryLevel: Int? = -1
 
@@ -104,7 +106,12 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
     }
 
     fun speed(percentage: Float) {
-        val actual = (SPEED_MAX * percentage).toByte()
+        gasPedal = percentage
+        syncSpeed()
+    }
+
+    private fun syncSpeed() {
+        val actual = (maxSpeed * gasPedal).toByte()
         jumpingSumo.setPilotingPCMDSpeed(actual)
         jumpingSumo.setPilotingPCMDFlag(ON)
     }
@@ -216,6 +223,10 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
 
         private val TURN_MAX: Byte = 20
         private val TURN_DEADZONE: Byte = 3
-        private val SPEED_MAX: Byte = 100
+    }
+
+    fun maxSpeed(percent: Float) {
+        maxSpeed = (255 * percent).toByte()
+        syncSpeed()
     }
 }

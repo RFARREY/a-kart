@@ -98,6 +98,8 @@ class PlayActivity : AppCompatActivity() {
             } else if (event is Comm.GameState) {
                 isGameOn = event.on
                 updateGameState()
+            } else if (event is Comm.Speed) {
+                controller!!.maxSpeed(event.percent)
             }
         })
 
@@ -115,8 +117,8 @@ class PlayActivity : AppCompatActivity() {
         updateGameState()
 
 
-        colorBlobsDetector = ColorBlobsDetector()
-    //    colorBlobsDetector = ARMarkerDetector()
+    //    colorBlobsDetector = ColorBlobsDetector()
+        colorBlobsDetector = ARMarkerDetector()
         application.registerActivityLifecycleCallbacks(colorBlobsDetector)
     }
 

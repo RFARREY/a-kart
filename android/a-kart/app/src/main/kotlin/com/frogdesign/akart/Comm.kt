@@ -53,6 +53,10 @@ class Comm(val id: String, val ctx: Context, val uri: String = Comm.DEFAULT_SERV
         }).on("hit", { args ->
             trace("hit")
             subject.onNext(Hit())
+        }).on("speed", { args ->
+            trace("speed")
+            val percent = args[0].toString().toInt() / 100f
+            subject.onNext(Speed(percent))
         }).on(Socket.EVENT_DISCONNECT, { args ->
             trace("disconnect")
         });
@@ -96,6 +100,7 @@ class Comm(val id: String, val ctx: Context, val uri: String = Comm.DEFAULT_SERV
     public open class Event(val type: String)
     public class Message(val mex: String) : Event("message")
     public class Hit() : Event("hit")
+    public class Speed(val percent: Float) : Event("hit")
     public class GameState(val on: Boolean) : Event("gamestate")
     public class Erroz(ex: Exception) : Event("error")
 
