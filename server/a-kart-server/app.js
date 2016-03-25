@@ -22,16 +22,18 @@ app.get('/', function (req, res) {
 });
 
 var GAME_IS_ON = false
+var globalSpeed = 100
 
 var connecteds = {}
 io.on('connection', function (socket) {
     console.log('a user connected');
 
     function broadcastGameStatus(socket) {
-        io.emit('set game', GAME_IS_ON);
+        socket.emit('set game', GAME_IS_ON);
         var players = [];
         for (var k in connecteds) players.push(k);
-        io.emit('players', players);
+        socket.emit('players', players);
+		socket.emit('speed', globalSpeed);
     }
 
     broadcastGameStatus(socket);
@@ -97,6 +99,7 @@ io.on('connection', function (socket) {
 				if (connecteds.hasOwnProperty(key)) {
 					console.log( "Send message to " + key);
 					connecteds[key].emit( 'speed', data.value );
+					globalSpeed = data.value
 				}
 			}
         }
