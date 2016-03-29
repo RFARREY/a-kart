@@ -68,7 +68,7 @@ class AKartApplication : Application() {
             }
 
             when (priority) {
-                Log.VERBOSE -> Timber.v(tag, message, t)
+                Log.VERBOSE -> Timber.v(message, t)
                 Log.DEBUG -> Timber.d(tag, message, t)
                 Log.INFO -> Timber.i(tag, message, t)
                 Log.WARN -> Timber.w(tag, message, t)

@@ -30,6 +30,8 @@ final class ViewTreeObserverGlobalLayoutOnSubscribe implements Observable.OnSubs
     view.getViewTreeObserver().addOnGlobalLayoutListener(listener);
 
     subscriber.add(new MainThreadSubscription() {
+
+      @SuppressWarnings("deprecation")
       @Override protected void onUnsubscribe() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
           view.getViewTreeObserver().removeOnGlobalLayoutListener(listener);

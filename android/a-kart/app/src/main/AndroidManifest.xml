@@ -38,6 +38,7 @@
 
         <activity
             android:name="com.frogdesign.akart.DiscoveryActivity"
+            android:screenOrientation="landscape"
             android:label="@string/app_name"
             android:theme="@style/AppTheme">
             <intent-filter>

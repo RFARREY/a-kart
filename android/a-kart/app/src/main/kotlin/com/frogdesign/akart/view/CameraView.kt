@@ -6,8 +6,8 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
-import org.opencv.core.Scalar
-import org.opencv.samples.colorblobdetect.ColorBlobDetectionActivity
+//import org.opencv.core.Scalar
+//import org.opencv.samples.colorblobdetect.ColorBlobDetectionActivity
 import rx.Observable
 import rx.Subscription
 import rx.subjects.BehaviorSubject
@@ -57,9 +57,9 @@ class CameraView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, def
         drawMatrixInverse.mapPoints(point)
 //        Timber.i("CONTOUR", "you inverted "+point.get(0)+","+point.get(1))
         val color = image!!.getPixel(point[0].toInt(), point[1].toInt());
-        val violet = ColorBlobDetectionActivity.converScalarRgba2Hsv(color);
+       // val violet = ColorBlobDetectionActivity.converScalarRgba2Hsv(color);
         Timber.i("CameraView", "TOUCHED: (" +Integer.toHexString(color)+")");
-        Timber.i("CameraView", "TOUCHED: (" + violet.`val`[0] + ", " + violet.`val`[1] +", " + violet.`val`[2] + ", " + violet.`val`[3] +")");
+        //Timber.i("CameraView", "TOUCHED: (" + violet.`val`[0] + ", " + violet.`val`[1] +", " + violet.`val`[2] + ", " + violet.`val`[3] +")");
         return super.onTouchEvent(event)
     }
 

@@ -20,7 +20,7 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
 
     private val deviceController: ARDeviceController
     private val jumpingSumo: ARFeatureJumpingSumo
-    private var maxSpeed = 255.toByte()
+    private var maxSpeed = Byte.MAX_VALUE
     private var gasPedal = 0f
 
     private var batteryLevel: Int? = -1
@@ -79,7 +79,7 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
                 private var data: ByteArray? = ByteArray(150000)
 
                 override fun onFrameReceived(arDeviceController: ARDeviceController, arFrame: ARFrame) {
-                    trace("mediaStreamer.onFrameReceived: MAIN? %b", isMainThread())
+                    //trace("mediaStreamer.onFrameReceived: MAIN? %b", isMainThread())
                     if (subscriber == null) return
                     if (!arFrame.isIFrame) return
                     if (data == null) {
@@ -92,7 +92,7 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
                 var n: Int = 0;
 
                 override fun onFrameTimeout(arDeviceController: ARDeviceController) {
-                    Timber.w(TAG, "onFrameTimeout" + ++n)
+                    Timber.w("onFrameTimeout" + ++n)
                 }
             }
             deviceController.addStreamListener(listener)
@@ -112,6 +112,7 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
 
     private fun syncSpeed() {
         val actual = (maxSpeed * gasPedal).toByte()
+        trace("syncSpeed "+maxSpeed+", "+gasPedal+", "+actual)
         jumpingSumo.setPilotingPCMDSpeed(actual)
         jumpingSumo.setPilotingPCMDFlag(ON)
     }
@@ -128,6 +129,7 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
     }
 
     fun neutral() {
+        gasPedal = 0f
         jumpingSumo.setPilotingPCMDSpeed(OFF)
         jumpingSumo.setPilotingPCMDTurn(OFF)
         jumpingSumo.setPilotingPCMDFlag(OFF)
@@ -142,18 +144,18 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
             } else if (newState == ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_STOPPED) {
                 status?.onNext(false)
             } else {
-                Timber.i(TAG, "onStateChanged: " + newState.toString())
+                Timber.i("onStateChanged: " + newState.toString())
             }
         }
-        if (error != null) Timber.e(TAG, "onStateChanged: " + error.toString())
+        if (error != null) Timber.e("onStateChanged: " + error.toString())
     }
 
     override fun onExtensionStateChanged(arDeviceController: ARDeviceController,
                                          newState: ARCONTROLLER_DEVICE_STATE_ENUM?,
                                          product: ARDISCOVERY_PRODUCT_ENUM, s: String,
                                          error: ARCONTROLLER_ERROR_ENUM?) {
-        if (newState != null) Timber.i(TAG, "onExtensionStateChanged: " + newState.toString() + ", " + composeDesc(product, s))
-        if (error != null) Timber.e(TAG, "onExtensionStateChanged: " + error.toString() + ", " + composeDesc(product, s))
+        if (newState != null) Timber.i("onExtensionStateChanged: " + newState.toString() + ", " + composeDesc(product, s))
+        if (error != null) Timber.e("onExtensionStateChanged: " + error.toString() + ", " + composeDesc(product, s))
     }
 
     private fun composeDesc(ardiscovery_product_enum: ARDISCOVERY_PRODUCT_ENUM, s: String): String {
@@ -172,7 +174,7 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
                 //trace("Battery: %d", batValue)
                 if (batValue != null) batteryLevel = batValue.toInt()
             } else {
-                Timber.e(TAG, "elementDictionary is null")
+                Timber.e("elementDictionary is null")
             }
             if (battery != null) battery!!.onNext(batteryLevel)
         } else if (commandKey == ARCONTROLLER_DICTIONARY_KEY_ENUM.ARCONTROLLER_DICTIONARY_KEY_COMMON_COMMONSTATE_WIFISIGNALCHANGED) {
@@ -180,13 +182,13 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
         } else if (commandKey == ARCONTROLLER_DICTIONARY_KEY_ENUM.ARCONTROLLER_DICTIONARY_KEY_JUMPINGSUMO_NETWORKSTATE_LINKQUALITYCHANGED) {
             //
         } else {
-            Timber.i(TAG, "Command: " + commandKey.name)
+            Timber.i("Command: " + commandKey.name)
         }
     }
 
     private fun logAll(elems: ARControllerDictionary) {
         if (elems.entries != null) for ((k, v) in elems.entries) {
-            Timber.i(TAG, "(%s, %v)".format(k, v))
+            Timber.i("(%s, %v)".format(k, v))
         }
     }
 
@@ -210,12 +212,12 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
     }
 
     private fun trace(s: String, vararg args: Any) {
-        if (TRACE) Timber.d(TAG, s.format(args))
+        if (TRACE) Timber.d(s, args)
     }
 
     companion object {
         private val TAG = Controller::class.java.simpleName
-        private val TRACE = false
+        private val TRACE = true
 
 
         private val ON = 1.toByte()
@@ -226,7 +228,8 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
     }
 
     fun maxSpeed(percent: Float) {
-        maxSpeed = (255 * percent).toByte()
+        maxSpeed = (Byte.MAX_VALUE * percent).toByte()
+        trace("maxSpeed "+maxSpeed)
         syncSpeed()
     }
 }

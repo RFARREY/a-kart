@@ -22,11 +22,7 @@ import com.jakewharton.rxbinding.widget.RxSeekBar
 import com.jakewharton.rxbinding.widget.SeekBarProgressChangeEvent
 import com.jakewharton.rxbinding.widget.SeekBarStopChangeEvent
 import com.parrot.arsdk.ardiscovery.ARDiscoveryDeviceService
-import org.opencv.android.BaseLoaderCallback
-import org.opencv.android.LoaderCallbackInterface
-import org.opencv.android.OpenCVLoader
-import org.opencv.core.Scalar
-import org.opencv.samples.colorblobdetect.ColorBlobsDetector
+//import org.opencv.samples.colorblobdetect.ColorBlobsDetector
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import rx.functions.Func1
