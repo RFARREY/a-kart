@@ -5,9 +5,9 @@ import org.artoolkit.ar.base.ARToolKit
 
 data class Position(var x: Float, var y: Float, var z: Float) {
     operator infix fun divAssign(d: Int) {
-        x /= d;
-        y /= d;
-        z /= d;
+        x /= d.toFloat();
+        y /= d.toFloat();
+        z /= d.toFloat();
     }
 }
 
@@ -29,9 +29,9 @@ data class Car(val id: String, val lrMarkers: Pair<Int, Int>/*, val color: Scala
         var pos : Position = Position(0f,0f,0f);
         if (!isDetected(arScene)) return pos;
         var sides : Int = 0;
-        val X_OFFSET = 50f;
-        val X_BIAS = 0f;
-        val Y_BIAS = -120f;
+        val X_OFFSET = 0f;
+        val X_BIAS = 16f;
+        val Y_BIAS = 25f;
         if(isLeftMarkerVisible(arScene)) {
             var matrix : FloatArray = arScene.queryMarkerTransformation(leftAR)
             sides++
@@ -49,15 +49,16 @@ data class Car(val id: String, val lrMarkers: Pair<Int, Int>/*, val color: Scala
         }
 
         pos /= sides
-        pos.x += X_BIAS
-        pos.y += Y_BIAS
         //scaled to nullify depth
-        var depth : Float = pos.z / -500
+        var depth : Float = pos.z / -80
         pos.x /= depth
         pos.y /= depth
 
-        val X_FACTOR = 2.85f
-        val Y_FACTOR = 2.6f
+        pos.x += X_BIAS
+        pos.y += Y_BIAS
+
+        val X_FACTOR = 15f
+        val Y_FACTOR = 18f
         pos.x *= X_FACTOR
         pos.y *= Y_FACTOR
         return pos;

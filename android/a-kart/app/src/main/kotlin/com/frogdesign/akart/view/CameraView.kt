@@ -58,7 +58,7 @@ class CameraView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, def
 //        Timber.i("CONTOUR", "you inverted "+point.get(0)+","+point.get(1))
         val color = image!!.getPixel(point[0].toInt(), point[1].toInt());
        // val violet = ColorBlobDetectionActivity.converScalarRgba2Hsv(color);
-        Timber.i("CameraView", "TOUCHED: (" +Integer.toHexString(color)+")");
+        Timber.i("TOUCHED: (" +Integer.toHexString(color)+")");
         //Timber.i("CameraView", "TOUCHED: (" + violet.`val`[0] + ", " + violet.`val`[1] +", " + violet.`val`[2] + ", " + violet.`val`[3] +")");
         return super.onTouchEvent(event)
     }

@@ -17,7 +17,7 @@ import java.util.*
 import java.util.concurrent.Executors
 
 
-public fun dpToPx(context: Context, dp: Float): Int = Math.round(dp * pixelScaleFactor(context))
+fun dpToPx(context: Context, dp: Float): Int = Math.round(dp * pixelScaleFactor(context))
 
 private fun pixelScaleFactor(context: Context): Float {
     var displayMetrics = context.resources.displayMetrics
@@ -25,9 +25,9 @@ private fun pixelScaleFactor(context: Context): Float {
     return displayMetrics.densityDpi / mdpi
 }
 
-public fun threadName(): String = Thread.currentThread().name
+fun threadName(): String = Thread.currentThread().name
 
-public fun isMainThread(): Boolean = Looper.getMainLooper() == Looper.myLooper()
+fun isMainThread(): Boolean = Looper.getMainLooper() == Looper.myLooper()
 
 val PI: Float = Math.PI.toFloat()
 
@@ -100,12 +100,12 @@ class BmpToYUVToARToolkitConverterJava : Func1<Bitmap, Boolean> {
 
 class TrackedSubscriptions : ArrayList<Subscription>() {
 
-    public fun track(sub: Subscription?): TrackedSubscriptions {
+    fun track(sub: Subscription?): TrackedSubscriptions {
         if (sub != null) super.add(sub)
         return this
     }
 
-    public fun unsubAll(): TrackedSubscriptions {
+    fun unsubAll(): TrackedSubscriptions {
         for (a in this)
             if (a.isUnsubscribed) a.unsubscribe()
 

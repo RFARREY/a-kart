@@ -78,12 +78,12 @@ class DiscoveryActivity : AppCompatActivity() {
         ensureUnsubscribed()
         sub = discovery!!.discoverer().subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread()).subscribe({ deviceList ->
-            Timber.i(TAG, "--> SERVICES:")
+            Timber.tag(TAG).i("--> SERVICES:")
             // Do what you want with the device list
             for (service in deviceList) {
-                Timber.i(TAG, "The service " + service)
+                Timber.tag(TAG).i( "The service " + service)
             }
-            Timber.i(TAG, "<-- SERVICES.")
+            Timber.tag(TAG).i( "<-- SERVICES.")
             adapter!!.update(deviceList)
         })
 

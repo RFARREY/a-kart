@@ -25,7 +25,7 @@ class Discovery(ctx: Context) {
     private var currentSubscriber: Subscriber<in Discovery>? = null
     private val mArdiscoveryServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
-            Timber.i(TAG, "nexted" + currentSubscriber!!)
+            Timber.tag(TAG).i("nexted" + currentSubscriber!!)
             mArdiscoveryService = (service as ARDiscoveryService.LocalBinder).service
             if (currentSubscriber != null) {
                 currentSubscriber!!.onNext(this@Discovery)
@@ -45,7 +45,7 @@ class Discovery(ctx: Context) {
 
     fun binder(): Observable<Discovery> {
         return Observable.create { subscriber ->
-            Timber.i(TAG, "Subscribed on binder " + mArdiscoveryService)
+            Timber.i("Subscribed on binder " + mArdiscoveryService)
             // if the discoverer service doesn't exists, bind to it
             if (mArdiscoveryService == null) {
                 currentSubscriber = subscriber
@@ -62,9 +62,9 @@ class Discovery(ctx: Context) {
         subscriber ->
         unbind()
         binder().subscribe(rx.functions.Action1<com.frogdesign.akart.Discovery> {
-            Timber.i(TAG, "nexted call")
+            Timber.tag(TAG).i("nexted call")
             val delegate = com.parrot.arsdk.ardiscovery.receivers.ARDiscoveryServicesDevicesListUpdatedReceiverDelegate {
-                Timber.d(TAG, "onServicesDevicesListUpdated ...")
+                Timber.tag(TAG).i( "onServicesDevicesListUpdated ...")
                 if (mArdiscoveryService != null) {
                     val deviceList = mArdiscoveryService!!.deviceServicesArray
                     subscriber.onNext(deviceList)
@@ -87,7 +87,7 @@ class Discovery(ctx: Context) {
 
     fun unbind() {
         unregisterReceivers()
-        Timber.d(TAG, "closeServices ...")
+        Timber.tag(TAG).i( "closeServices ...")
         if (mArdiscoveryService != null) {
             ctx.unbindService(mArdiscoveryServiceConnection)
             mArdiscoveryService!!.stop()

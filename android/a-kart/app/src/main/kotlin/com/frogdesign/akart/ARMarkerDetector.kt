@@ -60,7 +60,7 @@ class ARMarkerDetector : MarkerDetector {
         }
 
         NativeInterface.arwSetPatternDetectionMode(NativeInterface.AR_MATRIX_CODE_DETECTION)
-        NativeInterface.arwSetMatrixCodeType(NativeInterface.AR_MATRIX_CODE_3x3_HAMMING63)
+        NativeInterface.arwSetMatrixCodeType(NativeInterface.AR_MATRIX_CODE_3x3_PARITY65)
 
 
         for (c in Cars.all) {

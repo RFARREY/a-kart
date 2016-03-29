@@ -61,7 +61,7 @@ class AimView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defSty
         targetedId = null
         for ((k,b) in points.entries) {
             if (b.x > Float.MIN_VALUE) {
-                Timber.i("CONTROUR", "Drawing $k, $b")
+                Timber.i("Drawing %s, %s", k, b)
                 canvas?.drawCircle(b.x, b.y, 10f, paint)
             };
             var distance = hypot(cx - b.x, cy - b.y)
@@ -86,12 +86,10 @@ class AimView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defSty
 
     fun setTarget(id: String, x: Float, y: Float) {
         var pair = points.get(id) ?: PointF()
-        pair.x = x// + xImageInsets
+        pair.x = x
         pair.y = y
         points.put(id, pair)
         invalidate()
     }
-
-    public var xImageInsets: Float = 0f
 }
 

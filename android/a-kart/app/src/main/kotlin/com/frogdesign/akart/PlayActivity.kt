@@ -58,7 +58,7 @@ class PlayActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.play_activity)
         RxView.touches(rear).subscribe { event ->
-            Timber.i(TAG, "touch " + event)
+            Timber.tag(TAG).i( "touch " + event)
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
                     if (isGameOn) {
@@ -100,7 +100,7 @@ class PlayActivity : AppCompatActivity() {
         })
 
         RxView.clicks(fireButton).subscribe {
-            Timber.i(TAG, "fire?")
+            Timber.tag(TAG).i( "fire?")
             var s = targets.targetedId
             if (s != null) {
                 comm?.boom(s)
@@ -124,7 +124,7 @@ class PlayActivity : AppCompatActivity() {
     }
 
     private fun updateGameState() {
-        Timber.i(TAG, "updateGameState($isGameOn)")
+        Timber.tag(TAG).i("updateGameState(%s)", isGameOn)
         if (isGameOn) {
             stoppedMask.visibility = View.GONE
         } else {
@@ -205,6 +205,6 @@ class PlayActivity : AppCompatActivity() {
     }
 
     private fun trace(s: String, vararg args: Any) {
-        if (TRACE) Timber.d(TAG, s.format(args))
+        if (TRACE) Timber.tag(TAG).i(s.format(args))
     }
 }
