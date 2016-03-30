@@ -7,6 +7,7 @@ import android.support.v7.widget.AppCompatSeekBar
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.widget.SeekBar
+import com.frogdesign.akart.util.dpToPx
 
 /**
  * taken from https://github.com/jeisfeld/Augendiagnose/tree/master/AugendiagnoseIdea/augendiagnoseLib
@@ -28,6 +29,7 @@ class VerticalSeekBar : AppCompatSeekBar {
      * @see android.view.View.View
      */
     constructor(context: Context) : super(context) {
+        init()
     }
 
     /**
@@ -40,6 +42,7 @@ class VerticalSeekBar : AppCompatSeekBar {
      * @see android.view.View.View
      */
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
+        init()
     }
 
     /**
@@ -55,6 +58,11 @@ class VerticalSeekBar : AppCompatSeekBar {
      * @see android.view.View.View
      */
     constructor(context: Context, attrs: AttributeSet, defStyle: Int) : super(context, attrs, defStyle) {
+        init()
+    }
+
+    private fun init() {
+        setPadding(0, dpToPx(context, 16f),0, dpToPx(context, 16f))
     }
 
     /*

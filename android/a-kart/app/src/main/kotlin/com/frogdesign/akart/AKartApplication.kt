@@ -2,9 +2,11 @@ package com.frogdesign.akart
 
 import android.app.Application
 import android.util.Log
+import com.parrot.arsdk.ARSDK
 
 import org.artoolkit.ar.base.assets.AssetHelper
 import timber.log.Timber
+import uk.co.chrisjenx.calligraphy.CalligraphyConfig
 
 class AKartApplication : Application() {
 
@@ -33,27 +35,12 @@ class AKartApplication : Application() {
 
         init {
             try {
-                System.loadLibrary("arsal")
-                System.loadLibrary("arsal_android")
-                System.loadLibrary("arnetworkal")
-                System.loadLibrary("arnetworkal_android")
-                System.loadLibrary("arnetwork")
-                System.loadLibrary("arnetwork_android")
-                System.loadLibrary("arcommands")
-                System.loadLibrary("arcommands_android")
-                System.loadLibrary("arstream")
-                System.loadLibrary("arstream_android")
-                System.loadLibrary("json")
-                System.loadLibrary("ardiscovery")
-                System.loadLibrary("ardiscovery_android")
-                System.loadLibrary("arutils")
-                System.loadLibrary("arutils_android")
-                System.loadLibrary("ardatatransfer")
-                System.loadLibrary("ardatatransfer_android")
-                System.loadLibrary("armedia")
-                System.loadLibrary("armedia_android")
-                System.loadLibrary("arcontroller")
-                System.loadLibrary("arcontroller_android")
+                ARSDK.loadSDKLibs()
+
+                CalligraphyConfig.initDefault(CalligraphyConfig.Builder()
+                        .setDefaultFontPath("fonts/Menlo-Regular.ttf")
+                        .setFontAttrId(R.attr.fontPath)
+                        .build())
             } catch (e: Exception) {
                 Timber.e(TAG, "Problem occured during native library loading", e)
             }

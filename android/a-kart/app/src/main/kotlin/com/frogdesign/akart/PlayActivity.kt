@@ -7,16 +7,13 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
-import android.widget.Button
-import android.widget.ImageButton
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import butterknife.bindView
 import com.frogdesign.akart.model.Cars
 import com.frogdesign.akart.util.*
 import com.frogdesign.akart.view.AimView
 import com.frogdesign.akart.view.CameraView
-import com.frogdesign.akart.view.VerticalSeekBar
+import com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBar
 import com.jakewharton.rxbinding.view.RxView
 import com.jakewharton.rxbinding.widget.RxSeekBar
 import com.jakewharton.rxbinding.widget.SeekBarProgressChangeEvent
@@ -40,7 +37,7 @@ class PlayActivity : AppCompatActivity() {
 
     private val camera: CameraView by bindView(R.id.camera)
     private val targets: AimView by bindView(R.id.aim)
-    private val gasPedal: VerticalSeekBar by bindView(R.id.gasPedal)
+    private val gasPedal: SeekBar by bindView(R.id.gasPedal)
     private val battery: TextView by bindView(R.id.battery)
     private val rear: Button by bindView(R.id.rear)
     private val fireButton: ImageButton by bindView(R.id.fireButton)

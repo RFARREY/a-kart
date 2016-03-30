@@ -31,7 +31,9 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
         val productId = ARDiscoveryService.getProductFromProductID(productIdInt)
         trace("ProductId: %s", productId.toString())
 
-        if (ARDISCOVERY_PRODUCT_ENUM.ARDISCOVERY_PRODUCT_JS == productId) {
+        if (ARDISCOVERY_PRODUCT_ENUM.ARDISCOVERY_PRODUCT_JS == productId
+                || ARDISCOVERY_PRODUCT_ENUM.ARDISCOVERY_PRODUCT_JS_EVO_LIGHT == productId
+                || ARDISCOVERY_PRODUCT_ENUM.ARDISCOVERY_PRODUCT_JS_EVO_RACE == productId) {
             try {
                 val device = ARDiscoveryDevice()
                 val netDeviceService = service.device as ARDiscoveryDeviceNetService
@@ -75,19 +77,23 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
         return Observable.create { subscriber ->
             trace("mediaStreamer.OnSusbascribe: MAIN? ", isMainThread())
             val listener = object : ARDeviceControllerStreamListener {
-
-                private var data: ByteArray? = ByteArray(150000)
-
-                override fun onFrameReceived(arDeviceController: ARDeviceController, arFrame: ARFrame) {
+                override fun onFrameReceived(deviceController: ARDeviceController?, arFrame: ARFrame?): ARCONTROLLER_ERROR_ENUM? {
                     //trace("mediaStreamer.onFrameReceived: MAIN? %b", isMainThread())
-                    if (subscriber == null) return
-                    if (!arFrame.isIFrame) return
+                    if (subscriber == null) return ARCONTROLLER_ERROR_ENUM.ARCONTROLLER_OK
+                    if (arFrame == null || !arFrame.isIFrame) return ARCONTROLLER_ERROR_ENUM.ARCONTROLLER_OK
                     if (data == null) {
                         data = arFrame.byteData
                     } else ARNativeDataHelper.copyData(arFrame, data)
 
                     subscriber.onNext(data)
+                    return ARCONTROLLER_ERROR_ENUM.ARCONTROLLER_OK
                 }
+
+                override fun configureDecoder(deviceController: ARDeviceController?, codec: ARControllerCodec?): ARCONTROLLER_ERROR_ENUM? {
+                    return ARCONTROLLER_ERROR_ENUM.ARCONTROLLER_OK
+                }
+
+                private var data: ByteArray? = ByteArray(150000)
 
                 var n: Int = 0;
 

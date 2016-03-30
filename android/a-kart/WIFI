@@ -7,11 +7,39 @@
 
 cat /data/wifi.sh
 killall udhcpd
-ifconfig wifi_bcm down
-iwconfig wifi_bcm mode managed essid AP_Jumping
-ifconfig wifi_bcm 192.168.42.62 netmask 255.255.255.0 up
+                                                        ifconfig wifi_bcm down
+                                                        iwconfig wifi_bcm mode managed essid AP_Jumping
+                                                        ifconfig wifi_bcm 192.168.42.62 netmask 255.255.255.0 up
 
+64 is for carlo
+63 is for gianni
 62 is for gargamella
 61 is for taxiguerrilla
 
+
 # also its suggsted to use a 5ghz Wifi setting and a free channel
+
+dragon.conf
+
+
+{
+        "JumpingSumo" :
+        {
+                "audio_theme" : 0,
+                "auto_record" : 0,
+                "volume" : 90.0,
+                "wifi_autoselect_mode" : "none",
+                "wifi_band" : 1,
+                "wifi_channel" : 40,
+                "wifi_settings_outdoor" : false
+        },
+        "network" :
+        {
+                "auto_country" : 0,
+                "country_code" : "IT",
+                "default_c2dport" : 54321,
+                "default_d2cport" : 43210,
+                "product_name" : "gianni",
+                "service_type" : "_arsdk-0902._udp"
+        }
+}
