@@ -7,7 +7,7 @@
       android:layout_width="0dp"
       android:layout_weight="1"
       android:layout_height="match_parent">
-    <com.frogdesign.akart.view.VerticalSeekBar
+    <com.frogdesign.akart.view.GasPedal
         android:id="@+id/gasPedal"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
@@ -16,11 +16,11 @@
         android:progressDrawable="@drawable/gas_pedal_track"
         android:thumb="@drawable/gas_pedal_thumb"
         android:thumbOffset="0dp"
-        android:layout_margin="@dimen/col_1"
-        android:max="100"
-        android:progress="0"/>
+        android:layout_margin="@dimen/col_1"/>
   </com.frogdesign.akart.view.DelegatingFrameLayout>
-  <Space
+
+  <com.frogdesign.akart.view.AimView
+      android:id="@+id/aim"
       android:layout_width="0dp"
       android:layout_weight="1"
       android:layout_height="match_parent"/>
@@ -35,5 +35,16 @@
         android:layout_gravity="bottom|right"
         android:src="@drawable/ic_missile"
         android:background="@drawable/fire_btn_bg"/>
+    <ProgressBar
+        android:id="@+id/batteryLevel"
+        android:progressDrawable="@drawable/battery_progress"
+        android:progress="75"
+        android:max="100"
+        style="@android:style/Widget.ProgressBar.Horizontal"
+        android:layout_gravity="top|right"
+        android:minHeight="0dp"
+        android:layout_width="@dimen/col_8"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/col_1"/>
   </com.frogdesign.akart.view.DelegatingFrameLayout>
 </LinearLayout>

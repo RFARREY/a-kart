@@ -1,9 +1,14 @@
 package com.frogdesign.akart.util
 
 import android.content.Context
+import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Looper
+import android.support.annotation.ColorInt
+import android.support.annotation.ColorRes
+import android.support.annotation.NonNull
+import android.support.v4.content.res.ResourcesCompat
 import android.util.DisplayMetrics
 import android.view.View
 import org.artoolkit.ar.base.ARToolKit
@@ -45,7 +50,6 @@ fun clamp(value: Double, min: Double, max: Double): Double {
 
 fun inrange(value: Double, min: Double, max: Double): Boolean = value >= min && value <= max
 
-
 class CachedBitmapDecoder : Func1<ByteArray, Bitmap> {
     private var inBitmap: Bitmap? = null
     private val opts = BitmapFactory.Options()
@@ -70,12 +74,10 @@ class BmpToYUVToARToolkitConverterJava : Func1<Bitmap, Boolean> {
 
     private fun checkForBuffers(w: Int, h: Int) {
         val argbLength = w * h
-        if (argbBuffer == null || argbBuffer!!.size != argbLength)
-            argbBuffer = IntArray(argbLength)
+        if (argbBuffer == null || argbBuffer!!.size != argbLength) argbBuffer = IntArray(argbLength)
 
         val yuvLength = yuvByteLength(w, h)
-        if (yuvBuffer == null || yuvBuffer!!.size != yuvLength)
-            yuvBuffer = ByteArray(yuvLength)
+        if (yuvBuffer == null || yuvBuffer!!.size != yuvLength) yuvBuffer = ByteArray(yuvLength)
     }
 
     override fun call(inBitmap: Bitmap?): Boolean {
@@ -97,7 +99,6 @@ class BmpToYUVToARToolkitConverterJava : Func1<Bitmap, Boolean> {
     }
 }
 
-
 class TrackedSubscriptions : ArrayList<Subscription>() {
 
     fun track(sub: Subscription?): TrackedSubscriptions {
@@ -106,8 +107,7 @@ class TrackedSubscriptions : ArrayList<Subscription>() {
     }
 
     fun unsubAll(): TrackedSubscriptions {
-        for (a in this)
-            if (a.isUnsubscribed) a.unsubscribe()
+        for (a in this) if (a.isUnsubscribed) a.unsubscribe()
 
         this.clear();
         return this
@@ -135,7 +135,6 @@ fun View.hideNavbar() {
                     .or(View.SYSTEM_UI_FLAG_FULLSCREEN)
                     .or(View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
 }
-
 
 fun yuvByteLength(w: Int, h: Int): Int = w * h * 3 / 2
 
@@ -184,3 +183,9 @@ fun encodeYUV420SP(yuv420sp: ByteArray?, argb: IntArray?, width: Int, height: In
         ++j
     }
 }
+
+val ResourcesCompatInstance: ResourcesCompat by lazy {
+    ResourcesCompat()
+}
+
+
