@@ -5,82 +5,87 @@
     android:layout_height="match_parent"
     tools:context=".PlayActivity">
 
-    <FrameLayout
+  <FrameLayout
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:layout_gravity="center">
+
+    <com.frogdesign.akart.view.CameraView
+        android:id="@+id/camera"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <com.frogdesign.akart.view.AimView
+        android:id="@+id/aim"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="center">
+        android:layout_gravity="center"/>
+  </FrameLayout>
 
-        <com.frogdesign.akart.view.CameraView
-            android:id="@+id/camera"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-        <com.frogdesign.akart.view.AimView
-            android:id="@+id/aim"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center" />
-    </FrameLayout>
-
-    <FrameLayout
-        android:id="@+id/stopped_mask"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#22FF0000">
-        <TextView
-            android:layout_width="wrap_content"
-            android:maxWidth="200dp"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:textColor="@android:color/white"
-            android:text="Game Is Stopped\nprepare to start!"
-            android:textAllCaps="true"
-            android:textStyle="bold|italic"
-            android:layout_height="wrap_content" />
-    </FrameLayout>
-
-    <LinearLayout
-        android:layout_width="96dp"
-        android:layout_height="match_parent"
-        android:alpha="0.9"
-        android:orientation="vertical">
-
-        <com.frogdesign.akart.view.VerticalSeekBar
-            android:id="@+id/gasPedal"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_gravity="start"
-            android:layout_weight="1"
-            android:progressDrawable="@drawable/gas_pedal_track"
-            android:thumb="@drawable/gas_pedal_track"
-            android:max="100"
-            android:paddingBottom="16dp"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:paddingTop="16dp"
-            android:progress="0" />
-
-        <Button
-            android:id="@+id/rear"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:text="R" />
-    </LinearLayout>
-
-    <ImageButton
-        android:id="@+id/fireButton"
-        android:layout_width="100dp"
-        android:layout_height="match_parent"
-        android:layout_gravity="end"
-        android:alpha="0.8"
-        android:background="@android:color/darker_gray"
-        android:src="@drawable/missile" />
-
+  <FrameLayout
+      android:id="@+id/stopped_mask"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:background="#22FF0000">
     <TextView
-        android:id="@+id/battery"
-        android:layout_width="100dp"
-        android:layout_height="40dp"
-        android:layout_gravity="end"
+        android:layout_width="wrap_content"
+        android:maxWidth="200dp"
+        android:layout_gravity="center"
         android:gravity="center"
-        android:text="-" />
+        android:textColor="@android:color/white"
+        android:text="Game Is Stopped\nprepare to start!"
+        android:textAllCaps="true"
+        android:textStyle="bold|italic"
+        android:layout_height="wrap_content"/>
+  </FrameLayout>
+
+  <LinearLayout
+      android:orientation="horizontal"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent">
+    <com.frogdesign.akart.view.DelegatingFrameLayout
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="match_parent">
+      <com.frogdesign.akart.view.GasPedal
+          android:id="@+id/gasPedal"
+          android:layout_width="wrap_content"
+          android:layout_height="match_parent"
+          android:layout_gravity="start"
+          android:splitTrack="false"
+          android:progressDrawable="@drawable/gas_pedal_track"
+          android:thumb="@drawable/gas_pedal_thumb"
+          android:thumbOffset="0dp"
+          android:layout_margin="@dimen/col_1"/>
+    </com.frogdesign.akart.view.DelegatingFrameLayout>
+
+    <Space
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="match_parent"/>
+    <com.frogdesign.akart.view.DelegatingFrameLayout
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="match_parent">
+      <ImageButton
+          android:id="@+id/fireButton"
+          android:layout_width="@dimen/col_8"
+          android:layout_height="@dimen/col_6"
+          android:layout_margin="@dimen/col_1"
+          android:layout_gravity="bottom|right"
+          android:src="@drawable/ic_missile"
+          android:background="@drawable/fire_btn_bg"/>
+      <ProgressBar
+          android:id="@+id/batteryLevel"
+          android:progressDrawable="@drawable/battery_progress"
+          android:progress="75"
+          android:max="100"
+          style="@android:style/Widget.ProgressBar.Horizontal"
+          android:layout_gravity="top|right"
+          android:minHeight="0dp"
+          android:layout_width="@dimen/col_8"
+          android:layout_height="wrap_content"
+          android:layout_margin="@dimen/col_1"/>
+    </com.frogdesign.akart.view.DelegatingFrameLayout>
+  </LinearLayout>
 </FrameLayout>

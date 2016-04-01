@@ -1,7 +1,6 @@
 package com.frogdesign.akart
 
 import android.content.Context
-import android.util.Log
 import com.frogdesign.akart.util.isMainThread
 import com.parrot.arsdk.arcommands.ARCOMMANDS_JUMPINGSUMO_ANIMATIONS_SIMPLEANIMATION_ID_ENUM
 import com.parrot.arsdk.arcontroller.*
@@ -14,8 +13,8 @@ import timber.log.Timber
 
 
 /**
-*
-*/
+ *
+ */
 class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceControllerListener {
 
     private val deviceController: ARDeviceController
@@ -102,7 +101,6 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
                 }
             }
             deviceController.addStreamListener(listener)
-            deviceController.featureJumpingSumo.sendMediaStreamingVideoEnable(ON)
             subscriber!!.add(Subscriptions.create {
                 trace("mediastreamer.unsubscribe")
                 deviceController.removeStreamListener(listener)
@@ -118,7 +116,7 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
 
     private fun syncSpeed() {
         val actual = (maxSpeed * gasPedal).toByte()
-        trace("syncSpeed "+maxSpeed+", "+gasPedal+", "+actual)
+        trace("syncSpeed " + maxSpeed + ", " + gasPedal + ", " + actual)
         jumpingSumo.setPilotingPCMDSpeed(actual)
         jumpingSumo.setPilotingPCMDFlag(ON)
     }
@@ -145,7 +143,10 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
     fun onStateChanged(deviceController: ARDeviceController,
                        newState: ARCONTROLLER_DEVICE_STATE_ENUM?, error: ARCONTROLLER_ERROR_ENUM?) {
         if (newState != null) {
-            if (newState == ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING) {
+
+            if (ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING.equals(newState)) {
+                deviceController.featureJumpingSumo.sendMediaStreamingVideoEnable(ON)
+            } else if (newState == ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING) {
                 status?.onNext(true)
             } else if (newState == ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_STOPPED) {
                 status?.onNext(false)
@@ -229,13 +230,13 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
         private val ON = 1.toByte()
         private val OFF = 0.toByte()
 
-        private val TURN_MAX: Byte = 20
+        private val TURN_MAX: Byte = 40
         private val TURN_DEADZONE: Byte = 3
     }
 
     fun maxSpeed(percent: Float) {
         maxSpeed = (Byte.MAX_VALUE * percent).toByte()
-        trace("maxSpeed "+maxSpeed)
+        trace("maxSpeed " + maxSpeed)
         syncSpeed()
     }
 }

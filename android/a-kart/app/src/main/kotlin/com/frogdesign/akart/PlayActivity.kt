@@ -13,12 +13,14 @@ import com.frogdesign.akart.model.Cars
 import com.frogdesign.akart.util.*
 import com.frogdesign.akart.view.AimView
 import com.frogdesign.akart.view.CameraView
+import com.frogdesign.akart.view.GasPedal
 import com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBar
 import com.jakewharton.rxbinding.view.RxView
 import com.jakewharton.rxbinding.widget.RxSeekBar
 import com.jakewharton.rxbinding.widget.SeekBarProgressChangeEvent
 import com.jakewharton.rxbinding.widget.SeekBarStopChangeEvent
 import com.parrot.arsdk.ardiscovery.ARDiscoveryDeviceService
+import kotlinx.android.synthetic.main.ui_test_activity.*
 //import org.opencv.samples.colorblobdetect.ColorBlobsDetector
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
@@ -37,9 +39,8 @@ class PlayActivity : AppCompatActivity() {
 
     private val camera: CameraView by bindView(R.id.camera)
     private val targets: AimView by bindView(R.id.aim)
-    private val gasPedal: SeekBar by bindView(R.id.gasPedal)
-    private val battery: TextView by bindView(R.id.battery)
-    private val rear: Button by bindView(R.id.rear)
+    private val gasPedal: GasPedal by bindView(R.id.gasPedal)
+    private val battery: ProgressBar by bindView(R.id.batteryLevel)
     private val fireButton: ImageButton by bindView(R.id.fireButton)
     private val stoppedMask: View by bindView(R.id.stopped_mask)
 
@@ -54,34 +55,20 @@ class PlayActivity : AppCompatActivity() {
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.play_activity)
-        RxView.touches(rear).subscribe { event ->
-            Timber.tag(TAG).i( "touch " + event)
-            when (event.actionMasked) {
-                MotionEvent.ACTION_DOWN -> {
-                    if (isGameOn) {
-                        controller?.speed(-0.4f)
-                        rear.isPressed = true
-                    }
-                }
-                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    controller?.neutral()
-                    rear.isPressed = false
-                }
-            }
-        }
 
         val device = intent.getParcelableExtra<ARDiscoveryDeviceService>(EXTRA_DEVICE)
         controller = Controller(baseContext, device)
         comm = Comm(device.name, this)
 
-        RxSeekBar.changeEvents(gasPedal).subscribe { event ->
+
+        gasPedal.events.subscribe { event ->
+            Timber.i("EVENT %s", gasPedal.level)
             if (event is SeekBarProgressChangeEvent && isGameOn) {
-                var progress = event.progress()
-                if (progress != 0) controller!!.speed(progress / event.view().max.toFloat())
+                var progress = gasPedal.level
+                if (progress != 0f) controller!!.speed(progress)
                 else controller!!.neutral()
             } else if (event is SeekBarStopChangeEvent) {
                 controller!!.neutral()
-                event.view().progress = 0
             }
         }
 
@@ -171,12 +158,13 @@ class PlayActivity : AppCompatActivity() {
 
         var steerSubscription = SteeringWheel(this).stream().subscribe { steer ->
             trace("steer: %b", isMainThread())
+            aim.horizonRotate(steer)
             if (isGameOn) controller?.turn(steer / 90f)
         }
         trackedSubscriptions.track(steerSubscription);
 
         var batterySubscription = controller!!.batteryLevel()
-                .observeOn(AndroidSchedulers.mainThread()).subscribe { bat -> battery.text = Integer.toString(bat) }
+                .observeOn(AndroidSchedulers.mainThread()).subscribe { bat -> battery.progress = bat }
         trackedSubscriptions.track(batterySubscription)
         comm?.connect()
     }

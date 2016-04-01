@@ -69,7 +69,7 @@ class CameraView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, def
             if (!sameSize(image, bmp)) {
                 var bmpBounds = RectF(0f, 0f, bmp.width.toFloat(), bmp.height.toFloat())
                 var viewBounds = RectF(0f, 0f, width.toFloat(), height.toFloat())
-                drawMatrix.setRectToRect(bmpBounds, viewBounds, Matrix.ScaleToFit.CENTER)
+                drawMatrix.setRectToRect(bmpBounds, viewBounds, Matrix.ScaleToFit.FILL)
                 drawMatrix.invert(drawMatrixInverse)
                 drawMatrix.getValues(values)
                 xImageInsets.onNext(values[2])
