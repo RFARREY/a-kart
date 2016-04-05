@@ -13,12 +13,6 @@ class AKartApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         initializeInstance()
-
-        if (BuildConfig.DEBUG) {
-            Timber.plant(Timber.DebugTree());
-        } else {
-            Timber.plant(CrashReportingTree());
-        }
     }
 
     protected fun initializeInstance() {
@@ -28,6 +22,17 @@ class AKartApplication : Application() {
         // versionCode integer in the AndroidManifest.xml file.
         val assetHelper = AssetHelper(assets)
         assetHelper.cacheAssetFolder(this, "Data")
+
+        CalligraphyConfig.initDefault(CalligraphyConfig.Builder()
+                .setDefaultFontPath("fonts/Menlo-Regular.ttf")
+                .setFontAttrId(R.attr.fontPath)
+                .build())
+
+        if (BuildConfig.DEBUG) {
+            Timber.plant(Timber.DebugTree());
+        } else {
+            Timber.plant(CrashReportingTree());
+        }
     }
 
     companion object {
@@ -36,11 +41,6 @@ class AKartApplication : Application() {
         init {
             try {
                 ARSDK.loadSDKLibs()
-
-                CalligraphyConfig.initDefault(CalligraphyConfig.Builder()
-                        .setDefaultFontPath("fonts/Menlo-Regular.ttf")
-                        .setFontAttrId(R.attr.fontPath)
-                        .build())
             } catch (e: Exception) {
                 Timber.e(TAG, "Problem occured during native library loading", e)
             }

@@ -2,4 +2,5 @@
 <resources>
     <string name="app_name">A-Kart</string>
     <string name="search">Search</string>
+    <string name="join_race">Join race</string>
 </resources>

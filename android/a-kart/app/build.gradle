@@ -38,8 +38,10 @@ android {
     main.java.srcDirs += 'src/main/kotlin'
   }
 }
-
-
+repositories {
+  maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+  maven { url 'https://jitpack.io' }
+}
 dependencies {
   compile fileTree(dir: 'libs', include: ['*.jar'])
   testCompile 'junit:junit:4.12'
@@ -56,8 +58,13 @@ dependencies {
   }
   compile 'com.jakewharton.timber:timber:4.1.1'
   compile 'com.parrot:arsdk:3.8.3'
+
+  //visual dependencies
   compile 'com.h6ah4i.android.widget.verticalseekbar:verticalseekbar:0.6.0'
   compile 'uk.co.chrisjenx:calligraphy:2.1.0'
+  compile 'com.makeramen:roundedimageview:2.2.1'
+  compile 'org.lucasr.twowayview:core:1.0.0-SNAPSHOT@aar'
+  compile 'org.lucasr.twowayview:layouts:1.0.0-SNAPSHOT@aar'
 }
 
 buildscript {

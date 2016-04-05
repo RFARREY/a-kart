@@ -104,7 +104,6 @@ class AimView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defSty
                 targeted = true
             }
         }
-        targeted = true
         drawAim(canvas, cx, cy, targeted)
     }
 

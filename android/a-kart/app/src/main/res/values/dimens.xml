@@ -5,8 +5,10 @@
 
 
     <dimen name="col_0_25">4dp</dimen>
+    <dimen name="col_0_5">8dp</dimen>
     <dimen name="col_1">16dp</dimen>
     <dimen name="col_2">32dp</dimen>
+    <dimen name="col_3">48dp</dimen>
     <dimen name="col_4">64dp</dimen>
     <dimen name="col_6">92dp</dimen>
     <dimen name="col_8">128dp</dimen>

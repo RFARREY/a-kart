@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#5695ec</color>
-    <color name="colorPrimaryDark">#16359a</color>
-    <color name="colorAccent">#a31f26</color>
     <color name="militaryGreen">#ff61bf40</color>
+    <color name="militaryGreenDark">#42802b</color>
     <color name="militaryGreen_25">#4461bf40</color>
-    <color name="black_50">#88000000</color>
+    <color name="militaryGreen_40">#5561bf40</color>
+    <color name="black_40">#66000000</color>
     <color name="black_25">#44000000</color>
 </resources>
