@@ -26,6 +26,7 @@ import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
+import rx.subjects.BehaviorSubject
 import rx.subjects.PublishSubject
 import timber.log.Timber
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper
@@ -201,7 +202,7 @@ class DiscoveryActivity : AppCompatActivity() {
             text1.text = device.id
             itemView.setOnClickListener(on)
             Timber.i("BIND index %s on %s", adapterPosition, selections.isItemChecked(adapterPosition))
-            selectable.isChecked = selections.isItemChecked(adapterPosition) ?: false
+            selectable.isChecked = selections.isItemChecked(adapterPosition)
         }
     }
 

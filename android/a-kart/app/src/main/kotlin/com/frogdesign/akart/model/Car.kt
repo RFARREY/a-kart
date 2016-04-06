@@ -73,14 +73,10 @@ data class Car(val id: String, val lrMarkers: Pair<Int, Int>, @DrawableRes val r
 object Cars {
     @JvmField
     val all = listOf(
-            //yellow
-            Car("gargamella", Pair(0, 1), R.drawable.banana),//, Scalar(50.0, 158.0, 160.0, 0.0)),
-            //red
-            Car("taxiguerrilla", Pair(2, 3), R.drawable.banana)//, Scalar(252.0, 205.0, 170.0, 0.0)),
-//            //blue
-//            Car("taxiguerrilla", Pair(2, 3)),//, Scalar(165.0, 155.0, 120.0, 0.0)),
-//            //green
-//            Car("taxiguerrilla", Pair(2, 3))// Scalar(93.0, 182.0, 147.0))
+            Car("gargamella", Pair(0, 1), R.drawable.banana),
+            Car("taxiguerrilla", Pair(2, 3), R.drawable.banana),
+            Car("gianni", Pair(4, 5), R.drawable.banana),
+            Car("carlo", Pair(6, 7), R.drawable.banana)
     );
 
     fun retrieveRelatedTo(dev: ARDiscoveryDeviceService) : Car? {
@@ -88,4 +84,14 @@ object Cars {
         c?.associatedDevice = dev
         return c
     }
+}
+
+data class Box(val id: String, val lrMarkers: Pair<Int, Int>) {
+
+    var markerID_1: Int = -1;
+    var markerID_2: Int = -1;
+    var markerID_3: Int = -1;
+
+    private fun isMarkerVisible(markerID: Int, arScene: ARToolKit) = markerID >= 0 && arScene.queryMarkerVisible(markerID)
+
 }
