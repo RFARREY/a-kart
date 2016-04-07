@@ -35,8 +35,8 @@ data class Car(val id: String, val lrMarkers: Pair<Int, Int>, @DrawableRes val r
         if (!isDetected(arScene)) return pos;
         var sides : Int = 0;
         val X_OFFSET = 0f;
-        val X_BIAS = 16f;
-        val Y_BIAS = 25f;
+        val X_BIAS = 0f;
+        val Y_BIAS = 10f;
         if(isLeftMarkerVisible(arScene)) {
             var matrix : FloatArray = arScene.queryMarkerTransformation(leftAR)
             sides++

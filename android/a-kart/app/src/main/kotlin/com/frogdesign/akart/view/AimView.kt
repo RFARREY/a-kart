@@ -90,15 +90,17 @@ class AimView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defSty
         var targeted =  false
         for ((k, b) in points.entries) {
             if (b.x > Float.MIN_VALUE) {
-                Timber.i("Drawing %s, %s", k, b)
+                //Timber.i("Drawing %s, %s", k, b)
                 canvas?.drawCircle(b.x, b.y, 10f, paint)
             };
             var distance = hypot(cx - b.x, cy - b.y)
 
 
             if (distance < radius && targetedId == null) {
+                paint.alpha = 60
                 paint.style = Paint.Style.FILL
                 canvas?.drawCircle(cx, cy, radius, paint)
+                paint.alpha = 255
                 paint.style = Paint.Style.STROKE
                 targetedId = k
                 targeted = true

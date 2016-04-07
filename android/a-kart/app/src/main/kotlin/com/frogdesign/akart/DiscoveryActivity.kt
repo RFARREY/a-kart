@@ -130,6 +130,8 @@ class DiscoveryActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        selections.clearChoices()
+        adapter.update(emptyList())
         updateButton()
     }
 

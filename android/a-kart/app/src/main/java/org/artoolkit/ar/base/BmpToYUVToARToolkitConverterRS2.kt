@@ -20,6 +20,9 @@ class BmpToYUVToARToolkitConverterRS2(ctx: Context) : Func1<Bitmap, Boolean> {
     private val rs: RenderScript
     private val script: ScriptC_argb_to_yuv
 
+    private var WIDTH = 300
+    private var HEIGHT = 300
+
     init {
         rs = RenderScript.create(ctx)
         script = ScriptC_argb_to_yuv(rs)

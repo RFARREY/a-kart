@@ -29,8 +29,8 @@ class ARMarkerDetector : MarkerDetector {
     override fun setTarget(forCar: Car, webcamToScreenTransf: Matrix, targets: AimView) {
         if (forCar.isDetected(ARToolKit.getInstance())) {
             val p = forCar.estimatePosition(ARToolKit.getInstance())
-            Timber.i("Car visibile! " + forCar.id)
-            Timber.i("Position: " + forCar.estimatePosition(ARToolKit.getInstance()))
+         //   Timber.i("Car visibile! " + forCar.id)
+         //   Timber.i("Position: " + forCar.estimatePosition(ARToolKit.getInstance()))
 
             webcamToScreenTransf.getValues(values)
             val x = p.x + targets.width / 2 - values[2]

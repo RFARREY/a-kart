@@ -62,7 +62,7 @@ class PlayActivity : AppCompatActivity() {
 
 
         gasPedal.events.subscribe { event ->
-            Timber.i("EVENT %s", gasPedal.level)
+            //Timber.i("EVENT %s", gasPedal.level)
             if (event is SeekBarProgressChangeEvent && isGameOn) {
                 var progress = gasPedal.level
                 if (progress != 0f) controller!!.speed(progress)

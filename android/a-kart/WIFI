@@ -7,9 +7,9 @@
 
 cat /data/wifi.sh
 killall udhcpd
-                                                        ifconfig wifi_bcm down
-                                                        iwconfig wifi_bcm mode managed essid AP_Jumping
-                                                        ifconfig wifi_bcm 192.168.42.62 netmask 255.255.255.0 up
+ifconfig wifi_bcm down
+iwconfig wifi_bcm mode managed essid AP_Jumping
+ifconfig wifi_bcm 192.168.42.62 netmask 255.255.255.0 up
 
 64 is for carlo
 63 is for gianni
@@ -27,7 +27,7 @@ dragon.conf
         {
                 "audio_theme" : 0,
                 "auto_record" : 0,
-                "volume" : 90.0,
+                "volume" : 0.0,
                 "wifi_autoselect_mode" : "none",
                 "wifi_band" : 1,
                 "wifi_channel" : 40,

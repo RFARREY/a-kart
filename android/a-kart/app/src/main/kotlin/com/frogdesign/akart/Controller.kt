@@ -20,7 +20,9 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
     private val deviceController: ARDeviceController
     private val jumpingSumo: ARFeatureJumpingSumo
     private var maxSpeed = Byte.MAX_VALUE
+    private var modelMultiplier = 1f
     private var gasPedal = 0f
+    private var turn : Byte = 0
 
     private var batteryLevel: Int? = -1
 
@@ -41,7 +43,9 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
                         netDeviceService.name,
                         netDeviceService.ip,
                         netDeviceService.port)
-
+                if (ARDISCOVERY_PRODUCT_ENUM.ARDISCOVERY_PRODUCT_JS_EVO_RACE == productId) {
+                    modelMultiplier = .48f
+                }
                 deviceController = ARDeviceController(device)
                 deviceController.addListener(this)
                 jumpingSumo = deviceController.featureJumpingSumo
@@ -111,14 +115,7 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
 
     fun speed(percentage: Float) {
         gasPedal = percentage
-        syncSpeed()
-    }
-
-    private fun syncSpeed() {
-        val actual = (maxSpeed * gasPedal).toByte()
-        trace("syncSpeed " + maxSpeed + ", " + gasPedal + ", " + actual)
-        jumpingSumo.setPilotingPCMDSpeed(actual)
-        jumpingSumo.setPilotingPCMDFlag(ON)
+        syncPilot()
     }
 
     fun hitAnim() {
@@ -126,17 +123,31 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
     }
 
     fun turn(percentage: Float) {
-        val dataToBeSent = (-TURN_MAX * percentage).toByte()
-        //trace("turn %d", dataToBeSent)
-        if (dataToBeSent > -TURN_DEADZONE && dataToBeSent < TURN_DEADZONE) jumpingSumo.setPilotingPCMDTurn(OFF)
-        else jumpingSumo.setPilotingPCMDTurn(dataToBeSent)
+        turn = (-TURN_MAX * percentage).toByte()
+        syncPilot()
+    }
+
+    fun syncPilot() {
+        var piloting = false
+        if (turn > -TURN_DEADZONE && turn < TURN_DEADZONE) {
+            jumpingSumo.setPilotingPCMDTurn(OFF)
+        } else {
+            jumpingSumo.setPilotingPCMDTurn(turn)
+            piloting = true
+        }
+        if (Math.abs(gasPedal) >= ACCEL_DEADZONE) {
+            jumpingSumo.setPilotingPCMDSpeed(OFF)
+            val actual = (maxSpeed * gasPedal * modelMultiplier).toByte()
+            jumpingSumo.setPilotingPCMDSpeed(actual)
+            piloting = true
+        } else jumpingSumo.setPilotingPCMDSpeed(OFF)
+
+        jumpingSumo.setPilotingPCMDFlag(if (piloting) ON else OFF)
     }
 
     fun neutral() {
         gasPedal = 0f
-        jumpingSumo.setPilotingPCMDSpeed(OFF)
-        jumpingSumo.setPilotingPCMDTurn(OFF)
-        jumpingSumo.setPilotingPCMDFlag(OFF)
+        syncPilot()
     }
 
     override // called when the state of the device controller has changed
@@ -232,11 +243,12 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
 
         private val TURN_MAX: Byte = 40
         private val TURN_DEADZONE: Byte = 3
+        private val ACCEL_DEADZONE: Float = 0.05f
     }
 
     fun maxSpeed(percent: Float) {
         maxSpeed = (Byte.MAX_VALUE * percent).toByte()
         trace("maxSpeed " + maxSpeed)
-        syncSpeed()
+        syncPilot()
     }
 }
