@@ -133,7 +133,6 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
             jumpingSumo.setPilotingPCMDTurn(OFF)
         } else {
             jumpingSumo.setPilotingPCMDTurn(turn)
-            piloting = true
         }
         if (Math.abs(gasPedal) >= ACCEL_DEADZONE) {
             jumpingSumo.setPilotingPCMDSpeed(OFF)

@@ -18,7 +18,6 @@ data class Position(var x: Float, var y: Float, var z: Float) {
  * of the cars, one on the left and one on the right of the car
  *
  */
-
 data class Car(val id: String, val lrMarkers: Pair<Int, Int>, @DrawableRes val resId : Int) {
 
     var associatedDevice : ARDiscoveryDeviceService? = null
@@ -31,7 +30,7 @@ data class Car(val id: String, val lrMarkers: Pair<Int, Int>, @DrawableRes val r
     private fun isRightMarkerVisible(arScene: ARToolKit) = rightAR >= 0 && arScene.queryMarkerVisible(rightAR)
 
     fun estimatePosition(arScene: ARToolKit): Position {
-        var pos : Position = Position(0f,0f,0f);
+        var pos = Position(0f,0f,0f);
         if (!isDetected(arScene)) return pos;
         var sides : Int = 0;
         val X_OFFSET = 0f;
@@ -86,12 +85,49 @@ object Cars {
     }
 }
 
-data class Box(val id: String, val lrMarkers: Pair<Int, Int>) {
+data class BoxFace(val id: String, val markerValue: Int) {
 
-    var markerID_1: Int = -1;
-    var markerID_2: Int = -1;
-    var markerID_3: Int = -1;
+    var markerID = -1
 
-    private fun isMarkerVisible(markerID: Int, arScene: ARToolKit) = markerID >= 0 && arScene.queryMarkerVisible(markerID)
+    fun isDetected(arScene: ARToolKit): Boolean = isMarkerVisible(arScene)
+    private fun isMarkerVisible(arScene: ARToolKit) = markerID >= 0 && arScene.queryMarkerVisible(markerID)
 
+    fun estimatePosition(arScene: ARToolKit): Position {
+        var pos : Position = Position(0f,0f,0f);
+        if (!isMarkerVisible(arScene)) return pos;
+        val X_OFFSET = 0f;
+        val X_BIAS = 0f;
+        val Y_BIAS = 10f;
+
+        var matrix : FloatArray = arScene.queryMarkerTransformation(markerID)
+
+        pos.x += (matrix[12] + X_OFFSET)
+        pos.y += matrix[13]
+        pos.z += matrix[14]
+
+        //scaled to nullify depth
+        var depth : Float = pos.z / -80
+        pos.x /= depth
+        pos.y /= depth
+
+        pos.x += X_BIAS
+        pos.y += Y_BIAS
+
+        val X_FACTOR = 15f
+        val Y_FACTOR = 18f
+        pos.x *= X_FACTOR
+        pos.y *= Y_FACTOR
+        return pos;
+    }
+}
+
+
+
+object BoxFaces {
+    @JvmField
+    val all = listOf(
+            BoxFace("shot_random", 31),
+            BoxFace("ffwd", 30),
+            BoxFace("slow_all", 29)
+    )
 }

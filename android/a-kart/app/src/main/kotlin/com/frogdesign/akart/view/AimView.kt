@@ -21,6 +21,7 @@ class AimView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defSty
     }
 
     private val points: MutableMap<String, PointF> = hashMapOf()
+    private val boxPoints: MutableMap<String, PointF> = hashMapOf()
     private var size = AimView.SIZE.toInt()
     private var radius = AimView.RADIUS
     private var stroke = AimView.STROKE
@@ -28,19 +29,11 @@ class AimView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defSty
     private var textSize = 24f
     private val paint: Paint
     private val textPaint: Paint
-    private var rotationAnim: ValueAnimator = ValueAnimator.ofFloat(0f, 0f)
     private var scroller: Scroller  by Delegates.notNull()
-    var targetedId: String? = null
+    val targetedIds = mutableListOf<String>()
+    val boxIds = mutableListOf<String>()
 
     fun horizonRotate(c: Float) {
-        //        rotationAnim.cancel()
-        //        rotationAnim = ValueAnimator.ofFloat(actualRotation, c)
-        //        rotationAnim.addUpdateListener { ev ->
-        //            actualRotation = ev.animatedValue as Float
-        //            invalidate()
-        //        }
-        //        rotationAnim.interpolator = LinearInterpolator()
-        //        rotationAnim.start()
         targetRotation = c
         invalidate()
     }
@@ -91,7 +84,8 @@ class AimView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defSty
         if (canvas == null) return
         var cx = (width / 2).toFloat()
         var cy = (height / 2).toFloat()
-        targetedId = null
+        targetedIds.clear()
+        boxIds.clear()
         var targeted = false
         for ((k, b) in points.entries) {
             if (b.x > Float.MIN_VALUE) {
@@ -101,15 +95,30 @@ class AimView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defSty
             var distance = hypot(cx - b.x, cy - b.y)
 
 
-            if (distance < radius && targetedId == null) {
-                paint.alpha = 60
-                paint.style = Paint.Style.FILL
-                canvas?.drawCircle(cx, cy, radius, paint)
-                paint.alpha = 255
-                paint.style = Paint.Style.STROKE
-                targetedId = k
-                targeted = true
+            if (distance < radius) {
+                targetedIds.add(k)
             }
+        }
+        for ((k, b) in boxPoints.entries) {
+            if (b.x > Float.MIN_VALUE) {
+                //Timber.i("Drawing %s, %s", k, b)
+                canvas?.drawCircle(b.x, b.y, 10f, paint)
+            };
+            var distance = hypot(cx - b.x, cy - b.y)
+
+
+            if (distance < radius) {
+                boxIds.add(k)
+            }
+        }
+
+        if (boxIds.isNotEmpty() || targetedIds.isNotEmpty()) {
+            paint.alpha = 60
+            paint.style = Paint.Style.FILL
+            canvas?.drawCircle(cx, cy, radius, paint)
+            paint.alpha = 255
+            paint.style = Paint.Style.STROKE
+            targeted = true
         }
         drawAim(canvas, cx, cy, targeted)
         var delta = targetRotation - actualRotation
@@ -173,16 +182,28 @@ class AimView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defSty
     fun nullify() {
         for (b in points.values) {
             b.x = Float.MIN_VALUE
+            b.y = Float.MIN_VALUE
+        }
+        for (b in boxPoints.values) {
             b.x = Float.MIN_VALUE
+            b.y = Float.MIN_VALUE
         }
         invalidate()
     }
 
     fun setTarget(id: String, x: Float, y: Float) {
-        var pair = points.get(id) ?: PointF()
+        var pair = points[id] ?: PointF()
         pair.x = x
         pair.y = y
         points.put(id, pair)
+        invalidate()
+    }
+
+    fun setBox(id: String, x: Float, y: Float) {
+        var pair = points[id] ?: PointF()
+        pair.x = x
+        pair.y = y
+        boxPoints.put(id, pair)
         invalidate()
     }
 }

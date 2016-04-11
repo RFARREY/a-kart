@@ -6,6 +6,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.os.Bundle
+import com.frogdesign.akart.model.BoxFace
 import com.frogdesign.akart.model.Car
 import com.frogdesign.akart.view.AimView
 
@@ -22,4 +23,5 @@ interface MarkerDetector : Application.ActivityLifecycleCallbacks {
     override fun onActivityStopped(activity: Activity) {}
     override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
     override fun onActivityDestroyed(activity: Activity) {}
+    open fun setBoxFace(forCar: BoxFace, webcamToScreenTransf: Matrix, targets: AimView)
 }

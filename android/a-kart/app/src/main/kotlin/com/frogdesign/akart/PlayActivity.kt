@@ -1,30 +1,28 @@
 package com.frogdesign.akart
 
+//import org.opencv.samples.colorblobdetect.ColorBlobsDetector
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
-import android.view.MotionEvent
 import android.view.View
-import android.widget.*
+import android.widget.ImageButton
+import android.widget.ProgressBar
+import android.widget.Toast
 import butterknife.bindView
+import com.frogdesign.akart.model.BoxFaces
 import com.frogdesign.akart.model.Cars
 import com.frogdesign.akart.util.*
 import com.frogdesign.akart.view.AimView
 import com.frogdesign.akart.view.CameraView
 import com.frogdesign.akart.view.GasPedal
-import com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBar
 import com.jakewharton.rxbinding.view.RxView
-import com.jakewharton.rxbinding.widget.RxSeekBar
 import com.jakewharton.rxbinding.widget.SeekBarProgressChangeEvent
 import com.jakewharton.rxbinding.widget.SeekBarStopChangeEvent
 import com.parrot.arsdk.ardiscovery.ARDiscoveryDeviceService
 import kotlinx.android.synthetic.main.ui_test_activity.*
-//import org.opencv.samples.colorblobdetect.ColorBlobsDetector
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
-import rx.functions.Func1
 import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.TimeUnit
@@ -84,20 +82,26 @@ class PlayActivity : AppCompatActivity() {
         })
 
         RxView.clicks(fireButton).subscribe {
-            Timber.tag(TAG).i( "fire?")
-            var s = targets.targetedId
-            if (s != null) {
-                comm?.boom(s)
-                Toast.makeText(this, "Hit "+s+"!", Toast.LENGTH_SHORT).show()
+            Timber.tag(TAG).i("fire?")
+            var gotSomeone = false
+            targets.targetedIds.map { id ->
+                comm?.boom(id)
+                Timber.i("Boom for: %s", id)
+                gotSomeone = true
             }
-            else Toast.makeText(this, "MISS!", Toast.LENGTH_SHORT).show()
+            targets.boxIds.map { id ->
+                comm?.boxHit(id)
+                Timber.i("BoxHit for: %s", id)
+                gotSomeone = true
+            }
+            if (!gotSomeone) Toast.makeText(this, "MISS!", Toast.LENGTH_SHORT).show()
         }
 
         comm?.connect()
         updateGameState()
 
 
-    //    colorBlobsDetector = ColorBlobsDetector()
+        //    colorBlobsDetector = ColorBlobsDetector()
         colorBlobsDetector = ARMarkerDetector()
         application.registerActivityLifecycleCallbacks(colorBlobsDetector)
     }
@@ -181,6 +185,10 @@ class PlayActivity : AppCompatActivity() {
         for (i in Cars.all.indices) {
             val c = Cars.all[i]
             colorBlobsDetector?.setTarget(c, camera.drawMatrix, targets)
+        }
+        for (i in BoxFaces.all.indices) {
+            val c = BoxFaces.all[i]
+            colorBlobsDetector?.setBoxFace(c, camera.drawMatrix, targets)
         }
     }
 

@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.RectF
 import android.os.Looper
 import android.support.annotation.ColorInt
 import android.support.annotation.ColorRes
@@ -18,6 +20,7 @@ import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.functions.Func1
 import rx.schedulers.Schedulers
+import timber.log.Timber
 import java.util.*
 import java.util.concurrent.Executors
 
@@ -62,7 +65,7 @@ class CachedBitmapDecoder : Func1<ByteArray, Bitmap> {
 
     override fun call(data: ByteArray?): Bitmap? {
         opts.inBitmap = inBitmap
-        if (data != null) inBitmap = BitmapFactory.decodeByteArray(data, 0, data.size, null)
+        if (data != null) inBitmap = BitmapFactory.decodeByteArray(data, 0, data.size, opts)
         var result = inBitmap
         return result
     }
@@ -188,4 +191,26 @@ val ResourcesCompatInstance: ResourcesCompat by lazy {
     ResourcesCompat()
 }
 
+fun scaleCenterCrop(source : Bitmap, newWidth : Int, newHeight : Int) : RectF {
+    val sourceWidth = source.width
+    val sourceHeight = source.height
 
+    // Compute the scaling factors to fit the new height and width, respectively.
+    // To cover the final image, the final scaling will be the bigger
+    // of these two.
+    val xScale = newWidth.toFloat() / sourceWidth
+    val yScale = newHeight.toFloat() / sourceHeight
+    val scale = Math.max(xScale, yScale)
+    // Now get the size of the source bitmap when scaled
+    val scaledWidth = scale * sourceWidth
+    val scaledHeight = scale * sourceHeight
+
+    // Let's find out the upper left coordinates if the scaled bitmap
+    // should be centered in the new size give by the parameters
+    val left = (newWidth - scaledWidth) / 2
+    val top = (newHeight - scaledHeight) / 2
+
+    // The target rectangle for the new, scaled version of the source bitmap will now
+    // be
+    return RectF(left, top, scale, scale);
+}

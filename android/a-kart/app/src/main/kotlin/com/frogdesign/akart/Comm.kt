@@ -113,4 +113,10 @@ class Comm(val id: String, val ctx: Context, val uri: String = Comm.DEFAULT_SERV
     public fun send(s: String) {
         client.send(s)
     }
+
+    fun boxHit(id: String) {
+        var obj = JSONObject()
+        obj.put("type", id)
+        client.emit("boxHit", obj)
+    }
 }

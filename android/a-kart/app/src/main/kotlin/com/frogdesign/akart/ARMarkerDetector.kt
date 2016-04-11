@@ -5,6 +5,8 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.util.Log
+import com.frogdesign.akart.model.BoxFace
+import com.frogdesign.akart.model.BoxFaces
 import com.frogdesign.akart.model.Car
 import com.frogdesign.akart.model.Cars
 import com.frogdesign.akart.view.AimView
@@ -19,6 +21,8 @@ class ARMarkerDetector : MarkerDetector {
     private val values = FloatArray(9)
     companion object {
         private val TAG = ARMarkerDetector::class.java.simpleName
+        val WIDTH = 640
+        val HEIGHT = 480
     }
 
     private var converter: BmpToYUVToARToolkitConverterRS2? = null;
@@ -29,13 +33,26 @@ class ARMarkerDetector : MarkerDetector {
     override fun setTarget(forCar: Car, webcamToScreenTransf: Matrix, targets: AimView) {
         if (forCar.isDetected(ARToolKit.getInstance())) {
             val p = forCar.estimatePosition(ARToolKit.getInstance())
-         //   Timber.i("Car visibile! " + forCar.id)
-         //   Timber.i("Position: " + forCar.estimatePosition(ARToolKit.getInstance()))
+            //   Timber.i("Car visibile! " + forCar.id)
+            //   Timber.i("Position: " + forCar.estimatePosition(ARToolKit.getInstance()))
 
             webcamToScreenTransf.getValues(values)
             val x = p.x + targets.width / 2 - values[2]
             val y = -p.y + targets.height / 2;
             targets.setTarget(forCar.id, x, y)
+        }
+    }
+
+    override fun setBoxFace(forCar: BoxFace, webcamToScreenTransf: Matrix, targets: AimView) {
+        if (forCar.isDetected(ARToolKit.getInstance())) {
+            val p = forCar.estimatePosition(ARToolKit.getInstance())
+            //   Timber.i("Car visibile! " + forCar.id)
+            //   Timber.i("Position: " + forCar.estimatePosition(ARToolKit.getInstance()))
+
+            webcamToScreenTransf.getValues(values)
+            val x = p.x + targets.width / 2 - values[2]
+            val y = -p.y + targets.height / 2;
+            targets.setBox(forCar.id, x, y)
         }
     }
 
@@ -70,7 +87,12 @@ class ARMarkerDetector : MarkerDetector {
             c.rightAR = rightId
             Timber.i("Car added!"+c.id)
         }
-        ARToolKit.getInstance().initialiseAR(640, 480, "Data/camera_para.dat", 0, true)
+        for (c in BoxFaces.all) {
+            val id = ARToolKit.getInstance().addMarker("single_barcode;" + c.markerValue + ";80")
+            c.markerID = id
+            Timber.i("BoxFace added!"+c.id)
+        }
+        ARToolKit.getInstance().initialiseAR(WIDTH, HEIGHT, "Data/camera_para.dat", 0, true)
         Timber.i("ARToolkit initialized!")
     }
 

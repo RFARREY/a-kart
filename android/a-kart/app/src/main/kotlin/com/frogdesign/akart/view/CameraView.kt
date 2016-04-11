@@ -12,6 +12,7 @@ import rx.Observable
 import rx.Subscription
 import rx.subjects.BehaviorSubject
 import timber.log.Timber
+import com.frogdesign.akart.util.scaleCenterCrop
 
 //import rx.lang.kotlin.BehaviourSubject
 //import rx.lang.kotlin.PublishSubject
@@ -67,9 +68,10 @@ class CameraView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, def
 
         if (bmp != null) {
             if (!sameSize(image, bmp)) {
-                var bmpBounds = RectF(0f, 0f, bmp.width.toFloat(), bmp.height.toFloat())
-                var viewBounds = RectF(0f, 0f, width.toFloat(), height.toFloat())
-                drawMatrix.setRectToRect(bmpBounds, viewBounds, Matrix.ScaleToFit.FILL)
+                var viewBounds = scaleCenterCrop(bmp, width, height)
+                drawMatrix.reset()
+                drawMatrix.postScale(viewBounds.bottom,viewBounds.bottom)
+                drawMatrix.postTranslate(viewBounds.left,viewBounds.top)
                 drawMatrix.invert(drawMatrixInverse)
                 drawMatrix.getValues(values)
                 xImageInsets.onNext(values[2])
