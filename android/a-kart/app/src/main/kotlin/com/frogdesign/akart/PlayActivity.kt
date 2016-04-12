@@ -153,6 +153,7 @@ class PlayActivity : AppCompatActivity() {
         var bitmapSubscription = bmpObs
                 .sample(30, TimeUnit.MILLISECONDS)
                 .filter({ p0 ->
+                    //Timber.i("process" + isMainThread())
                     colorBlobsDetector?.process(p0)
                     true
                 })

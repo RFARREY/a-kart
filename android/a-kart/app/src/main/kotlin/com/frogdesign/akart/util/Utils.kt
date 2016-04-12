@@ -64,6 +64,7 @@ class CachedBitmapDecoder : Func1<ByteArray, Bitmap> {
 
 
     override fun call(data: ByteArray?): Bitmap? {
+        //Timber.i("CachedBitmapDecoder: MAIN? %s", isMainThread())
         opts.inBitmap = inBitmap
         if (data != null) inBitmap = BitmapFactory.decodeByteArray(data, 0, data.size, opts)
         var result = inBitmap
@@ -127,6 +128,11 @@ val scheduler by lazy {
 fun <T> Observable<T>.andAsync(): Observable<T> {
     return this.subscribeOn(scheduler)
             .observeOn(AndroidSchedulers.mainThread())
+}
+
+fun <T> Observable<T>.async(): Observable<T> {
+    return this.subscribeOn(scheduler)
+            .observeOn(scheduler)
 }
 
 fun View.hideNavbar() {

@@ -46,7 +46,9 @@
     <com.frogdesign.akart.view.DelegatingFrameLayout
         android:layout_width="0dp"
         android:layout_weight="1"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:paddingTop="@dimen/col_6"
+        android:paddingBottom="@dimen/col_3">
       <com.frogdesign.akart.view.GasPedal
           android:id="@+id/gasPedal"
           android:layout_width="wrap_content"
@@ -56,7 +58,8 @@
           android:progressDrawable="@drawable/gas_pedal_track"
           android:thumb="@drawable/gas_pedal_thumb"
           android:thumbOffset="0dp"
-          android:layout_margin="@dimen/col_1"/>
+          android:layout_marginLeft="@dimen/col_1"
+          android:layout_marginRight="@dimen/col_1"/>
     </com.frogdesign.akart.view.DelegatingFrameLayout>
 
     <Space

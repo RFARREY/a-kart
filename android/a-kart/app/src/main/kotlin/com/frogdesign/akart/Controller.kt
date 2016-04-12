@@ -38,7 +38,7 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
             try {
                 val device = ARDiscoveryDevice()
                 val netDeviceService = service.device as ARDiscoveryDeviceNetService
-
+                Timber.i("Device %s, %s : %s", netDeviceService.name, netDeviceService.ip, netDeviceService.port)
                 device.initWifi(ARDISCOVERY_PRODUCT_ENUM.ARDISCOVERY_PRODUCT_JS,
                         netDeviceService.name,
                         netDeviceService.ip,
@@ -47,6 +47,7 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
                     modelMultiplier = .48f
                 }
                 deviceController = ARDeviceController(device)
+
                 deviceController.addListener(this)
                 jumpingSumo = deviceController.featureJumpingSumo
 

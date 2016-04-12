@@ -22,6 +22,10 @@ class DelegatingFrameLayout(context: Context?, attrs: AttributeSet?, defStyleAtt
     }
 
     override fun onTouchEvent(ev: MotionEvent?): Boolean {
-        return getChildAt(0).onTouchEvent(ev)
+        val targetchild = getChildAt(0)
+        if (ev != null && targetchild != null) {
+            ev.offsetLocation(-targetchild.x, -targetchild.y)
+            return targetchild.onTouchEvent(ev)
+        } else return false
     }
 }
