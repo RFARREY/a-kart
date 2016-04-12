@@ -6,7 +6,6 @@ android {
   compileSdkVersion 23
 
   buildToolsVersion '23.0.2'
-
   compileOptions {
     sourceCompatibility JavaVersion.VERSION_1_7
     targetCompatibility JavaVersion.VERSION_1_7
@@ -26,18 +25,38 @@ android {
     }
   }
 
-
   buildTypes {
+    debug {
+      minifyEnabled false
+      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+    }
     release {
       minifyEnabled false
       proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
     }
   }
 
+  signingConfigs {
+    debug {
+      storeFile file('../certs/debug.keystore')
+    }
+    release {
+      storeFile file('../certs/debug.keystore')
+    }
+  }
+
   sourceSets {
     main.java.srcDirs += 'src/main/kotlin'
   }
+
+  //  applicationVariants.all { variant ->
+  //    variant.outputs.each { output ->
+  //      def file = output.outputFile
+  //      output.outputFile = new File(file.parent, file.name.replace(".apk", "-" + defaultConfig.versionName + ".apk"))
+  //    }
+  //  }
 }
+
 repositories {
   maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
   maven { url 'https://jitpack.io' }

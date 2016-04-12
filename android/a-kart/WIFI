@@ -23,14 +23,14 @@ dragon.conf
 
 
 {
-        "JumpingSumo" :
+        "JumpingSumo" :fi
         {
                 "audio_theme" : 0,
                 "auto_record" : 0,
                 "volume" : 0.0,
                 "wifi_autoselect_mode" : "none",
                 "wifi_band" : 1,
-                "wifi_channel" : 40,
+                "wifi_channel" : 48,
                 "wifi_settings_outdoor" : false
         },
         "network" :
