@@ -7,12 +7,13 @@ import android.support.v7.widget.AppCompatSeekBar
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.widget.SeekBar
+import com.frogdesign.akart.util.dpToPx
 
 /**
  * taken from https://github.com/jeisfeld/Augendiagnose/tree/master/AugendiagnoseIdea/augendiagnoseLib
  * Implementation of an easy vertical SeekBar, based on the normal SeekBar.
  */
-class VerticalSeekBar : AppCompatSeekBar {
+open class VerticalSeekBar(context: Context?, attrs: AttributeSet?, defStyle: Int, defStyleRes: Int) : AppCompatSeekBar(context, attrs, defStyle) {
 
     /**
      * A change listener registrating start and stop of tracking. Need an own listener because the listener in SeekBar
@@ -27,7 +28,7 @@ class VerticalSeekBar : AppCompatSeekBar {
      * *
      * @see android.view.View.View
      */
-    constructor(context: Context) : super(context) {
+    constructor(context: Context) : this(context, null, 0, 0) {
     }
 
     /**
@@ -39,22 +40,10 @@ class VerticalSeekBar : AppCompatSeekBar {
      * *
      * @see android.view.View.View
      */
-    constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
+    constructor(context: Context, attrs: AttributeSet) : this(context, attrs, 0, 0) {
     }
 
-    /**
-     * Standard constructor to be implemented for all views.
-
-     * @param context  The Context the view is running in, through which it can access the current theme, resources, etc.
-     * *
-     * @param attrs    The attributes of the XML tag that is inflating the view.
-     * *
-     * @param defStyle An attribute in the current theme that contains a reference to a style resource that supplies default
-     * *                 values for the view. Can be 0 to not look for defaults.
-     * *
-     * @see android.view.View.View
-     */
-    constructor(context: Context, attrs: AttributeSet, defStyle: Int) : super(context, attrs, defStyle) {
+    constructor(context: Context, attrs: AttributeSet, defStyle: Int) : this(context, attrs, 0, 0) {
     }
 
     /*

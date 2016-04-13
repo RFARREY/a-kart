@@ -53,6 +53,10 @@ class Comm(val id: String, val ctx: Context, val uri: String = Comm.DEFAULT_SERV
         }).on("hit", { args ->
             trace("hit")
             subject.onNext(Hit())
+        }).on("speed", { args ->
+            val percent = args[0].toString().toInt() / 100f
+            trace("speed "+ Arrays.toString(args)+", percent" +percent)
+            subject.onNext(Speed(percent))
         }).on(Socket.EVENT_DISCONNECT, { args ->
             trace("disconnect")
         });
@@ -96,14 +100,23 @@ class Comm(val id: String, val ctx: Context, val uri: String = Comm.DEFAULT_SERV
     public open class Event(val type: String)
     public class Message(val mex: String) : Event("message")
     public class Hit() : Event("hit")
+    public class Speed(val percent: Float) : Event("speed")
     public class GameState(val on: Boolean) : Event("gamestate")
     public class Erroz(ex: Exception) : Event("error")
 
     private fun trace(s: String, vararg args: Any?) {
-        if (TRACE) Timber.d(TAG, if (args != null) s.format(args) else s)
+        if (TRACE) {
+            Timber.d(s, args)
+        }
     }
 
     public fun send(s: String) {
         client.send(s)
+    }
+
+    fun boxHit(id: String) {
+        var obj = JSONObject()
+        obj.put("type", id)
+        client.emit("boxHit", obj)
     }
 }

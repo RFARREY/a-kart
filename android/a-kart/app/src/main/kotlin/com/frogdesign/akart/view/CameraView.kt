@@ -6,12 +6,13 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
-import org.opencv.core.Scalar
-import org.opencv.samples.colorblobdetect.ColorBlobDetectionActivity
+//import org.opencv.core.Scalar
+//import org.opencv.samples.colorblobdetect.ColorBlobDetectionActivity
 import rx.Observable
 import rx.Subscription
 import rx.subjects.BehaviorSubject
 import timber.log.Timber
+import com.frogdesign.akart.util.scaleCenterCrop
 
 //import rx.lang.kotlin.BehaviourSubject
 //import rx.lang.kotlin.PublishSubject
@@ -57,9 +58,9 @@ class CameraView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, def
         drawMatrixInverse.mapPoints(point)
 //        Timber.i("CONTOUR", "you inverted "+point.get(0)+","+point.get(1))
         val color = image!!.getPixel(point[0].toInt(), point[1].toInt());
-        val violet = ColorBlobDetectionActivity.converScalarRgba2Hsv(color);
-        Timber.i("CameraView", "TOUCHED: (" +Integer.toHexString(color)+")");
-        Timber.i("CameraView", "TOUCHED: (" + violet.`val`[0] + ", " + violet.`val`[1] +", " + violet.`val`[2] + ", " + violet.`val`[3] +")");
+       // val violet = ColorBlobDetectionActivity.converScalarRgba2Hsv(color);
+        Timber.i("TOUCHED: (" +Integer.toHexString(color)+")");
+        //Timber.i("CameraView", "TOUCHED: (" + violet.`val`[0] + ", " + violet.`val`[1] +", " + violet.`val`[2] + ", " + violet.`val`[3] +")");
         return super.onTouchEvent(event)
     }
 
@@ -67,9 +68,10 @@ class CameraView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, def
 
         if (bmp != null) {
             if (!sameSize(image, bmp)) {
-                var bmpBounds = RectF(0f, 0f, bmp.width.toFloat(), bmp.height.toFloat())
-                var viewBounds = RectF(0f, 0f, width.toFloat(), height.toFloat())
-                drawMatrix.setRectToRect(bmpBounds, viewBounds, Matrix.ScaleToFit.CENTER)
+                var viewBounds = scaleCenterCrop(bmp, width, height)
+                drawMatrix.reset()
+                drawMatrix.postScale(viewBounds.bottom,viewBounds.bottom)
+                drawMatrix.postTranslate(viewBounds.left,viewBounds.top)
                 drawMatrix.invert(drawMatrixInverse)
                 drawMatrix.getValues(values)
                 xImageInsets.onNext(values[2])

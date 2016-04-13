@@ -2,76 +2,75 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.frogdesign.akart">
 
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+  <uses-permission android:name="android.permission.CAMERA"/>
+  <uses-permission android:name="android.permission.INTERNET"/>
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
 
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+  <uses-permission android:name="android.permission.BLUETOOTH"/>
+  <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+  <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+  <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE"/>
+  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
-    <uses-feature android:name="android.hardware.camera.any" />
-    <uses-feature
-        android:name="android.hardware.camera"
-        android:required="false" />
-    <uses-feature
-        android:name="android.hardware.camera.autofocus"
-        android:required="false" />
-    <uses-feature android:glEsVersion="0x00010100" />
+  <uses-feature android:name="android.hardware.camera.any"/>
+  <uses-feature
+      android:name="android.hardware.camera"
+      android:required="false"/>
+  <uses-feature
+      android:name="android.hardware.camera.autofocus"
+      android:required="false"/>
+  <uses-feature android:glEsVersion="0x00010100"/>
 
-    <supports-screens
-        android:anyDensity="true"
-        android:largeScreens="true"
-        android:normalScreens="true"
-        android:smallScreens="true"
-        android:xlargeScreens="true" />
+  <supports-screens
+      android:anyDensity="true"
+      android:largeScreens="true"
+      android:normalScreens="true"
+      android:smallScreens="true"
+      android:xlargeScreens="true"/>
 
-    <application
-        android:name=".AKartApplication"
-        android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+  <application
+      android:name=".AKartApplication"
+      android:allowBackup="true"
+      android:icon="@mipmap/ic_launcher"
+      android:label="@string/app_name"
+      android:theme="@style/AppTheme">
+
+    <activity
+        android:name="com.frogdesign.akart.DiscoveryActivity"
+        android:screenOrientation="landscape"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN"/>
+        <category android:name="android.intent.category.LAUNCHER"/>
+      </intent-filter>
+    </activity>
 
-        <activity
-            android:name="com.frogdesign.akart.DiscoveryActivity"
-            android:label="@string/app_name"
-            android:theme="@style/AppTheme">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+    <activity
+        android:name="com.frogdesign.akart.PlayActivity"
+        android:screenOrientation="landscape"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme.Play">
+    </activity>
 
-        <activity
-            android:name="com.frogdesign.akart.PlayActivity"
-            android:screenOrientation="landscape"
-            android:label="@string/app_name"
-            android:theme="@style/AppThemePlay">
-        </activity>
+    <activity
+        android:name="com.frogdesign.akart.AccelTestActivity"
+        android:screenOrientation="landscape">
+    </activity>
 
-        <activity
-            android:name="com.frogdesign.akart.AccelTestActivity"
-            android:screenOrientation="landscape">
-        </activity>
+    <activity
+        android:name="com.frogdesign.akart.CommTestActivity"
+        android:screenOrientation="portrait">
+    </activity>
 
-        <activity
-            android:name="com.frogdesign.akart.CommTestActivity"
-            android:screenOrientation="portrait">
-        </activity>
-
-        <activity
-            android:name="org.opencv.samples.colorblobdetect.ColorBlobDetectionActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="landscape"
-            android:theme="@style/AppTheme">
-        </activity>
+    <activity
+        android:name="com.frogdesign.akart.UITestActivity"
+        android:screenOrientation="landscape">
+    </activity>
 
 
-        <service android:name="com.parrot.arsdk.ardiscovery.ARDiscoveryService" />
-    </application>
+    <service android:name="com.parrot.arsdk.ardiscovery.ARDiscoveryService"/>
+  </application>
 
 </manifest>

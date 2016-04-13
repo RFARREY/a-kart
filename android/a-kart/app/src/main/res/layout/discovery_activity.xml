@@ -1,30 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical"
-              tools:context="com.frogdesign.akart.DiscoveryActivity">
-
-    <android.support.v4.widget.SwipeRefreshLayout
-        android:id="@+id/swiperefresh"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context="com.frogdesign.akart.DiscoveryActivity">
+  <ImageView
+      android:layout_width="match_parent"
+      android:layout_height="120dp"
+      android:background="@drawable/list_bg"
+      android:layout_gravity="bottom"/>
+  <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:orientation="horizontal">
+    <ImageView
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:scaleType="fitStart"
+        android:paddingTop="@dimen/col_4"
+        android:src="@drawable/banner"
+        android:layout_height="match_parent"/>
+    <FrameLayout
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="match_parent"
+        android:layout_marginTop="@dimen/col_1"
+        android:layout_marginBottom="@dimen/col_6">
+      <TextView
+          android:id="@+id/prompt"
+          android:text="Swipe down to search for devices"
+          android:layout_width="@dimen/col_8"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center"
+          android:gravity="center"
+          />
+      <android.support.v4.widget.SwipeRefreshLayout
+          android:id="@+id/swiperefresh"
+          android:layout_width="wrap_content"
+          android:layout_height="match_parent"
+          android:layout_weight="1">
 
         <android.support.v7.widget.RecyclerView
             android:id="@android:id/list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
-    </android.support.v4.widget.SwipeRefreshLayout>
-
-    <Button
-        android:id="@+id/search"
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:layout_marginBottom="@dimen/activity_vertical_margin"
-        android:layout_marginLeft="@dimen/activity_horizontal_margin"
-        android:layout_marginRight="@dimen/activity_horizontal_margin"
-        android:layout_marginTop="@dimen/activity_vertical_margin"
-        android:text="@string/search"/>
-</LinearLayout>
+      </android.support.v4.widget.SwipeRefreshLayout>
+    </FrameLayout>
+  </LinearLayout>
+  <Button
+      android:id="@+id/search"
+      android:background="@drawable/fire_btn_bg"
+      android:textColor="@color/military_green_stateful"
+      android:layout_width="314dp"
+      android:textSize="18dp"
+      android:layout_height="60dp"
+      android:layout_marginBottom="@dimen/col_2"
+      android:layout_marginLeft="@dimen/activity_horizontal_margin"
+      android:layout_marginRight="@dimen/activity_horizontal_margin"
+      android:layout_marginTop="@dimen/activity_vertical_margin"
+      android:layout_gravity="bottom|center_horizontal"
+      android:text="@string/join_race"/>
+</FrameLayout>

@@ -16,7 +16,7 @@ class CommTestActivity : Activity() {
         setContentView(R.layout.accel_test_activity)
         //comm = Comm("taxiguerrilla", this, "http://10.228.81.53:5000")
         trackedSubs.add(comm.pin.subscribe { event ->
-            Timber.i("COMM", "event " + event)
+            Timber.i("event " + event)
         })
 
         comm.connect()

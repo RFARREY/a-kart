@@ -2,36 +2,46 @@ package com.frogdesign.akart
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.util.Log
+import android.support.v7.widget.RecyclerView.AdapterDataObserver
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import butterknife.bindView
+import com.frogdesign.akart.model.Car
+import com.frogdesign.akart.model.Cars
+import com.frogdesign.akart.view.CheckableImageView
 import com.parrot.arsdk.ardiscovery.ARDiscoveryDeviceService
+import org.lucasr.twowayview.ItemSelectionSupport
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
+import rx.subjects.BehaviorSubject
 import rx.subjects.PublishSubject
 import timber.log.Timber
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper
 import java.util.*
+import kotlin.properties.Delegates
 
 class DiscoveryActivity : AppCompatActivity() {
     private val list: RecyclerView by bindView(android.R.id.list)
     private val swiperefresh: SwipeRefreshLayout by bindView(R.id.swiperefresh)
     private val search: Button by bindView(R.id.search)
+    private val prompt: TextView by bindView(R.id.prompt)
 
-    private var adapter: DiscoveryAdapter? = null
-    private var llm: LinearLayoutManager? = null
-    private var discovery: Discovery? = null
+    private var adapter: DiscoveryAdapter by Delegates.notNull()
+    private var discovery: Discovery by Delegates.notNull()
+    private var selections: ItemSelectionSupport by Delegates.notNull()
     private var sub: Subscription? = null
 
     private val handler = Handler()
@@ -41,28 +51,49 @@ class DiscoveryActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.discovery_activity)
         discovery = Discovery(baseContext)
-        list.setHasFixedSize(true)
-        llm = LinearLayoutManager(this)
-        list.layoutManager = llm
+        selections = ItemSelectionSupport.addTo(list)
         adapter = DiscoveryAdapter(this)
+
+        list.layoutManager = LinearLayoutManager(this)
+        list.setHasFixedSize(true)
+        selections.choiceMode = ItemSelectionSupport.ChoiceMode.MULTIPLE
         list.adapter = adapter
 
-        adapter!!.clicksOn().subscribe { dev ->
+        adapter.registerAdapterDataObserver(object : AdapterDataObserver() {
+            override fun onChanged() {
+                updateButton()
+            }
+        })
+
+        search.setOnClickListener {
             val i = Intent(baseContext, PlayActivity::class.java)
-            i.putExtra(PlayActivity.EXTRA_DEVICE, dev)
+            val checks = selections.checkedItemPositions
+            if (checks.size() != 1)
+                throw IllegalArgumentException("Should be 1 checked!")
+
+            val checked = checks.keyAt(0)
+            val car = adapter.getItemAt(checked)
+            i.putExtra(PlayActivity.EXTRA_DEVICE, car.associatedDevice)
             startActivity(i)
         }
+        swiperefresh.setOnRefreshListener {
+            startDiscovery()
+            selections.clearChoices()
+            adapter.update(emptyList())
+        }
 
-        search.setOnClickListener { startDiscovery() }
-        swiperefresh.setOnRefreshListener { startDiscovery() }
+        swiperefresh.setColorSchemeResources(R.color.militaryGreen, R.color.militaryGreen, R.color.militaryGreenDark)
+        swiperefresh.setProgressBackgroundColorSchemeColor(Color.TRANSPARENT)
+    }
 
-        swiperefresh.setColorSchemeResources(R.color.colorAccent, R.color.colorPrimary, R.color.colorPrimaryDark)
+    override fun attachBaseContext(newBase : Context) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 
     override fun onStop() {
         super.onStop()
         ensureUnsubscribed()
-        discovery?.unbind()
+        discovery.unbind()
         stopRefresh.run()
         handler.removeCallbacks(stopRefresh)
     }
@@ -76,15 +107,20 @@ class DiscoveryActivity : AppCompatActivity() {
 
     private fun startDiscovery() {
         ensureUnsubscribed()
-        sub = discovery!!.discoverer().subscribeOn(Schedulers.io())
+        sub = discovery.discoverer().subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread()).subscribe({ deviceList ->
-            Timber.i(TAG, "--> SERVICES:")
+            Timber.tag(TAG).i("--> SERVICES:")
             // Do what you want with the device list
             for (service in deviceList) {
-                Timber.i(TAG, "The service " + service)
+                Timber.tag(TAG).i( "The service " + service)
             }
-            Timber.i(TAG, "<-- SERVICES.")
-            adapter!!.update(deviceList)
+            Timber.tag(TAG).i( "<-- SERVICES.")
+
+            @Suppress("UNCHECKED_CAST")
+//            val dl = listOf(ARDiscoveryDeviceService("gargamella", null, 0),
+//                                ARDiscoveryDeviceService("taxiguerrilla", null, 1))
+            adapter.update(deviceList.map { dev -> Cars.retrieveRelatedTo(dev) }.filter { it -> it != null } as List<Car>)
+
         })
 
         swiperefresh.isRefreshing = true
@@ -92,25 +128,39 @@ class DiscoveryActivity : AppCompatActivity() {
         handler.postDelayed(stopRefresh, 3000);
     }
 
-    class DiscoveryAdapter constructor(ctx: Context) : RecyclerView.Adapter<DiscoveryListItemHolder>(), View.OnClickListener {
+    override fun onResume() {
+        super.onResume()
+        selections.clearChoices()
+        adapter.update(emptyList())
+        updateButton()
+    }
+
+    private fun updateButton() {
+        val size = selections.checkedItemPositions.size()
+        search.isEnabled = size > 0
+
+        val elems = adapter.itemCount
+        prompt.visibility = if (elems > 0) View.INVISIBLE else View.VISIBLE
+    }
+
+    inner class DiscoveryAdapter constructor(ctx: Context) : RecyclerView.Adapter<DiscoveryListItemHolder>(), View.OnClickListener {
 
         private val layoutInflater: LayoutInflater
-        private val subject = PublishSubject.create<ARDiscoveryDeviceService>()
-        private val devices = ArrayList<ARDiscoveryDeviceService>()
+        private val devices = ArrayList<Car>()
 
         init {
             layoutInflater = LayoutInflater.from(ctx)
             setHasStableIds(true)
         }
 
-        fun update(newDevices: List<ARDiscoveryDeviceService>) {
+        fun update(newDevices: List<Car>) {
             devices.clear()
             devices.addAll(newDevices)
             notifyDataSetChanged()
         }
 
         override fun getItemId(position: Int): Long {
-            return devices[position].name.hashCode().toLong()
+            return devices[position].id.hashCode().toLong()
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DiscoveryListItemHolder {
@@ -126,27 +176,35 @@ class DiscoveryActivity : AppCompatActivity() {
             return devices.size
         }
 
-        fun clicksOn(): Observable<ARDiscoveryDeviceService> {
-            return subject
+        override fun onClick(v: View) {
+            val indexClicked = list.getChildAdapterPosition(v)
+            val currentlyChecked = selections.isItemChecked(indexClicked)
+            selections.clearChoices()
+            Timber.i("Clicked on %s, currently %s", indexClicked, true)
+            if (currentlyChecked) selections.setItemChecked(indexClicked, currentlyChecked)
+            notifyDataSetChanged()
         }
 
-        override fun onClick(v: View) {
-            val device = v.tag as ARDiscoveryDeviceService
-            subject.onNext(device)
-        }
+        fun getItemAt(checked: Int): Car = devices[checked]
     }
 
-    class DiscoveryListItemHolder constructor(v: View, private val on: View.OnClickListener) : RecyclerView.ViewHolder(v) {
+    inner class DiscoveryListItemHolder constructor(v: View, private val on: View.OnClickListener) : RecyclerView.ViewHolder(v) {
+        private val selectable: CheckableImageView
+        private val avatar: ImageView
         private val text1: TextView
 
         init {
+            selectable = v.findViewById(R.id.selectable) as CheckableImageView
+            avatar = v.findViewById(R.id.avatar) as ImageView
             text1 = v.findViewById(android.R.id.text1) as TextView
         }
 
-        fun bind(device: ARDiscoveryDeviceService) {
+        fun bind(device: Car) {
             itemView.tag = device
-            text1.text = device.name
+            text1.text = device.id
             itemView.setOnClickListener(on)
+            Timber.i("BIND index %s on %s", adapterPosition, selections.isItemChecked(adapterPosition))
+            selectable.isChecked = selections.isItemChecked(adapterPosition)
         }
     }
 

@@ -1,35 +1,28 @@
 package com.frogdesign.akart
 
+//import org.opencv.samples.colorblobdetect.ColorBlobsDetector
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
-import android.view.MotionEvent
 import android.view.View
-import android.widget.Button
 import android.widget.ImageButton
-import android.widget.TextView
+import android.widget.ProgressBar
 import android.widget.Toast
 import butterknife.bindView
+import com.frogdesign.akart.model.BoxFaces
 import com.frogdesign.akart.model.Cars
 import com.frogdesign.akart.util.*
 import com.frogdesign.akart.view.AimView
 import com.frogdesign.akart.view.CameraView
-import com.frogdesign.akart.view.VerticalSeekBar
+import com.frogdesign.akart.view.GasPedal
 import com.jakewharton.rxbinding.view.RxView
-import com.jakewharton.rxbinding.widget.RxSeekBar
 import com.jakewharton.rxbinding.widget.SeekBarProgressChangeEvent
 import com.jakewharton.rxbinding.widget.SeekBarStopChangeEvent
 import com.parrot.arsdk.ardiscovery.ARDiscoveryDeviceService
-import org.opencv.android.BaseLoaderCallback
-import org.opencv.android.LoaderCallbackInterface
-import org.opencv.android.OpenCVLoader
-import org.opencv.core.Scalar
-import org.opencv.samples.colorblobdetect.ColorBlobsDetector
+import kotlinx.android.synthetic.main.ui_test_activity.*
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
-import rx.functions.Func1
 import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.TimeUnit
@@ -44,9 +37,8 @@ class PlayActivity : AppCompatActivity() {
 
     private val camera: CameraView by bindView(R.id.camera)
     private val targets: AimView by bindView(R.id.aim)
-    private val gasPedal: VerticalSeekBar by bindView(R.id.gasPedal)
-    private val battery: TextView by bindView(R.id.battery)
-    private val rear: Button by bindView(R.id.rear)
+    private val gasPedal: GasPedal by bindView(R.id.gasPedal)
+    private val battery: ProgressBar by bindView(R.id.batteryLevel)
     private val fireButton: ImageButton by bindView(R.id.fireButton)
     private val stoppedMask: View by bindView(R.id.stopped_mask)
 
@@ -61,34 +53,20 @@ class PlayActivity : AppCompatActivity() {
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.play_activity)
-        RxView.touches(rear).subscribe { event ->
-            Timber.i(TAG, "touch " + event)
-            when (event.actionMasked) {
-                MotionEvent.ACTION_DOWN -> {
-                    if (isGameOn) {
-                        controller?.speed(-0.4f)
-                        rear.isPressed = true
-                    }
-                }
-                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    controller?.neutral()
-                    rear.isPressed = false
-                }
-            }
-        }
 
         val device = intent.getParcelableExtra<ARDiscoveryDeviceService>(EXTRA_DEVICE)
         controller = Controller(baseContext, device)
         comm = Comm(device.name, this)
 
-        RxSeekBar.changeEvents(gasPedal).subscribe { event ->
+
+        gasPedal.events.subscribe { event ->
+            //Timber.i("EVENT %s", gasPedal.level)
             if (event is SeekBarProgressChangeEvent && isGameOn) {
-                var progress = event.progress()
-                if (progress != 0) controller!!.speed(progress / event.view().max.toFloat())
+                var progress = gasPedal.level
+                if (progress != 0f) controller!!.speed(progress)
                 else controller!!.neutral()
             } else if (event is SeekBarStopChangeEvent) {
                 controller!!.neutral()
-                event.view().progress = 0
             }
         }
 
@@ -98,25 +76,33 @@ class PlayActivity : AppCompatActivity() {
             } else if (event is Comm.GameState) {
                 isGameOn = event.on
                 updateGameState()
+            } else if (event is Comm.Speed) {
+                controller!!.maxSpeed(event.percent)
             }
         })
 
         RxView.clicks(fireButton).subscribe {
-            Timber.i(TAG, "fire?")
-            var s = targets.targetedId
-            if (s != null) {
-                comm?.boom(s)
-                Toast.makeText(this, "Hit "+s+"!", Toast.LENGTH_SHORT).show()
+            Timber.tag(TAG).i("fire?")
+            var gotSomeone = false
+            targets.targetedIds.map { id ->
+                comm?.boom(id)
+                Timber.i("Boom for: %s", id)
+                gotSomeone = true
             }
-            else Toast.makeText(this, "MISS!", Toast.LENGTH_SHORT).show()
+            targets.boxIds.map { id ->
+                comm?.boxHit(id)
+                Timber.i("BoxHit for: %s", id)
+                gotSomeone = true
+            }
+            if (!gotSomeone) Toast.makeText(this, "MISS!", Toast.LENGTH_SHORT).show()
         }
 
         comm?.connect()
         updateGameState()
 
 
-        colorBlobsDetector = ColorBlobsDetector()
-    //    colorBlobsDetector = ARMarkerDetector()
+        //    colorBlobsDetector = ColorBlobsDetector()
+        colorBlobsDetector = ARMarkerDetector()
         application.registerActivityLifecycleCallbacks(colorBlobsDetector)
     }
 
@@ -126,7 +112,7 @@ class PlayActivity : AppCompatActivity() {
     }
 
     private fun updateGameState() {
-        Timber.i(TAG, "updateGameState($isGameOn)")
+        Timber.tag(TAG).i("updateGameState(%s)", isGameOn)
         if (isGameOn) {
             stoppedMask.visibility = View.GONE
         } else {
@@ -167,6 +153,7 @@ class PlayActivity : AppCompatActivity() {
         var bitmapSubscription = bmpObs
                 .sample(30, TimeUnit.MILLISECONDS)
                 .filter({ p0 ->
+                    //Timber.i("process" + isMainThread())
                     colorBlobsDetector?.process(p0)
                     true
                 })
@@ -176,12 +163,13 @@ class PlayActivity : AppCompatActivity() {
 
         var steerSubscription = SteeringWheel(this).stream().subscribe { steer ->
             trace("steer: %b", isMainThread())
+            aim.horizonRotate(steer)
             if (isGameOn) controller?.turn(steer / 90f)
         }
         trackedSubscriptions.track(steerSubscription);
 
         var batterySubscription = controller!!.batteryLevel()
-                .observeOn(AndroidSchedulers.mainThread()).subscribe { bat -> battery.text = Integer.toString(bat) }
+                .observeOn(AndroidSchedulers.mainThread()).subscribe { bat -> battery.progress = bat }
         trackedSubscriptions.track(batterySubscription)
         comm?.connect()
     }
@@ -199,6 +187,10 @@ class PlayActivity : AppCompatActivity() {
             val c = Cars.all[i]
             colorBlobsDetector?.setTarget(c, camera.drawMatrix, targets)
         }
+        for (i in BoxFaces.all.indices) {
+            val c = BoxFaces.all[i]
+            colorBlobsDetector?.setBoxFace(c, camera.drawMatrix, targets)
+        }
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -207,6 +199,6 @@ class PlayActivity : AppCompatActivity() {
     }
 
     private fun trace(s: String, vararg args: Any) {
-        if (TRACE) Timber.d(TAG, s.format(args))
+        if (TRACE) Timber.tag(TAG).i(s.format(args))
     }
 }

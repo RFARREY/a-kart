@@ -72,7 +72,7 @@ class SteeringWheel(context: Context) : SensorEventListener {
             steer = sub
             setListeners()
             sub.add(Subscriptions.create {
-                Timber.i(TAG, "unsub!")
+                Timber.tag(TAG).i( "unsub!")
                 steer = sub
                 unregister()
             })

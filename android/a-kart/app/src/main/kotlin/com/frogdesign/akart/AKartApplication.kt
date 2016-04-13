@@ -2,21 +2,17 @@ package com.frogdesign.akart
 
 import android.app.Application
 import android.util.Log
+import com.parrot.arsdk.ARSDK
 
 import org.artoolkit.ar.base.assets.AssetHelper
 import timber.log.Timber
+import uk.co.chrisjenx.calligraphy.CalligraphyConfig
 
 class AKartApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
         initializeInstance()
-
-        if (BuildConfig.DEBUG) {
-            Timber.plant(Timber.DebugTree());
-        } else {
-            Timber.plant(CrashReportingTree());
-        }
     }
 
     protected fun initializeInstance() {
@@ -26,6 +22,17 @@ class AKartApplication : Application() {
         // versionCode integer in the AndroidManifest.xml file.
         val assetHelper = AssetHelper(assets)
         assetHelper.cacheAssetFolder(this, "Data")
+
+        CalligraphyConfig.initDefault(CalligraphyConfig.Builder()
+                .setDefaultFontPath("fonts/Menlo-Regular.ttf")
+                .setFontAttrId(R.attr.fontPath)
+                .build())
+
+        if (BuildConfig.DEBUG) {
+            Timber.plant(Timber.DebugTree());
+        } else {
+            Timber.plant(CrashReportingTree());
+        }
     }
 
     companion object {
@@ -33,27 +40,7 @@ class AKartApplication : Application() {
 
         init {
             try {
-                System.loadLibrary("arsal")
-                System.loadLibrary("arsal_android")
-                System.loadLibrary("arnetworkal")
-                System.loadLibrary("arnetworkal_android")
-                System.loadLibrary("arnetwork")
-                System.loadLibrary("arnetwork_android")
-                System.loadLibrary("arcommands")
-                System.loadLibrary("arcommands_android")
-                System.loadLibrary("arstream")
-                System.loadLibrary("arstream_android")
-                System.loadLibrary("json")
-                System.loadLibrary("ardiscovery")
-                System.loadLibrary("ardiscovery_android")
-                System.loadLibrary("arutils")
-                System.loadLibrary("arutils_android")
-                System.loadLibrary("ardatatransfer")
-                System.loadLibrary("ardatatransfer_android")
-                System.loadLibrary("armedia")
-                System.loadLibrary("armedia_android")
-                System.loadLibrary("arcontroller")
-                System.loadLibrary("arcontroller_android")
+                ARSDK.loadSDKLibs()
             } catch (e: Exception) {
                 Timber.e(TAG, "Problem occured during native library loading", e)
             }
@@ -68,7 +55,7 @@ class AKartApplication : Application() {
             }
 
             when (priority) {
-                Log.VERBOSE -> Timber.v(tag, message, t)
+                Log.VERBOSE -> Timber.v(message, t)
                 Log.DEBUG -> Timber.d(tag, message, t)
                 Log.INFO -> Timber.i(tag, message, t)
                 Log.WARN -> Timber.w(tag, message, t)

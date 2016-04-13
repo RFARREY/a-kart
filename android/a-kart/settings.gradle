@@ -1,2 +1,2 @@
 include ':app' //, ':artoolkit'
-include ':openCVLibrary310'
+//include ':openCVLibrary310'

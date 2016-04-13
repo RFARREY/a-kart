@@ -5,11 +5,11 @@ import android.graphics.Bitmap
 import android.renderscript.Allocation
 import android.renderscript.Element
 import android.renderscript.RenderScript
-
+import com.frogdesign.akart.ARMarkerDetector
 import com.frogdesign.akart.ScriptC_argb_to_yuv
-import com.frogdesign.akart.util.*
-
+import com.frogdesign.akart.util.yuvByteLength
 import rx.functions.Func1
+import timber.log.Timber
 
 
 class BmpToYUVToARToolkitConverterRS2(ctx: Context) : Func1<Bitmap, Boolean> {
@@ -25,13 +25,15 @@ class BmpToYUVToARToolkitConverterRS2(ctx: Context) : Func1<Bitmap, Boolean> {
         script = ScriptC_argb_to_yuv(rs)
     }
 
-    private fun checkForBuffers(b: Bitmap) {
-
-        val w = b.width
-        val h = b.height
+    private fun checkForBuffers(c: Bitmap) {
+        var x = (c.width - ARMarkerDetector.WIDTH) / 2
+        var y = (c.height - ARMarkerDetector.HEIGHT) / 2
+        val w = ARMarkerDetector.WIDTH
+        val h = ARMarkerDetector.HEIGHT
         val yuvLength = yuvByteLength(w, h)
         if (yuvBuffer == null || yuvBuffer!!.size != yuvLength) {
-
+            Timber.i("Creating buf x: %s, y: %s, w: %s, h: %s", x, y, w, h)
+            var b = Bitmap.createBitmap(c, x, y, w, h)
             inAllocation = Allocation.createFromBitmap(rs, b,
                     Allocation.MipmapControl.MIPMAP_NONE, Allocation.USAGE_SCRIPT)
             script._gInImage = inAllocation

@@ -1,9 +1,16 @@
 package com.frogdesign.akart.util
 
 import android.content.Context
+import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.RectF
 import android.os.Looper
+import android.support.annotation.ColorInt
+import android.support.annotation.ColorRes
+import android.support.annotation.NonNull
+import android.support.v4.content.res.ResourcesCompat
 import android.util.DisplayMetrics
 import android.view.View
 import org.artoolkit.ar.base.ARToolKit
@@ -13,11 +20,12 @@ import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.functions.Func1
 import rx.schedulers.Schedulers
+import timber.log.Timber
 import java.util.*
 import java.util.concurrent.Executors
 
 
-public fun dpToPx(context: Context, dp: Float): Int = Math.round(dp * pixelScaleFactor(context))
+fun dpToPx(context: Context, dp: Float): Int = Math.round(dp * pixelScaleFactor(context))
 
 private fun pixelScaleFactor(context: Context): Float {
     var displayMetrics = context.resources.displayMetrics
@@ -25,9 +33,9 @@ private fun pixelScaleFactor(context: Context): Float {
     return displayMetrics.densityDpi / mdpi
 }
 
-public fun threadName(): String = Thread.currentThread().name
+fun threadName(): String = Thread.currentThread().name
 
-public fun isMainThread(): Boolean = Looper.getMainLooper() == Looper.myLooper()
+fun isMainThread(): Boolean = Looper.getMainLooper() == Looper.myLooper()
 
 val PI: Float = Math.PI.toFloat()
 
@@ -45,7 +53,6 @@ fun clamp(value: Double, min: Double, max: Double): Double {
 
 fun inrange(value: Double, min: Double, max: Double): Boolean = value >= min && value <= max
 
-
 class CachedBitmapDecoder : Func1<ByteArray, Bitmap> {
     private var inBitmap: Bitmap? = null
     private val opts = BitmapFactory.Options()
@@ -57,8 +64,9 @@ class CachedBitmapDecoder : Func1<ByteArray, Bitmap> {
 
 
     override fun call(data: ByteArray?): Bitmap? {
+        //Timber.i("CachedBitmapDecoder: MAIN? %s", isMainThread())
         opts.inBitmap = inBitmap
-        if (data != null) inBitmap = BitmapFactory.decodeByteArray(data, 0, data.size, null)
+        if (data != null) inBitmap = BitmapFactory.decodeByteArray(data, 0, data.size, opts)
         var result = inBitmap
         return result
     }
@@ -70,12 +78,10 @@ class BmpToYUVToARToolkitConverterJava : Func1<Bitmap, Boolean> {
 
     private fun checkForBuffers(w: Int, h: Int) {
         val argbLength = w * h
-        if (argbBuffer == null || argbBuffer!!.size != argbLength)
-            argbBuffer = IntArray(argbLength)
+        if (argbBuffer == null || argbBuffer!!.size != argbLength) argbBuffer = IntArray(argbLength)
 
         val yuvLength = yuvByteLength(w, h)
-        if (yuvBuffer == null || yuvBuffer!!.size != yuvLength)
-            yuvBuffer = ByteArray(yuvLength)
+        if (yuvBuffer == null || yuvBuffer!!.size != yuvLength) yuvBuffer = ByteArray(yuvLength)
     }
 
     override fun call(inBitmap: Bitmap?): Boolean {
@@ -97,17 +103,15 @@ class BmpToYUVToARToolkitConverterJava : Func1<Bitmap, Boolean> {
     }
 }
 
-
 class TrackedSubscriptions : ArrayList<Subscription>() {
 
-    public fun track(sub: Subscription?): TrackedSubscriptions {
+    fun track(sub: Subscription?): TrackedSubscriptions {
         if (sub != null) super.add(sub)
         return this
     }
 
-    public fun unsubAll(): TrackedSubscriptions {
-        for (a in this)
-            if (a.isUnsubscribed) a.unsubscribe()
+    fun unsubAll(): TrackedSubscriptions {
+        for (a in this) if (a.isUnsubscribed) a.unsubscribe()
 
         this.clear();
         return this
@@ -126,6 +130,11 @@ fun <T> Observable<T>.andAsync(): Observable<T> {
             .observeOn(AndroidSchedulers.mainThread())
 }
 
+fun <T> Observable<T>.async(): Observable<T> {
+    return this.subscribeOn(scheduler)
+            .observeOn(scheduler)
+}
+
 fun View.hideNavbar() {
     this.systemUiVisibility =
             View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -135,7 +144,6 @@ fun View.hideNavbar() {
                     .or(View.SYSTEM_UI_FLAG_FULLSCREEN)
                     .or(View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
 }
-
 
 fun yuvByteLength(w: Int, h: Int): Int = w * h * 3 / 2
 
@@ -183,4 +191,32 @@ fun encodeYUV420SP(yuv420sp: ByteArray?, argb: IntArray?, width: Int, height: In
         }
         ++j
     }
+}
+
+val ResourcesCompatInstance: ResourcesCompat by lazy {
+    ResourcesCompat()
+}
+
+fun scaleCenterCrop(source : Bitmap, newWidth : Int, newHeight : Int) : RectF {
+    val sourceWidth = source.width
+    val sourceHeight = source.height
+
+    // Compute the scaling factors to fit the new height and width, respectively.
+    // To cover the final image, the final scaling will be the bigger
+    // of these two.
+    val xScale = newWidth.toFloat() / sourceWidth
+    val yScale = newHeight.toFloat() / sourceHeight
+    val scale = Math.max(xScale, yScale)
+    // Now get the size of the source bitmap when scaled
+    val scaledWidth = scale * sourceWidth
+    val scaledHeight = scale * sourceHeight
+
+    // Let's find out the upper left coordinates if the scaled bitmap
+    // should be centered in the new size give by the parameters
+    val left = (newWidth - scaledWidth) / 2
+    val top = (newHeight - scaledHeight) / 2
+
+    // The target rectangle for the new, scaled version of the source bitmap will now
+    // be
+    return RectF(left, top, scale, scale);
 }

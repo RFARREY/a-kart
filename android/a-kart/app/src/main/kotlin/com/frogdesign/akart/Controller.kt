@@ -1,7 +1,6 @@
 package com.frogdesign.akart
 
 import android.content.Context
-import android.util.Log
 import com.frogdesign.akart.util.isMainThread
 import com.parrot.arsdk.arcommands.ARCOMMANDS_JUMPINGSUMO_ANIMATIONS_SIMPLEANIMATION_ID_ENUM
 import com.parrot.arsdk.arcontroller.*
@@ -14,12 +13,16 @@ import timber.log.Timber
 
 
 /**
-
+ *
  */
 class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceControllerListener {
 
     private val deviceController: ARDeviceController
     private val jumpingSumo: ARFeatureJumpingSumo
+    private var maxSpeed = Byte.MAX_VALUE
+    private var modelMultiplier = 1f
+    private var gasPedal = 0f
+    private var turn : Byte = 0
 
     private var batteryLevel: Int? = -1
 
@@ -29,17 +32,22 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
         val productId = ARDiscoveryService.getProductFromProductID(productIdInt)
         trace("ProductId: %s", productId.toString())
 
-        if (ARDISCOVERY_PRODUCT_ENUM.ARDISCOVERY_PRODUCT_JS == productId) {
+        if (ARDISCOVERY_PRODUCT_ENUM.ARDISCOVERY_PRODUCT_JS == productId
+                || ARDISCOVERY_PRODUCT_ENUM.ARDISCOVERY_PRODUCT_JS_EVO_LIGHT == productId
+                || ARDISCOVERY_PRODUCT_ENUM.ARDISCOVERY_PRODUCT_JS_EVO_RACE == productId) {
             try {
                 val device = ARDiscoveryDevice()
                 val netDeviceService = service.device as ARDiscoveryDeviceNetService
-
+                Timber.i("Device %s, %s : %s", netDeviceService.name, netDeviceService.ip, netDeviceService.port)
                 device.initWifi(ARDISCOVERY_PRODUCT_ENUM.ARDISCOVERY_PRODUCT_JS,
                         netDeviceService.name,
                         netDeviceService.ip,
                         netDeviceService.port)
-
+                if (ARDISCOVERY_PRODUCT_ENUM.ARDISCOVERY_PRODUCT_JS_EVO_RACE == productId) {
+                    modelMultiplier = .48f
+                }
                 deviceController = ARDeviceController(device)
+
                 deviceController.addListener(this)
                 jumpingSumo = deviceController.featureJumpingSumo
 
@@ -73,28 +81,31 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
         return Observable.create { subscriber ->
             trace("mediaStreamer.OnSusbascribe: MAIN? ", isMainThread())
             val listener = object : ARDeviceControllerStreamListener {
-
-                private var data: ByteArray? = ByteArray(150000)
-
-                override fun onFrameReceived(arDeviceController: ARDeviceController, arFrame: ARFrame) {
-                    trace("mediaStreamer.onFrameReceived: MAIN? %b", isMainThread())
-                    if (subscriber == null) return
-                    if (!arFrame.isIFrame) return
+                override fun onFrameReceived(deviceController: ARDeviceController?, arFrame: ARFrame?): ARCONTROLLER_ERROR_ENUM? {
+                    //trace("mediaStreamer.onFrameReceived: MAIN? %b", isMainThread())
+                    if (subscriber == null) return ARCONTROLLER_ERROR_ENUM.ARCONTROLLER_OK
+                    if (arFrame == null || !arFrame.isIFrame) return ARCONTROLLER_ERROR_ENUM.ARCONTROLLER_OK
                     if (data == null) {
                         data = arFrame.byteData
                     } else ARNativeDataHelper.copyData(arFrame, data)
 
                     subscriber.onNext(data)
+                    return ARCONTROLLER_ERROR_ENUM.ARCONTROLLER_OK
                 }
+
+                override fun configureDecoder(deviceController: ARDeviceController?, codec: ARControllerCodec?): ARCONTROLLER_ERROR_ENUM? {
+                    return ARCONTROLLER_ERROR_ENUM.ARCONTROLLER_OK
+                }
+
+                private var data: ByteArray? = ByteArray(150000)
 
                 var n: Int = 0;
 
                 override fun onFrameTimeout(arDeviceController: ARDeviceController) {
-                    Timber.w(TAG, "onFrameTimeout" + ++n)
+                    Timber.w("onFrameTimeout" + ++n)
                 }
             }
             deviceController.addStreamListener(listener)
-            deviceController.featureJumpingSumo.sendMediaStreamingVideoEnable(ON)
             subscriber!!.add(Subscriptions.create {
                 trace("mediastreamer.unsubscribe")
                 deviceController.removeStreamListener(listener)
@@ -104,9 +115,8 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
     }
 
     fun speed(percentage: Float) {
-        val actual = (SPEED_MAX * percentage).toByte()
-        jumpingSumo.setPilotingPCMDSpeed(actual)
-        jumpingSumo.setPilotingPCMDFlag(ON)
+        gasPedal = percentage
+        syncPilot()
     }
 
     fun hitAnim() {
@@ -114,39 +124,56 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
     }
 
     fun turn(percentage: Float) {
-        val dataToBeSent = (-TURN_MAX * percentage).toByte()
-        //trace("turn %d", dataToBeSent)
-        if (dataToBeSent > -TURN_DEADZONE && dataToBeSent < TURN_DEADZONE) jumpingSumo.setPilotingPCMDTurn(OFF)
-        else jumpingSumo.setPilotingPCMDTurn(dataToBeSent)
+        turn = (-TURN_MAX * percentage).toByte()
+        syncPilot()
+    }
+
+    fun syncPilot() {
+        var piloting = false
+        if (turn > -TURN_DEADZONE && turn < TURN_DEADZONE) {
+            jumpingSumo.setPilotingPCMDTurn(OFF)
+        } else {
+            jumpingSumo.setPilotingPCMDTurn(turn)
+        }
+        if (Math.abs(gasPedal) >= ACCEL_DEADZONE) {
+            jumpingSumo.setPilotingPCMDSpeed(OFF)
+            val actual = (maxSpeed * gasPedal * modelMultiplier).toByte()
+            jumpingSumo.setPilotingPCMDSpeed(actual)
+            piloting = true
+        } else jumpingSumo.setPilotingPCMDSpeed(OFF)
+
+        jumpingSumo.setPilotingPCMDFlag(if (piloting) ON else OFF)
     }
 
     fun neutral() {
-        jumpingSumo.setPilotingPCMDSpeed(OFF)
-        jumpingSumo.setPilotingPCMDTurn(OFF)
-        jumpingSumo.setPilotingPCMDFlag(OFF)
+        gasPedal = 0f
+        syncPilot()
     }
 
     override // called when the state of the device controller has changed
     fun onStateChanged(deviceController: ARDeviceController,
                        newState: ARCONTROLLER_DEVICE_STATE_ENUM?, error: ARCONTROLLER_ERROR_ENUM?) {
         if (newState != null) {
-            if (newState == ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING) {
+
+            if (ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING.equals(newState)) {
+                deviceController.featureJumpingSumo.sendMediaStreamingVideoEnable(ON)
+            } else if (newState == ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING) {
                 status?.onNext(true)
             } else if (newState == ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_STOPPED) {
                 status?.onNext(false)
             } else {
-                Timber.i(TAG, "onStateChanged: " + newState.toString())
+                Timber.i("onStateChanged: " + newState.toString())
             }
         }
-        if (error != null) Timber.e(TAG, "onStateChanged: " + error.toString())
+        if (error != null) Timber.e("onStateChanged: " + error.toString())
     }
 
     override fun onExtensionStateChanged(arDeviceController: ARDeviceController,
                                          newState: ARCONTROLLER_DEVICE_STATE_ENUM?,
                                          product: ARDISCOVERY_PRODUCT_ENUM, s: String,
                                          error: ARCONTROLLER_ERROR_ENUM?) {
-        if (newState != null) Timber.i(TAG, "onExtensionStateChanged: " + newState.toString() + ", " + composeDesc(product, s))
-        if (error != null) Timber.e(TAG, "onExtensionStateChanged: " + error.toString() + ", " + composeDesc(product, s))
+        if (newState != null) Timber.i("onExtensionStateChanged: " + newState.toString() + ", " + composeDesc(product, s))
+        if (error != null) Timber.e("onExtensionStateChanged: " + error.toString() + ", " + composeDesc(product, s))
     }
 
     private fun composeDesc(ardiscovery_product_enum: ARDISCOVERY_PRODUCT_ENUM, s: String): String {
@@ -165,7 +192,7 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
                 //trace("Battery: %d", batValue)
                 if (batValue != null) batteryLevel = batValue.toInt()
             } else {
-                Timber.e(TAG, "elementDictionary is null")
+                Timber.e("elementDictionary is null")
             }
             if (battery != null) battery!!.onNext(batteryLevel)
         } else if (commandKey == ARCONTROLLER_DICTIONARY_KEY_ENUM.ARCONTROLLER_DICTIONARY_KEY_COMMON_COMMONSTATE_WIFISIGNALCHANGED) {
@@ -173,13 +200,13 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
         } else if (commandKey == ARCONTROLLER_DICTIONARY_KEY_ENUM.ARCONTROLLER_DICTIONARY_KEY_JUMPINGSUMO_NETWORKSTATE_LINKQUALITYCHANGED) {
             //
         } else {
-            Timber.i(TAG, "Command: " + commandKey.name)
+            Timber.i("Command: " + commandKey.name)
         }
     }
 
     private fun logAll(elems: ARControllerDictionary) {
         if (elems.entries != null) for ((k, v) in elems.entries) {
-            Timber.i(TAG, "(%s, %v)".format(k, v))
+            Timber.i("(%s, %v)".format(k, v))
         }
     }
 
@@ -203,19 +230,25 @@ class Controller(ctx: Context, service: ARDiscoveryDeviceService?) : ARDeviceCon
     }
 
     private fun trace(s: String, vararg args: Any) {
-        if (TRACE) Timber.d(TAG, s.format(args))
+        if (TRACE) Timber.d(s, args)
     }
 
     companion object {
         private val TAG = Controller::class.java.simpleName
-        private val TRACE = false
+        private val TRACE = true
 
 
         private val ON = 1.toByte()
         private val OFF = 0.toByte()
 
-        private val TURN_MAX: Byte = 20
+        private val TURN_MAX: Byte = 40
         private val TURN_DEADZONE: Byte = 3
-        private val SPEED_MAX: Byte = 100
+        private val ACCEL_DEADZONE: Float = 0.05f
+    }
+
+    fun maxSpeed(percent: Float) {
+        maxSpeed = (Byte.MAX_VALUE * percent).toByte()
+        trace("maxSpeed " + maxSpeed)
+        syncPilot()
     }
 }
