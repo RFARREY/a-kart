@@ -25,15 +25,16 @@ var GAME_IS_ON = false
 var globalSpeed = 100
 
 var connecteds = {}
+
 io.on('connection', function (socket) {
     console.log('a user connected');
 
     function broadcastGameStatus(socket) {
-        socket.emit('set game', GAME_IS_ON);
+        io.emit('set game', GAME_IS_ON);
         var players = [];
         for (var k in connecteds) players.push(k);
-        socket.emit('players', players);
-		socket.emit('speed', globalSpeed);
+        io.emit('players', players);
+		io.emit('speed', globalSpeed);
     }
 
     broadcastGameStatus(socket);
