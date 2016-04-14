@@ -128,10 +128,14 @@ io.on('connection', function (socket) {
 		    );
 	    
     }
+
+    function getRandomInt(max) {
+        return parseInt(""+ Math.random() * max);
+    }
     
     var onBonus = function(data) {
 	    console.log( data );
-	    if ( parseInt(data.marker) % 2 == 1) {
+	    if ( parseInt(data.marker) % 3 == 0) {
 		    //bonus
 		    console.log( "Assigning a bonus to the player that hit the cube, which means, assign a malus to all the other players " , data);
 		    for (var key in connecteds) {
@@ -141,14 +145,21 @@ io.on('connection', function (socket) {
 					}
 				}
 			}
-	    } else {
-		    //malus
-		    console.log( "Assigning a malus to the player that hit the cube " , data);
-		    setMalus(data.player);
-	    }
+	    } else if ( parseInt(data.marker) % 3 == 1) {
+            //malus
+            console.log( "Assigning a malus to the player that hit the cube " , data);
+            setMalus(data.player);
+        } else if ( parseInt(data.marker) % 3 == 2) {
+            //shot random
+            var keys = Object.keys(connecteds);
+            var randomIdx = Math.floor(Math.random()*keys.length);
+            var key = keys[randomIdx];
+            console.log("hitting", key, keys, randomIdx)
+            connecteds[key].emit('hit');
+        }
     }
     socket.on('s-bonus', function(data) {
-	    console.log( 's-bonus', data );
+	    console.log( 'bonus', data );
 	    onBonus( { "marker":1, "player": data.id } );
     });
     socket.on('s-malus', function(data) {
