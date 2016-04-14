@@ -1,17 +1,16 @@
 package com.frogdesign.akart
 
+//import rx.lang.kotlin.BehaviourSubject
 import android.content.Context
-import android.util.Log
+import com.frogdesign.akart.model.BoxFace
 import io.socket.client.IO
 import io.socket.client.Socket
 import org.json.JSONObject
 import rx.Observable
 import rx.subjects.BehaviorSubject
 import timber.log.Timber
-//import rx.lang.kotlin.BehaviourSubject
 import java.security.cert.X509Certificate
 import java.util.*
-import javax.net.ssl.HttpsURLConnection
 import javax.net.ssl.SSLContext
 
 class Comm(val id: String, val ctx: Context, val uri: String = Comm.DEFAULT_SERVER) {
@@ -55,7 +54,7 @@ class Comm(val id: String, val ctx: Context, val uri: String = Comm.DEFAULT_SERV
             subject.onNext(Hit())
         }).on("speed", { args ->
             val percent = args[0].toString().toInt() / 100f
-            trace("speed "+ Arrays.toString(args)+", percent" +percent)
+            trace("speed " + Arrays.toString(args) + ", percent" + percent)
             subject.onNext(Speed(percent))
         }).on(Socket.EVENT_DISCONNECT, { args ->
             trace("disconnect")
@@ -65,7 +64,6 @@ class Comm(val id: String, val ctx: Context, val uri: String = Comm.DEFAULT_SERV
     fun connect() {
         client.connect();
     }
-
 
     private fun createSSLContext(): SSLContext {
         var trustAllCerts = arrayOf(
@@ -86,23 +84,23 @@ class Comm(val id: String, val ctx: Context, val uri: String = Comm.DEFAULT_SERV
         return sc;
     }
 
-    public fun close() {
+    fun close() {
         client.off()
         client.close()
     }
 
-    public fun boom(id: String) {
+    fun boom(id: String) {
         var obj = JSONObject()
         obj.put("id", id)
         client.emit("boom", obj)
     }
 
-    public open class Event(val type: String)
-    public class Message(val mex: String) : Event("message")
-    public class Hit() : Event("hit")
-    public class Speed(val percent: Float) : Event("speed")
-    public class GameState(val on: Boolean) : Event("gamestate")
-    public class Erroz(ex: Exception) : Event("error")
+    open class Event(val type: String)
+    class Message(val mex: String) : Event("message")
+    class Hit() : Event("hit")
+    class Speed(val percent: Float) : Event("speed")
+    class GameState(val on: Boolean) : Event("gamestate")
+    class Erroz(ex: Exception) : Event("error")
 
     private fun trace(s: String, vararg args: Any?) {
         if (TRACE) {
@@ -110,13 +108,16 @@ class Comm(val id: String, val ctx: Context, val uri: String = Comm.DEFAULT_SERV
         }
     }
 
-    public fun send(s: String) {
+    fun send(s: String) {
         client.send(s)
     }
 
-    fun boxHit(id: String) {
+    fun bonus(boxFace: BoxFace) {
+
+        Timber.i("BoxHit from %s for: %s", id, boxFace.markerValue)
         var obj = JSONObject()
-        obj.put("type", id)
-        client.emit("boxHit", obj)
+        obj.put("marker", boxFace.markerValue)
+        obj.put("player", boxFace)
+        client.emit("bonus", obj)
     }
 }

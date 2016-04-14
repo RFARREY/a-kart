@@ -90,8 +90,9 @@ class PlayActivity : AppCompatActivity() {
                 gotSomeone = true
             }
             targets.boxIds.map { id ->
-                comm?.boxHit(id)
-                Timber.i("BoxHit for: %s", id)
+                val b = BoxFaces.all.find { b -> b.id.equals(id) }
+
+                if ( b!= null) comm?.bonus(b)
                 gotSomeone = true
             }
             if (!gotSomeone) Toast.makeText(this, "MISS!", Toast.LENGTH_SHORT).show()
