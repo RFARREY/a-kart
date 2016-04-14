@@ -135,28 +135,32 @@ io.on('connection', function (socket) {
     
     var onBonus = function(data) {
 	    console.log( data );
-	    if ( parseInt(data.marker) % 3 == 0) {
-		    //bonus
-		    console.log( "Assigning a bonus to the player that hit the cube, which means, assign a malus to all the other players " , data);
-		    for (var key in connecteds) {
-				if (connecteds.hasOwnProperty(key)) {
-					if (key != data.player) {
-						setMalus(key);
+	    try {
+		    if ( parseInt(data.marker) % 3 == 0) {
+			    //bonus
+			    console.log( "Assigning a bonus to the player that hit the cube, which means, assign a malus to all the other players " , data);
+			    for (var key in connecteds) {
+					if (connecteds.hasOwnProperty(key)) {
+						if (key != data.player) {
+							setMalus(key);
+						}
 					}
 				}
-			}
-	    } else if ( parseInt(data.marker) % 3 == 1) {
-            //malus
-            console.log( "Assigning a malus to the player that hit the cube " , data);
-            setMalus(data.player);
-        } else if ( parseInt(data.marker) % 3 == 2) {
-            //shot random
-            var keys = Object.keys(connecteds);
-            var randomIdx = Math.floor(Math.random()*keys.length);
-            var key = keys[randomIdx];
-            console.log("hitting", key, keys, randomIdx)
-            connecteds[key].emit('hit');
-        }
+		    } else if ( parseInt(data.marker) % 3 == 1) {
+	            //malus
+	            console.log( "Assigning a malus to the player that hit the cube " , data);
+	            setMalus(data.player);
+	        } else if ( parseInt(data.marker) % 3 == 2) {
+	            //shot random
+	            var keys = Object.keys(connecteds);
+	            var randomIdx = Math.floor(Math.random()*keys.length);
+	            var key = keys[randomIdx];
+	            console.log("hitting", key, keys, randomIdx)
+	            connecteds[key].emit('hit');
+	        }
+	     } catch(e) {
+		     console.log("Bonus failed", e);
+	     }
     }
     socket.on('s-bonus', function(data) {
 	    console.log( 'bonus', data );
