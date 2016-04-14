@@ -4,8 +4,10 @@ package com.frogdesign.akart
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.os.PowerManager
 import android.support.v7.app.AppCompatActivity
 import android.view.View
+import android.view.WindowManager
 import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.Toast
@@ -49,10 +51,12 @@ class PlayActivity : AppCompatActivity() {
 
     private var isGameOn = false
     private var colorBlobsDetector: MarkerDetector? = null;
+    private var wakeLock: PowerManager.WakeLock? = null;
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.play_activity)
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         val device = intent.getParcelableExtra<ARDiscoveryDeviceService>(EXTRA_DEVICE)
         controller = Controller(baseContext, device)
@@ -90,10 +94,12 @@ class PlayActivity : AppCompatActivity() {
                 gotSomeone = true
             }
             targets.boxIds.map { id ->
-                val b = BoxFaces.all.find { b -> b.id.equals(id) }
+                if (!gotSomeone) {
+                    val b = BoxFaces.all.find { b -> b.id.equals(id) }
 
-                if ( b!= null) comm?.bonus(b)
-                gotSomeone = true
+                    if ( b != null) comm?.bonus(b)
+                    gotSomeone = true
+                }
             }
             if (!gotSomeone) Toast.makeText(this, "MISS!", Toast.LENGTH_SHORT).show()
         }
@@ -173,6 +179,10 @@ class PlayActivity : AppCompatActivity() {
                 .observeOn(AndroidSchedulers.mainThread()).subscribe { bat -> battery.progress = bat }
         trackedSubscriptions.track(batterySubscription)
         comm?.connect()
+
+        val powerManager = getSystemService(POWER_SERVICE) as PowerManager;
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MyWakelockTag");
+        wakeLock?.acquire();
     }
 
     override fun onStop() {
@@ -180,6 +190,7 @@ class PlayActivity : AppCompatActivity() {
         trackedSubscriptions.unsubAll()
         controller!!.stop()
         comm?.close()
+        wakeLock?.release()
     }
 
     fun onFrameProcessed() {

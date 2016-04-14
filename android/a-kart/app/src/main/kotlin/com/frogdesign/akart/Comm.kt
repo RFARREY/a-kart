@@ -18,7 +18,8 @@ class Comm(val id: String, val ctx: Context, val uri: String = Comm.DEFAULT_SERV
     companion object {
         private val TAG = Comm::class.java.simpleName
         private val TRACE = true
-        private val DEFAULT_SERVER = "https://a-kart.cloud.frogdesign.com/"
+        private val DEFAULT_SERVER = "http://10.228.81.8:5000/"
+        //private val DEFAULT_SERVER = "https://a-kart.cloud.frogdesign.com/"
     }
 
 
@@ -35,7 +36,7 @@ class Comm(val id: String, val ctx: Context, val uri: String = Comm.DEFAULT_SERV
         pin = subject.asObservable()
         pin.doOnSubscribe {
             trace("onSub")
-            client.disconnect()
+            //client.disconnect()
         }
 
 
@@ -116,8 +117,8 @@ class Comm(val id: String, val ctx: Context, val uri: String = Comm.DEFAULT_SERV
 
         Timber.i("BoxHit from %s for: %s", id, boxFace.markerValue)
         var obj = JSONObject()
+        obj.put("player", id)
         obj.put("marker", boxFace.markerValue)
-        obj.put("player", boxFace)
         client.emit("bonus", obj)
     }
 }

@@ -13,6 +13,7 @@ import android.support.v7.widget.RecyclerView.AdapterDataObserver
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
@@ -50,6 +51,7 @@ class DiscoveryActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.discovery_activity)
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         discovery = Discovery(baseContext)
         selections = ItemSelectionSupport.addTo(list)
         adapter = DiscoveryAdapter(this)
