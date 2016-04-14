@@ -1,18 +1,20 @@
 package com.frogdesign.akart.view
 
-import android.content.Context
-import android.graphics.*
-import android.util.AttributeSet
-import android.util.Log
-import android.view.MotionEvent
-import android.view.View
 //import org.opencv.core.Scalar
 //import org.opencv.samples.colorblobdetect.ColorBlobDetectionActivity
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Matrix
+import android.graphics.Paint
+import android.util.AttributeSet
+import android.view.MotionEvent
+import android.view.View
+import com.frogdesign.akart.util.scaleCenterCrop
 import rx.Observable
 import rx.Subscription
 import rx.subjects.BehaviorSubject
 import timber.log.Timber
-import com.frogdesign.akart.util.scaleCenterCrop
 
 //import rx.lang.kotlin.BehaviourSubject
 //import rx.lang.kotlin.PublishSubject
@@ -36,8 +38,8 @@ class CameraView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, def
     private val values = FloatArray(9)
 
     init {
-//        paint.color = Color.RED
-//        paint.alpha = 50
+        //        paint.color = Color.RED
+        //        paint.alpha = 50
         setLayerType(LAYER_TYPE_SOFTWARE, null)
     }
 
@@ -53,13 +55,13 @@ class CameraView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, def
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-//        Timber.i("CONTOUR", "you touched "+event!!.x+", "+event.y)
+        //        Timber.i("CONTOUR", "you touched "+event!!.x+", "+event.y)
         val point = floatArrayOf(event!!.x, event.y)
         drawMatrixInverse.mapPoints(point)
-//        Timber.i("CONTOUR", "you inverted "+point.get(0)+","+point.get(1))
-        val color = image!!.getPixel(point[0].toInt(), point[1].toInt());
-       // val violet = ColorBlobDetectionActivity.converScalarRgba2Hsv(color);
-        Timber.i("TOUCHED: (" +Integer.toHexString(color)+")");
+        //        Timber.i("CONTOUR", "you inverted "+point.get(0)+","+point.get(1))
+        val color = image?.getPixel(point[0].toInt(), point[1].toInt());
+        // val violet = ColorBlobDetectionActivity.converScalarRgba2Hsv(color);
+        if (color != null) Timber.i("TOUCHED: (" + Integer.toHexString(color) + ")");
         //Timber.i("CameraView", "TOUCHED: (" + violet.`val`[0] + ", " + violet.`val`[1] +", " + violet.`val`[2] + ", " + violet.`val`[3] +")");
         return super.onTouchEvent(event)
     }
@@ -70,8 +72,8 @@ class CameraView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, def
             if (!sameSize(image, bmp)) {
                 var viewBounds = scaleCenterCrop(bmp, width, height)
                 drawMatrix.reset()
-                drawMatrix.postScale(viewBounds.bottom,viewBounds.bottom)
-                drawMatrix.postTranslate(viewBounds.left,viewBounds.top)
+                drawMatrix.postScale(viewBounds.bottom, viewBounds.bottom)
+                drawMatrix.postTranslate(viewBounds.left, viewBounds.top)
                 drawMatrix.invert(drawMatrixInverse)
                 drawMatrix.getValues(values)
                 xImageInsets.onNext(values[2])
@@ -81,10 +83,9 @@ class CameraView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, def
         }
     }
 
-
     val xImageInsets = BehaviorSubject.create<Float>()
 
-    private fun sameSize(a :Bitmap?, b: Bitmap?) : Boolean {
+    private fun sameSize(a: Bitmap?, b: Bitmap?): Boolean {
         if (a != null && b != null) {
             //both non-null
             return (a.width == b.width) and (a.height == b.height)
