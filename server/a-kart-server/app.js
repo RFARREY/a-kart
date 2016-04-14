@@ -111,54 +111,40 @@ io.on('connection', function (socket) {
         }
     });
     
+    var setMalus = function(id) {
+		    var newSpeed = (connecteds[id]._custom_speed - 10);
+		    connecteds[id]._custom_speed = (newSpeed > 10) ? newSpeed : 10;
+		    connecteds[id].emit( "speed", connecteds[id]._custom_speed );
+		    //clearTimeout( connecteds[id]._custom_timeout );
+		    connecteds[id]._custom_timeout = setTimeout(
+			    function() {
+				    //clearTimeout( connecteds[id]._custom_timeout );
+				    console.log("Timeout malus", id);
+				    var newSpeed = (connecteds[id]._custom_speed + 10);
+				    connecteds[id]._custom_speed = (newSpeed <= 100) ? newSpeed : 100;
+				    connecteds[id].emit( "speed", connecteds[id]._custom_speed );
+			    },
+			    5000
+		    );
+	    
+    }
     
     var onBonus = function(data) {
 	    console.log( data );
 	    if ( parseInt(data.marker) % 2 == 1) {
 		    //bonus
-		    console.log( "Assigning a bonus to the player that hit the cube " , data);
+		    console.log( "Assigning a bonus to the player that hit the cube, which means, assign a malus to all the other players " , data);
 		    for (var key in connecteds) {
 				if (connecteds.hasOwnProperty(key)) {
 					if (key != data.player) {
-						console.log( "Send message to " + key);
-						var newSpeed = (connecteds[data.player]._custom_speed - 10);
-						connecteds[key]._custom_speed = (newSpeed > 10) ? newSpeed : 10;
-						connecteds[key].emit( 'speed', connecteds[key]._custom_speed );
-						console.log('clear timeout', key);
-						clearTimeout( connecteds[key]._custom_timeout );
-						console.log('set timeout', key)
-						connecteds[key]._custom_timeout = setTimeout(
-						    function() {
-							    clearTimeout( connecteds[key]._custom_timeout );
-							    console.log( "Timeout bonus", key );
-							    var newSpeed = (connecteds[key]._custom_speed + 10);
-							    connecteds[key]._custom_speed = (newSpeed <= 100) ? newSpeed : 100;
-							    connecteds[key].emit( "speed", connecteds[key]._custom_speed );
-						    },
-						    5000
-					    );
-					    console.log(  "\n\n\n\n\n\n\n", key, connecteds[key]._custom_timeout, "\n\n\n\n\n\n\n");
-						
+						setMalus(key);
 					}
 				}
 			}
 	    } else {
 		    //malus
 		    console.log( "Assigning a malus to the player that hit the cube " , data);
-		    var newSpeed = (connecteds[data.player]._custom_speed - 10);
-		    connecteds[data.player]._custom_speed = (newSpeed > 10) ? newSpeed : 10;
-		    connecteds[data.player].emit( "speed", connecteds[data.player]._custom_speed );
-		    clearTimeout( connecteds[data.player]._custom_timeout );
-		    connecteds[data.player]._custom_timeout = setTimeout(
-			    function() {
-				    clearTimeout( connecteds[data.player]._custom_timeout );
-				    console.log("Timeout malus", data.player);
-				    var newSpeed = (connecteds[data.player]._custom_speed + 10);
-				    connecteds[data.player]._custom_speed = (newSpeed <= 100) ? newSpeed : 100;
-				    connecteds[data.player].emit( "speed", connecteds[data.player]._custom_speed );
-			    },
-			    5000
-		    );
+		    setMalus(data.player);
 	    }
     }
     socket.on('s-bonus', function(data) {
