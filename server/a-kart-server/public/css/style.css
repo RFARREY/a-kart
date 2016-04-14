@@ -10,8 +10,10 @@
 	width:100%;
 }
 
-.playerRow.taxiguerrilla, .playerRow.taxig { border-color:black; }
-.playerRow.gargamella { border-color:#b6ac78; }
+.playerRow.taxiguerrilla, .playerRow.taxig { border-color:orange; }
+.playerRow.gargamella { border-color:green; }
+.playerRow.gianni { border-color:blue; }
+.playerRow.carlo { border-color:red; }
 
 .playerRow button {
 	border-radius:50%;

@@ -25,15 +25,16 @@ var GAME_IS_ON = false
 var globalSpeed = 100
 
 var connecteds = {}
+
 io.on('connection', function (socket) {
     console.log('a user connected');
 
     function broadcastGameStatus(socket) {
-        socket.emit('set game', GAME_IS_ON);
+        io.emit('set game', GAME_IS_ON);
         var players = [];
         for (var k in connecteds) players.push(k);
-        socket.emit('players', players);
-		socket.emit('speed', globalSpeed);
+        io.emit('players', players);
+		io.emit('speed', globalSpeed);
     }
 
     broadcastGameStatus(socket);
@@ -72,8 +73,10 @@ io.on('connection', function (socket) {
     socket.on('register', function (data) {
         console.log('register ' + JSON.stringify(data));
         connecteds[data] = this;
+        connecteds[data]._custom_speed = globalSpeed;
+        connecteds[data]._custom_timeout = null;
         this['id'] = data;
-        broadcastGameStatus(socket)
+        broadcastGameStatus(socket);
     }.bind(socket));
 
     socket.on('boom', function (data) {
@@ -92,18 +95,81 @@ io.on('connection', function (socket) {
         if (connecteds[data.id]) {
 	        console.log( "Change " + data.id + " maximun speed to " + data.value);
             connecteds[data.id].emit('speed', data.value );
-            spped = data.value;
+            // speed = data.value;
+            connecteds[data.id]._custom_speed = data.value;
         } else {
             console.log( "Change all maximun speed to " + data.value);
             for (var key in connecteds) {
 				if (connecteds.hasOwnProperty(key)) {
 					console.log( "Send message to " + key);
+					clearTimeout( connecteds[key]._custom_timeout );
 					connecteds[key].emit( 'speed', data.value );
+					connecteds[key]._custom_speed = data.value;
 					globalSpeed = data.value
 				}
 			}
         }
     });
+    
+    
+    var onBonus = function(data) {
+	    console.log( data );
+	    if ( parseInt(data.marker) % 2 == 1) {
+		    //bonus
+		    console.log( "Assigning a bonus to the player that hit the cube " , data);
+		    for (var key in connecteds) {
+				if (connecteds.hasOwnProperty(key)) {
+					if (key != data.player) {
+						console.log( "Send message to " + key);
+						var newSpeed = (connecteds[data.player]._custom_speed - 10);
+						connecteds[key]._custom_speed = (newSpeed > 10) ? newSpeed : 10;
+						connecteds[key].emit( 'speed', connecteds[key]._custom_speed );
+						console.log('clear timeout', key);
+						clearTimeout( connecteds[key]._custom_timeout );
+						console.log('set timeout', key)
+						connecteds[key]._custom_timeout = setTimeout(
+						    function() {
+							    clearTimeout( connecteds[key]._custom_timeout );
+							    console.log( "Timeout bonus", key );
+							    var newSpeed = (connecteds[key]._custom_speed + 10);
+							    connecteds[key]._custom_speed = (newSpeed <= 100) ? newSpeed : 100;
+							    connecteds[key].emit( "speed", connecteds[key]._custom_speed );
+						    },
+						    5000
+					    );
+					    console.log(  "\n\n\n\n\n\n\n", key, connecteds[key]._custom_timeout, "\n\n\n\n\n\n\n");
+						
+					}
+				}
+			}
+	    } else {
+		    //malus
+		    console.log( "Assigning a malus to the player that hit the cube " , data);
+		    var newSpeed = (connecteds[data.player]._custom_speed - 10);
+		    connecteds[data.player]._custom_speed = (newSpeed > 10) ? newSpeed : 10;
+		    connecteds[data.player].emit( "speed", connecteds[data.player]._custom_speed );
+		    clearTimeout( connecteds[data.player]._custom_timeout );
+		    connecteds[data.player]._custom_timeout = setTimeout(
+			    function() {
+				    clearTimeout( connecteds[data.player]._custom_timeout );
+				    console.log("Timeout malus", data.player);
+				    var newSpeed = (connecteds[data.player]._custom_speed + 10);
+				    connecteds[data.player]._custom_speed = (newSpeed <= 100) ? newSpeed : 100;
+				    connecteds[data.player].emit( "speed", connecteds[data.player]._custom_speed );
+			    },
+			    5000
+		    );
+	    }
+    }
+    socket.on('s-bonus', function(data) {
+	    console.log( 's-bonus', data );
+	    onBonus( { "marker":1, "player": data.id } );
+    });
+    socket.on('s-malus', function(data) {
+	    console.log( 's-malus', data );
+	    onBonus( { "marker":0, "player": data.id } );
+    })
+    socket.on('bonus', onBonus);
 });
 
 server.listen(port, function () {

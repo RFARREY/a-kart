@@ -80,6 +80,8 @@ socket.on('players', function (data) {
         div.innerHTML = '<div class="playerItem flexHolder">' +
         	'<input type="range" min="0" max="100" step="5" class="single-speed" /> ' +
         	'<button class="pure-button" data-action="boom" ><i class="fa fa-bomb"></i></button> ' +
+        	'<button class="pure-button" data-action="s-malus" ><i class="fa fa-chain-broken"></i></button> ' +
+        	'<button class="pure-button" data-action="s-bonus" ><i class="fa fa-gift"></i></button> ' +
 			'<span class="playerName">' + e + '</span></div>';
         
         var buttons = div.querySelectorAll('button');
