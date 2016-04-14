@@ -18,8 +18,8 @@ class Comm(val id: String, val ctx: Context, val uri: String = Comm.DEFAULT_SERV
     companion object {
         private val TAG = Comm::class.java.simpleName
         private val TRACE = true
-        private val DEFAULT_SERVER = "http://10.228.81.8:5000/"
-        //private val DEFAULT_SERVER = "https://a-kart.cloud.frogdesign.com/"
+        //private val DEFAULT_SERVER = "http://10.228.81.8:5000/"
+        private val DEFAULT_SERVER = "https://a-kart.cloud.frogdesign.com/"
     }
 
 
