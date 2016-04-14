@@ -205,6 +205,7 @@ class DiscoveryActivity : AppCompatActivity() {
             itemView.setOnClickListener(on)
             Timber.i("BIND index %s on %s", adapterPosition, selections.isItemChecked(adapterPosition))
             selectable.isChecked = selections.isItemChecked(adapterPosition)
+            avatar.setImageResource(device.resId)
         }
     }
 

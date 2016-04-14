@@ -20,8 +20,8 @@
       android:id="@+id/avatar"
       android:layout_width="@dimen/col_3"
       android:layout_height="@dimen/col_3"
-      android:src="@drawable/banana"
-      app:riv_corner_radius="@dimen/col_1"
+      android:src="@drawable/red"
+      app:riv_corner_radius="@dimen/col_1_5"
       android:scaleType="centerCrop"
       app:riv_mutate_background="true"/>
   <TextView

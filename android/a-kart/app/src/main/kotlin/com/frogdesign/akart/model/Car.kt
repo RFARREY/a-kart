@@ -85,8 +85,8 @@ object Cars {
     val all = listOf(
             Car("gargamella", Pair(0, 1), R.drawable.yellow),
             Car("taxiguerrilla", Pair(2, 3), R.drawable.orange),
-            Car("gianni", Pair(4, 5), R.drawable.red),
-            Car("carlo", Pair(6, 7), R.drawable.blue)
+            Car("gianni", Pair(4, 5), R.drawable.blue),
+            Car("carlo", Pair(6, 7), R.drawable.red)
     );
 
     fun retrieveRelatedTo(dev: ARDiscoveryDeviceService): Car? {

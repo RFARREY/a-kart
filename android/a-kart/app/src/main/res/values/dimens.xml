@@ -7,6 +7,7 @@
     <dimen name="col_0_25">4dp</dimen>
     <dimen name="col_0_5">8dp</dimen>
     <dimen name="col_1">16dp</dimen>
+    <dimen name="col_1_5">24dp</dimen>
     <dimen name="col_2">32dp</dimen>
     <dimen name="col_3">48dp</dimen>
     <dimen name="col_4">64dp</dimen>
