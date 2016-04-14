@@ -12,8 +12,8 @@
 
 .playerRow.taxiguerrilla, .playerRow.taxig { border-color:orange; }
 .playerRow.gargamella { border-color:yellow; }
-.playerRow.gianni { border-color:red; }
-.playerRow.carlo { border-color:blue; }
+.playerRow.gianni { border-color:blue; }
+.playerRow.carlo { border-color:red; }
 
 .playerRow button {
 	border-radius:50%;
