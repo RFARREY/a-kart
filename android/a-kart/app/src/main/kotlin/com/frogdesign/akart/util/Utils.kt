@@ -1,16 +1,12 @@
 package com.frogdesign.akart.util
 
 import android.content.Context
-import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Canvas
 import android.graphics.RectF
 import android.os.Looper
-import android.support.annotation.ColorInt
-import android.support.annotation.ColorRes
-import android.support.annotation.NonNull
 import android.support.v4.content.res.ResourcesCompat
+import android.util.AttributeSet
 import android.util.DisplayMetrics
 import android.view.View
 import org.artoolkit.ar.base.ARToolKit
@@ -20,7 +16,6 @@ import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.functions.Func1
 import rx.schedulers.Schedulers
-import timber.log.Timber
 import java.util.*
 import java.util.concurrent.Executors
 
@@ -197,7 +192,7 @@ val ResourcesCompatInstance: ResourcesCompat by lazy {
     ResourcesCompat()
 }
 
-fun scaleCenterCrop(source : Bitmap, newWidth : Int, newHeight : Int) : RectF {
+fun scaleCenterCrop(source: Bitmap, newWidth: Int, newHeight: Int): RectF {
     val sourceWidth = source.width
     val sourceHeight = source.height
 
@@ -219,4 +214,54 @@ fun scaleCenterCrop(source : Bitmap, newWidth : Int, newHeight : Int) : RectF {
     // The target rectangle for the new, scaled version of the source bitmap will now
     // be
     return RectF(left, top, scale, scale);
+}
+
+fun <K, V> Map.Entry<K, V>.component1() = key
+fun <K, V> Map.Entry<K, V>.component2() = value
+
+
+object emptyAttributeSet : AttributeSet {
+    override fun getAttributeBooleanValue(index: Int, defaultValue: Boolean): Boolean = defaultValue
+
+    override fun getAttributeBooleanValue(namespace: String?, attribute: String?, defaultValue: Boolean): Boolean = defaultValue
+
+    override fun getAttributeCount(): Int = 0
+
+    override fun getAttributeFloatValue(index: Int, defaultValue: Float): Float = defaultValue
+
+    override fun getAttributeFloatValue(namespace: String?, attribute: String?, defaultValue: Float): Float = defaultValue
+
+    override fun getAttributeIntValue(index: Int, defaultValue: Int): Int = defaultValue
+
+    override fun getAttributeIntValue(namespace: String?, attribute: String?, defaultValue: Int): Int = defaultValue
+
+    override fun getAttributeListValue(index: Int, options: Array<out String>?, defaultValue: Int): Int = defaultValue
+
+    override fun getAttributeListValue(namespace: String?, attribute: String?, options: Array<out String>?, defaultValue: Int): Int = defaultValue
+
+    override fun getAttributeResourceValue(index: Int, defaultValue: Int): Int = defaultValue
+
+    override fun getAttributeResourceValue(namespace: String?, attribute: String?, defaultValue: Int): Int = defaultValue
+
+    override fun getAttributeUnsignedIntValue(index: Int, defaultValue: Int): Int = defaultValue
+
+    override fun getAttributeUnsignedIntValue(namespace: String?, attribute: String?, defaultValue: Int): Int = defaultValue
+
+    override fun getIdAttributeResourceValue(defaultValue: Int): Int = defaultValue
+
+    override fun getAttributeName(index: Int): String? = null
+
+    override fun getAttributeNameResource(index: Int): Int = 0
+
+    override fun getAttributeValue(index: Int): String? = null
+
+    override fun getAttributeValue(namespace: String?, name: String?): String? = null
+
+    override fun getClassAttribute(): String? = null
+
+    override fun getIdAttribute(): String? = null
+
+    override fun getPositionDescription(): String? = null
+
+    override fun getStyleAttribute(): Int = 0
 }
