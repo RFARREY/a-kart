@@ -3,7 +3,7 @@
 Source code for the Drone Race game presented at frog Milan event for the Salone del Mobile 2016.
 This is a racing and shooting game that is based on [Parrot JumpingSumo](http://www.parrot.com/usa/products/minidrones/jumping-race-drone/max/) drones and computer vision.
 
-For a description of the project please check [this article](http://www.google.it)
+For a description of the project please check [this article](http://designmind.frogdesign.com/2016/07/hacking-a-multi-game-user-drone-race/)
 
 The game is implemented by:
 - An Android Mobile app that acts as remote controller, written mostly in Kotlin language, with parts in RenderScript/C and Java.
