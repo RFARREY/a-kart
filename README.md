@@ -26,30 +26,30 @@ to explore the potential of the technologies.
 You'll need to login into the Drone IP (connecting to his own WiFi and IP)
 and then perform the following:
 
-Append at the end of '/etc/init.d/init_manager'
+Append at the end of `/etc/init.d/init_manager`
 
-'''
+```
 sleep 30 && sh /data/wifi.sh &
 exec /etc/init.d/start_main_app
-'''
+```
 
-Then create a script called in '/data/wifi.sh' with contents:
+Then create a script called in `/data/wifi.sh` with contents:
 
-'''
+```
 killall udhcpd
 ifconfig wifi_bcm down
 iwconfig wifi_bcm mode managed essid <you AP SSSID>
 ifconfig wifi_bcm <IP to be assigned ot drone> netmask 255.255.255.0 up
-'''
+```
 
 Please also note that the drones cannot acts as DHCP clients, so you need to
 assign static ip. Your WiFi should also be devoid of any authentication since
 the stripped-down Linux that is on-board of Parrots cannot handle that.
 It is also suggested to use a 5ghz Wifi setting and a free channel.
 
-To finish set up, edit the file 'dragon.conf' as following
+To finish set up, edit the file `dragon.conf` as following
 
-'''
+```
 {
         "JumpingSumo" :
         {
@@ -71,7 +71,7 @@ To finish set up, edit the file 'dragon.conf' as following
                 "service_type" : "_arsdk-0902._udp"
         }
 }
-'''
+```
 
 Reboot the drone from the shell and you should be able to see it connecting to your
 WiFi in a couple of minutes.
